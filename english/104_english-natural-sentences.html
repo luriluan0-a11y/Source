@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Natural Sentences</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans KR', sans-serif;
+    background: #f0f4f8;
+    color: #1a202c;
+    min-height: 100vh;
+}
+
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px 24px;
+    text-align: center;
+}
+header h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+header p { font-size: 0.85rem; opacity: 0.85; }
+
+.tabs {
+    display: flex;
+    background: white;
+    border-bottom: 2px solid #e2e8f0;
+    overflow-x: auto;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+.tab {
+    flex: 1;
+    min-width: 80px;
+    padding: 13px 16px;
+    text-align: center;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    color: #718096;
+    white-space: nowrap;
+}
+.tab.active { color: #667eea; border-bottom-color: #667eea; }
+
+main { max-width: 600px; margin: 0 auto; padding: 20px 16px; }
+
+/* Tab panels */
+.panel { display: none; }
+.panel.active { display: block; }
+
+/* Progress bar */
+.progress-bar-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+.progress-bar {
+    flex: 1;
+    height: 6px;
+    background: #e2e8f0;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+.progress-text {
+    font-size: 0.8rem;
+    color: #718096;
+    min-width: 50px;
+    text-align: right;
+}
+
+/* Date badge */
+.date-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: #ebf4ff;
+    color: #4c51bf;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+}
+
+/* Flashcard */
+.card-wrapper {
+    perspective: 1000px;
+    height: 300px;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+.card {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease;
+}
+.card.flipped { transform: rotateY(180deg); }
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    border-radius: 16px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+}
+.card-front {
+    background: white;
+    border: 2px solid #e2e8f0;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.card-front .card-emoji { font-size: 2.2rem; margin-bottom: 14px; }
+.card-front .card-title { font-size: 1.2rem; font-weight: 700; color: #2d3748; line-height: 1.4; }
+.card-front .flip-hint { position: absolute; bottom: 16px; font-size: 0.75rem; color: #a0aec0; }
+
+.card-back {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: rotateY(180deg);
+    overflow-y: auto;
+    box-shadow: 0 4px 20px rgba(102,126,234,0.35);
+    gap: 8px;
+}
+.sentence-item {
+    background: rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    line-height: 1.45;
+}
+.best-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    background: #f6e05e;
+    color: #744210;
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+.card-memo {
+    background: rgba(0,0,0,0.2);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+.card-memo::before { content: "💡 "; }
+
+/* Nav buttons */
+.card-nav { display: flex; gap: 10px; }
+.nav-btn {
+    flex: 1;
+    padding: 13px;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.nav-btn.prev { background: white; color: #667eea; border: 2px solid #667eea; }
+.nav-btn.next { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.nav-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+.nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.shuffle-btn {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border: 2px dashed #cbd5e0;
+    border-radius: 10px;
+    background: transparent;
+    color: #718096;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.shuffle-btn:hover { border-color: #667eea; color: #667eea; }
+
+/* Review */
+.review-date-header {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #667eea;
+    background: #ebf4ff;
+    padding: 6px 14px;
+    border-radius: 20px;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+.review-section { margin-bottom: 24px; }
+.review-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    border-left: 4px solid #667eea;
+}
+.review-situation {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #718096;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+}
+.review-sentence {
+    font-size: 0.95rem;
+    color: #2d3748;
+    padding: 4px 0;
+    border-bottom: 1px solid #f7fafc;
+    line-height: 1.45;
+}
+.review-sentence:last-of-type { border-bottom: none; }
+.review-memo {
+    font-size: 0.8rem;
+    color: #718096;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid #e2e8f0;
+    line-height: 1.5;
+}
+
+/* Patterns */
+.pattern-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+}
+.pattern-icon { font-size: 1.4rem; min-width: 36px; text-align: center; margin-top: 2px; }
+.pattern-text { font-size: 1rem; font-weight: 700; color: #2d3748; margin-bottom: 5px; }
+.pattern-meaning { font-size: 0.85rem; color: #718096; line-height: 1.4; }
+
+/* Quiz */
+.quiz-question {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 14px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+.q-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #a0aec0;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.q-text { font-size: 1.1rem; font-weight: 700; color: #2d3748; margin-bottom: 20px; }
+.quiz-options { display: flex; flex-direction: column; gap: 8px; }
+.quiz-option {
+    padding: 12px 16px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: white;
+    text-align: left;
+    line-height: 1.45;
+}
+.quiz-option:hover:not(.locked) { border-color: #667eea; background: #f0f4ff; }
+.quiz-option.correct { border-color: #48bb78; background: #f0fff4; color: #276749; font-weight: 600; }
+.quiz-option.wrong { border-color: #fc8181; background: #fff5f5; color: #9b2c2c; }
+.quiz-option.locked { cursor: default; }
+
+.quiz-next-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: none;
+    margin-top: 4px;
+}
+.quiz-next-btn.show { display: block; }
+.quiz-next-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
+
+.quiz-score {
+    text-align: center;
+    padding: 30px 20px;
+}
+.score-circle {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 1.6rem;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(102,126,234,0.4);
+}
+.score-pct { font-size: 0.75rem; font-weight: 600; opacity: 0.8; }
+.score-msg { font-size: 1.15rem; font-weight: 700; color: #2d3748; margin-bottom: 8px; }
+.score-sub { font-size: 0.85rem; color: #718096; margin-bottom: 24px; }
+.retry-btn {
+    padding: 13px 36px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.retry-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>English Natural Sentences</h1>
+    <p>2026-06-04 ~ 2026-06-05 &nbsp;·&nbsp; 23개 상황</p>
+</header>
+
+<div class="tabs">
+    <div class="tab active" onclick="showTab('flashcard')">플래시카드</div>
+    <div class="tab" onclick="showTab('review')">전체보기</div>
+    <div class="tab" onclick="showTab('patterns')">핵심패턴</div>
+    <div class="tab" onclick="showTab('quiz')">퀴즈</div>
+</div>
+
+<main>
+
+<!-- Flashcard -->
+<div class="panel active" id="tab-flashcard">
+    <div class="progress-bar-wrap">
+        <div class="progress-bar"><div class="progress-fill" id="fc-progress"></div></div>
+        <div class="progress-text" id="fc-counter">1 / 23</div>
+    </div>
+    <div class="date-badge" id="fc-date">2026-06-04</div>
+
+    <div class="card-wrapper" onclick="flipCard()">
+        <div class="card" id="flashcard">
+            <div class="card-front">
+                <div class="card-emoji" id="fc-emoji"></div>
+                <div class="card-title" id="fc-title"></div>
+                <div class="flip-hint">탭하여 영어 확인 👆</div>
+            </div>
+            <div class="card-back" id="fc-back"></div>
+        </div>
+    </div>
+
+    <div class="card-nav">
+        <button class="nav-btn prev" id="btn-prev" onclick="prevCard()" disabled>← 이전</button>
+        <button class="nav-btn next" id="btn-next" onclick="nextCard()">다음 →</button>
+    </div>
+    <button class="shuffle-btn" onclick="shuffleCards()">🔀 순서 섞기</button>
+</div>
+
+<!-- Review All -->
+<div class="panel" id="tab-review">
+    <div id="review-content"></div>
+</div>
+
+<!-- Patterns -->
+<div class="panel" id="tab-patterns">
+    <div id="patterns-content"></div>
+</div>
+
+<!-- Quiz -->
+<div class="panel" id="tab-quiz">
+    <div id="quiz-content"></div>
+</div>
+
+</main>
+
+<script>
+const DATA = [
+  { date:"2026-06-04", emoji:"🚗", title:"차에 대해 잘 모를 때",
+    sentences:[{t:"I don't know much about cars.",b:false}],
+    memo:'"I don\'t know anything about cars."도 틀리지는 않지만, 일상 대화에서는 "much"가 더 부드럽다.' },
+
+  { date:"2026-06-04", emoji:"📱", title:"듀오링고 완료",
+    sentences:[{t:"I'm done with Duolingo.",b:false},{t:"I finished Duolingo.",b:true},{t:"I completed my Duolingo lesson.",b:false}],
+    memo:'완료 보고라면 "I finished Duolingo."가 가장 깔끔하다.' },
+
+  { date:"2026-06-04", emoji:"✅", title:"데일리 트래커 확인 요청",
+    sentences:[{t:"Please check my daily tracker.",b:false},{t:"I'm done with Duolingo. Please check my daily tracker.",b:false}],
+    memo:null },
+
+  { date:"2026-06-04", emoji:"💬", title:"카카오톡으로 문서 보내기",
+    sentences:[{t:"I have to send the document via KakaoTalk today.",b:false},{t:"I have to send the document via KakaoTalk tomorrow.",b:false}],
+    memo:'"paper"보다 "document"가 자연스럽고, "카카오톡으로"는 "via KakaoTalk" 또는 "on KakaoTalk"라고 한다.' },
+
+  { date:"2026-06-04", emoji:"📅", title:"날짜 정정",
+    sentences:[{t:"Today is correct, thanks.",b:true},{t:"Today is right, thanks.",b:false}],
+    memo:'이 상황에서는 "Today is correct, thanks."가 가장 깔끔하다.' },
+
+  { date:"2026-06-05", emoji:"🌅", title:"아침에 일어났을 때",
+    sentences:[{t:"I woke up. Thank you.",b:false},{t:"I just woke up. Thank you.",b:true}],
+    memo:'"I just woke up."은 "방금 일어났어요"라는 느낌이 더 강하다.' },
+
+  { date:"2026-06-05", emoji:"🏥", title:"병원, 점심, 특강 장소 이동",
+    sentences:[
+      {t:"I have an appointment at the sleep clinic at 10:20 a.m.",b:false},
+      {t:"After that, I'll have lunch with my mom and then go to the lecture venue.",b:false},
+      {t:"I have an appointment at the sleep clinic at 10:20 a.m. After that, I'll have lunch with my mom and then go to the lecture venue.",b:true}
+    ],
+    memo:'"venue"는 행사, 강의, 공연, 회의 등이 열리는 장소를 말한다.' },
+
+  { date:"2026-06-05", emoji:"🏃", title:"트레드밀 운동",
+    sentences:[{t:"I just worked out on the treadmill for 20 minutes.",b:false},{t:"I just did 20 minutes on the treadmill.",b:false}],
+    memo:'"방금 했다"는 뜻이므로 "work out"보다 과거형 "worked out"이 맞다.' },
+
+  { date:"2026-06-05", emoji:"💪", title:"아령 운동",
+    sentences:[{t:"I did 40 reps with 2 kg dumbbells for my arms and shoulders.",b:false},{t:"I did 40 reps with 2 kg dumbbells.",b:false}],
+    memo:'"reps"는 "repetitions"의 줄임말로, 운동에서 "몇 회"라는 뜻이다.' },
+
+  { date:"2026-06-05", emoji:"🍱", title:"집안일과 점심 준비",
+    sentences:[{t:"I cleaned the sink and prepared lunch for my mom.",b:false},{t:"I cleaned the sink and made lunch for my mom.",b:false}],
+    memo:'"prepared lunch"는 점심을 준비했다는 느낌이고, "made lunch"는 점심을 만들었다는 일상적인 표현이다.' },
+
+  { date:"2026-06-05", emoji:"💇", title:"염색",
+    sentences:[{t:"I think I really need to dye my hair.",b:false},{t:"I think I really need to get my hair dyed.",b:false}],
+    memo:'직접 염색하면 "dye my hair", 미용실에서 받으면 "get my hair dyed"가 더 자연스럽다.' },
+
+  { date:"2026-06-05", emoji:"📺", title:"드라마 완주",
+    sentences:[{t:"I finished watching a Korean drama called Good Casting.",b:false},{t:"I finished the Korean drama Good Casting.",b:false}],
+    memo:'드라마를 다 봤다는 말에는 "completed"보다 "finished"가 일상적이다.' },
+
+  { date:"2026-06-05", emoji:"🎓", title:"특강 준비 완료",
+    sentences:[{t:"I finished preparing my special lecture.",b:false},{t:"I finished preparing for my special lecture.",b:false}],
+    memo:'"preparing my lecture"는 강의 자료나 내용을 준비했다는 느낌이고, "preparing for my lecture"는 강의 전체를 위해 준비했다는 느낌이다.' },
+
+  { date:"2026-06-05", emoji:"🚇", title:"병원, 점심, 어머니 모셔다드림, 지하철",
+    sentences:[{t:"I went to the sleep clinic, had lunch, took my mom home, and got on the subway.",b:false}],
+    memo:null },
+
+  { date:"2026-06-05", emoji:"📝", title:"쪽지를 같이 찾아봤지만 못 찾았을 때",
+    sentences:[{t:"I helped her look for the note, but we couldn't find it, so I had to leave.",b:false}],
+    memo:null },
+
+  { date:"2026-06-05", emoji:"🔬", title:"연구실 도착",
+    sentences:[{t:"I arrived at the lab.",b:false},{t:"I just arrived at the lab.",b:true}],
+    memo:'"just"를 넣으면 "방금 도착했다"는 느낌이 된다.' },
+
+  { date:"2026-06-05", emoji:"📄", title:"공문 보내고 특강 장소 이동",
+    sentences:[{t:"I'll send the official document to the branch president, then head to the lecture venue.",b:false}],
+    memo:'"head to"는 "~로 향하다"라는 자연스러운 표현이다.' },
+
+  { date:"2026-06-05", emoji:"🚌", title:"버스 탑승",
+    sentences:[{t:"I just took a bus.",b:false},{t:"I just got on the bus.",b:true}],
+    memo:'지금 막 버스에 탔다는 상황에는 "I just got on the bus."가 가장 자연스럽다.' },
+
+  { date:"2026-06-05", emoji:"🎤", title:"특강 종료",
+    sentences:[{t:"I finished my class. I'm free now.",b:false},{t:"My class is over. I'm free now.",b:false}],
+    memo:'"free"만 붙이면 문장이 덜 완성된다. "I\'m free now."까지 말해야 자연스럽다.' },
+
+  { date:"2026-06-05", emoji:"🏠", title:"귀가",
+    sentences:[{t:"I just arrived at home.",b:false},{t:"I just got home.",b:true}],
+    memo:'일상 대화에서는 "I just got home."이 더 많이 쓰인다.' },
+
+  { date:"2026-06-05", emoji:"🥗", title:"저녁 메뉴",
+    sentences:[
+      {t:"I had garlic scape bibimbap for dinner again, just like yesterday.",b:false},
+      {t:"Today, I chopped the garlic scapes finely with a knife.",b:false},
+      {t:"I had garlic scape bibimbap again. I chopped the garlic scapes myself today.",b:false}
+    ],
+    memo:'"garlic scapes"는 마늘쫑이다.' },
+
+  { date:"2026-06-05", emoji:"📞", title:"전화 영어 수업",
+    sentences:[{t:"I finished my phone English class.",b:false},{t:"I finished my English lesson over the phone.",b:true}],
+    memo:'"over the phone"은 전화로 했다는 뜻이다. 개인 수업 느낌에는 "lesson"이 잘 맞는다.' },
+
+  { date:"2026-06-05", emoji:"😴", title:"잠들었다가 영어 수업 때문에 깼을 때",
+    sentences:[{t:"I slept, but I woke up for my English lesson.",b:false},{t:"I fell asleep, but I woke up for my English lesson.",b:true}],
+    memo:'잠들었다는 느낌은 "slept"보다 "fell asleep"이 더 자연스럽다.' }
+];
+
+const PATTERNS = [
+  { icon:"⚡", p:"I just + 과거형", m:"방금 ~했어요   →  just woke up, just got home, just got on the bus" },
+  { icon:"✅", p:"I finished + -ing", m:"~하는 것을 마쳤어요   →  finished watching, finished preparing" },
+  { icon:"🚌", p:"I got on + 교통수단", m:"탑승했어요   →  got on the bus, got on the subway" },
+  { icon:"🏠", p:"I got home", m:"집에 왔어요 (I arrived at home보다 훨씬 자연스러운 표현)" },
+  { icon:"📞", p:"over the phone", m:"전화로   →  I finished my lesson over the phone" },
+  { icon:"🗺️", p:"head to + 장소", m:"~로 향하다   →  head to the lecture venue" }
+];
+
+// ── Flashcard ──────────────────────────────────────────────────
+let order = DATA.map((_,i)=>i);
+let cur = 0, flipped = false;
+
+function renderFC() {
+    const d = DATA[order[cur]];
+    document.getElementById('fc-emoji').textContent = d.emoji;
+    document.getElementById('fc-title').textContent = d.title;
+    document.getElementById('fc-date').textContent = d.date;
+
+    const back = document.getElementById('fc-back');
+    back.innerHTML = d.sentences.map(s =>
+        `<div class="sentence-item">${s.t}${s.b ? '<span class="best-badge">추천</span>' : ''}</div>`
+    ).join('') + (d.memo ? `<div class="card-memo">${d.memo}</div>` : '');
+
+    const pct = ((cur+1)/order.length)*100;
+    document.getElementById('fc-progress').style.width = pct+'%';
+    document.getElementById('fc-counter').textContent = `${cur+1} / ${order.length}`;
+    document.getElementById('btn-prev').disabled = cur === 0;
+    const nxt = document.getElementById('btn-next');
+    nxt.disabled = cur === order.length-1;
+    nxt.textContent = cur === order.length-1 ? '완료 🎉' : '다음 →';
+}
+
+function flipCard() {
+    flipped = !flipped;
+    document.getElementById('flashcard').classList.toggle('flipped', flipped);
+}
+
+function nextCard() {
+    if (cur < order.length-1) { cur++; resetFlip(); renderFC(); }
+}
+function prevCard() {
+    if (cur > 0) { cur--; resetFlip(); renderFC(); }
+}
+function resetFlip() {
+    flipped = false;
+    document.getElementById('flashcard').classList.remove('flipped');
+}
+function shuffleCards() {
+    for (let i=order.length-1;i>0;i--) {
+        const j=Math.floor(Math.random()*(i+1));
+        [order[i],order[j]]=[order[j],order[i]];
+    }
+    cur=0; resetFlip(); renderFC();
+}
+
+// ── Review ──────────────────────────────────────────────────────
+function renderReview() {
+    const dates = [...new Set(DATA.map(d=>d.date))];
+    document.getElementById('review-content').innerHTML = dates.map(date => {
+        const items = DATA.filter(d=>d.date===date);
+        return `<div class="review-section">
+            <div class="review-date-header">📅 ${date}</div>
+            ${items.map(item=>`
+                <div class="review-card">
+                    <div class="review-situation">${item.emoji} ${item.title}</div>
+                    ${item.sentences.map(s=>`<div class="review-sentence">${s.t}${s.b?' ⭐':''}</div>`).join('')}
+                    ${item.memo ? `<div class="review-memo">💡 ${item.memo}</div>` : ''}
+                </div>`).join('')}
+        </div>`;
+    }).join('');
+}
+
+// ── Patterns ────────────────────────────────────────────────────
+function renderPatterns() {
+    document.getElementById('patterns-content').innerHTML = PATTERNS.map(p=>`
+        <div class="pattern-card">
+            <div class="pattern-icon">${p.icon}</div>
+            <div>
+                <div class="pattern-text">${p.p}</div>
+                <div class="pattern-meaning">${p.m}</div>
+            </div>
+        </div>`).join('');
+}
+
+// ── Quiz ────────────────────────────────────────────────────────
+let qItems=[], qIdx=0, qScore=0, qAnswered=false;
+
+function initQuiz() {
+    // Only cards with 2+ sentences make good quiz items
+    const pool = DATA.filter(d=>d.sentences.length>=2);
+    qItems = [...pool].sort(()=>Math.random()-0.5).slice(0,8);
+    qIdx=0; qScore=0; renderQuiz();
+}
+
+function renderQuiz() {
+    const el = document.getElementById('quiz-content');
+    if (qIdx >= qItems.length) {
+        const pct = Math.round(qScore/qItems.length*100);
+        const msg = pct>=80?'훌륭해요! 🎉':pct>=60?'잘 하고 있어요! 👍':'다시 한번 도전해봐요! 💪';
+        el.innerHTML = `<div class="quiz-score">
+            <div class="score-circle">${qScore}/${qItems.length}<span class="score-pct">${pct}%</span></div>
+            <div class="score-msg">${msg}</div>
+            <div class="score-sub">총 ${qItems.length}문제 중 ${qScore}개 정답</div>
+            <button class="retry-btn" onclick="initQuiz()">다시 풀기 🔄</button>
+        </div>`;
+        return;
+    }
+
+    const item = qItems[qIdx];
+    const best = item.sentences.find(s=>s.b) || item.sentences[0];
+
+    // Wrong options from other cards
+    const wrong = DATA
+        .filter(d=>d!==item)
+        .flatMap(d=>d.sentences.map(s=>s.t))
+        .sort(()=>Math.random()-0.5)
+        .slice(0,3);
+
+    const opts = [best.t, ...wrong].sort(()=>Math.random()-0.5);
+
+    qAnswered = false;
+    el.innerHTML = `
+        <div class="progress-bar-wrap">
+            <div class="progress-bar"><div class="progress-fill" style="width:${(qIdx+1)/qItems.length*100}%"></div></div>
+            <div class="progress-text">${qIdx+1} / ${qItems.length}</div>
+        </div>
+        <div class="quiz-question">
+            <div class="q-label">이 상황에 맞는 표현은?</div>
+            <div class="q-text">${item.emoji} ${item.title}</div>
+            <div class="quiz-options">
+                ${opts.map(o=>`<button class="quiz-option" onclick="pickOpt(this,'${esc(o)}','${esc(best.t)}')">${o}</button>`).join('')}
+            </div>
+        </div>
+        <button class="quiz-next-btn" id="qnext" onclick="nextQuiz()">
+            ${qIdx===qItems.length-1 ? '결과 보기 →' : '다음 문제 →'}
+        </button>`;
+}
+
+function esc(s){ return s.replace(/\\/g,'\\\\').replace(/'/g,"\\'"); }
+
+function pickOpt(el, selected, correct) {
+    if (qAnswered) return;
+    qAnswered = true;
+    document.querySelectorAll('.quiz-option').forEach(o=>{
+        o.classList.add('locked');
+        if (o.textContent.trim()===correct) o.classList.add('correct');
+        else if (o===el) o.classList.add('wrong');
+    });
+    if (selected===correct) qScore++;
+    document.getElementById('qnext').classList.add('show');
+}
+
+function nextQuiz() { qIdx++; renderQuiz(); }
+
+// ── Tab switching ────────────────────────────────────────────────
+function showTab(name) {
+    document.querySelectorAll('.tab').forEach((t,i)=>{
+        t.classList.toggle('active', ['flashcard','review','patterns','quiz'][i]===name);
+    });
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('tab-'+name).classList.add('active');
+    if (name==='review') renderReview();
+    if (name==='patterns') renderPatterns();
+    if (name==='quiz') initQuiz();
+}
+
+// Init
+renderFC();
+</script>
+</body>
+</html>
