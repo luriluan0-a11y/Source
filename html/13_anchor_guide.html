@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HTML &lt;a&gt; 앵커 태그 완벽 가이드</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #0d1117;
+      --bg2:      #161b22;
+      --bg3:      #1c2333;
+      --border:   rgba(99,179,255,0.15);
+      --blue:     #4a9eff;
+      --blue-lt:  #7bbcff;
+      --blue-dk:  #1a6bd0;
+      --green:    #3fb950;
+      --amber:    #f0a732;
+      --red:      #f85149;
+      --purple:   #bc8cff;
+      --text:     #e6edf3;
+      --text2:    #8b949e;
+      --text3:    #484f58;
+      --mono:     'JetBrains Mono', monospace;
+      --sans:     'Noto Sans KR', sans-serif;
+      --serif:    'DM Serif Display', serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* 배경 그리드 */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(74,158,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,158,255,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,17,23,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0;
+    }
+    .nav-inner {
+      max-width: 860px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: .9rem;
+      color: var(--blue);
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--text2); }
+    .nav-links { display: flex; gap: 20px; }
+    .nav-links a {
+      font-size: .8rem;
+      color: var(--text2);
+      text-decoration: none;
+      transition: color .2s;
+      letter-spacing: .04em;
+    }
+    .nav-links a:hover { color: var(--blue-lt); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto;
+      padding: 72px 24px 48px;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: .75rem;
+      color: var(--blue); border: 1px solid var(--border);
+      background: rgba(74,158,255,.06);
+      padding: 4px 12px; border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    .hero-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.2;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .hero h1 em { font-style: normal; color: var(--blue); }
+    .hero p { font-size: 1rem; color: var(--text2); max-width: 520px; }
+
+    /* ── MAIN LAYOUT ── */
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto;
+      padding: 0 24px 80px;
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+
+    /* ── SIDEBAR TOC ── */
+    .toc {
+      position: sticky; top: 70px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+    }
+    .toc-title {
+      font-family: var(--mono); font-size: .7rem;
+      color: var(--text3); letter-spacing: .12em;
+      text-transform: uppercase; margin-bottom: 12px;
+    }
+    .toc a {
+      display: block; padding: 6px 10px;
+      font-size: .82rem; color: var(--text2);
+      text-decoration: none; border-radius: 6px;
+      border-left: 2px solid transparent;
+      transition: all .2s;
+      margin-bottom: 2px;
+    }
+    .toc a:hover { color: var(--blue-lt); background: rgba(74,158,255,.06); border-color: var(--blue); }
+
+    /* ── CONTENT ── */
+    .content { min-width: 0; }
+
+    .section {
+      margin-bottom: 52px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity .6s, transform .6s;
+    }
+    .section.visible { opacity: 1; transform: none; }
+
+    .section-badge {
+      display: inline-block;
+      font-family: var(--mono); font-size: .7rem;
+      padding: 3px 10px; border-radius: 20px;
+      margin-bottom: 10px;
+      border: 1px solid;
+    }
+    .badge-blue   { color: var(--blue);   background: rgba(74,158,255,.08);  border-color: rgba(74,158,255,.25); }
+    .badge-green  { color: var(--green);  background: rgba(63,185,80,.08);   border-color: rgba(63,185,80,.25); }
+    .badge-amber  { color: var(--amber);  background: rgba(240,167,50,.08);  border-color: rgba(240,167,50,.25); }
+    .badge-red    { color: var(--red);    background: rgba(248,81,73,.08);   border-color: rgba(248,81,73,.25); }
+    .badge-purple { color: var(--purple); background: rgba(188,140,255,.08); border-color: rgba(188,140,255,.25); }
+
+    .section h2 {
+      font-family: var(--serif); font-size: 1.55rem;
+      color: var(--text); margin-bottom: 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .section h2::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    .desc-text { font-size: .92rem; color: var(--text2); margin-bottom: 20px; line-height: 1.8; }
+
+    /* ── CODE BLOCK ── */
+    .code-wrap {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 16px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+    .code-title { font-family: var(--mono); font-size: .72rem; color: var(--text2); }
+    .copy-btn {
+      font-family: var(--mono); font-size: .68rem;
+      color: var(--text3); background: none; border: none;
+      cursor: pointer; padding: 2px 8px;
+      border-radius: 4px; transition: color .2s, background .2s;
+    }
+    .copy-btn:hover { color: var(--blue); background: rgba(74,158,255,.1); }
+    .copy-btn.copied { color: var(--green); }
+    pre {
+      padding: 18px 20px;
+      font-family: var(--mono);
+      font-size: .85rem;
+      line-height: 1.9;
+      overflow-x: auto;
+      color: var(--text);
+    }
+    .kw  { color: #ff7b72; }
+    .at  { color: #79c0ff; }
+    .vl  { color: #a5d6ff; }
+    .cm  { color: var(--text3); font-style: italic; }
+    .tx  { color: var(--green); }
+
+    /* ── RESULT PREVIEW ── */
+    .preview {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 16px;
+    }
+    .preview-label {
+      font-family: var(--mono); font-size: .68rem;
+      color: var(--text3); margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: .1em;
+    }
+    .preview a {
+      color: var(--blue-lt);
+      text-decoration: underline;
+      font-size: .9rem;
+    }
+    .preview a:hover { color: var(--blue); }
+
+    /* ── ATTR TABLE ── */
+    .attr-table { width: 100%; border-collapse: collapse; }
+    .attr-table th {
+      text-align: left; font-family: var(--mono); font-size: .72rem;
+      color: var(--text3); padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: .08em; text-transform: uppercase;
+    }
+    .attr-table td {
+      padding: 10px 12px; font-size: .85rem;
+      border-bottom: 1px solid rgba(99,179,255,.06);
+    }
+    .attr-table tr:last-child td { border-bottom: none; }
+    .attr-table td:first-child { font-family: var(--mono); color: var(--blue-lt); }
+    .attr-table td:nth-child(2) { color: var(--text2); }
+
+    /* ── CARDS GRID ── */
+    .cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 560px) { .cards { grid-template-columns: 1fr; } }
+    .card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 18px;
+      transition: border-color .2s;
+    }
+    .card:hover { border-color: rgba(74,158,255,.4); }
+    .card-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+    .card-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .card h3 { font-size: .9rem; font-weight: 500; color: var(--text); }
+    .card p { font-size: .8rem; color: var(--text2); margin-bottom: 10px; line-height: 1.6; }
+
+    /* ── TIP BOX ── */
+    .tip {
+      display: flex; gap: 12px;
+      background: rgba(74,158,255,.06);
+      border: 1px solid rgba(74,158,255,.2);
+      border-radius: 10px; padding: 14px 18px;
+      margin-top: 16px;
+    }
+    .tip-icon { font-size: 1.1rem; margin-top: 2px; flex-shrink: 0; }
+    .tip p { font-size: .85rem; color: var(--text2); line-height: 1.7; }
+    .tip strong { color: var(--blue-lt); font-weight: 500; }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative; z-index: 1;
+      text-align: center; padding: 32px 24px;
+      border-top: 1px solid var(--border);
+      font-family: var(--mono); font-size: .75rem;
+      color: var(--text3);
+    }
+
+    @media (max-width: 640px) {
+      .wrapper { grid-template-columns: 1fr; }
+      .toc { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="#">&lt;<span>a</span>&gt; 앵커 태그 가이드</a>
+      <div class="nav-links">
+        <a href="#basic">기본 구조</a>
+        <a href="#types">유형</a>
+        <a href="#attrs">속성</a>
+        <a href="#practice">실전</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="hero-tag">HTML Reference</div>
+    <h1>앵커 태그 <em>&lt;a&gt;</em><br/>완벽 가이드</h1>
+    <p>웹 페이지의 링크를 만드는 핵심 태그. 외부 사이트, 내부 페이지, 이메일, 전화까지 모두 연결할 수 있어요.</p>
+  </div>
+
+  <!-- MAIN -->
+  <div class="wrapper">
+
+    <!-- TOC -->
+    <aside class="toc">
+      <p class="toc-title">목차</p>
+      <a href="#basic">01. 기본 구조</a>
+      <a href="#types">02. 링크 유형 4가지</a>
+      <a href="#attrs">03. 주요 속성</a>
+      <a href="#anchor">04. 페이지 내 이동</a>
+      <a href="#practice">05. 실전 예제</a>
+      <a href="#tips">06. 주의사항</a>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="content">
+
+      <!-- 01 기본 구조 -->
+      <section class="section" id="basic">
+        <span class="section-badge badge-blue">01</span>
+        <h2>기본 구조</h2>
+        <p class="desc-text"><code>&lt;a&gt;</code> 태그는 <strong>Anchor(닻)</strong>의 약자예요. <code>href</code> 속성에 이동할 주소를 넣고, 태그 사이에 링크로 보일 텍스트(또는 이미지)를 넣으면 돼요.</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-title">기본 문법</span>
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre><span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"이동할 주소"</span><span class="kw">&gt;</span><span class="tx">링크 텍스트</span><span class="kw">&lt;/a&gt;</span></pre>
+        </div>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-title">예시</span>
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre><span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"https://google.com"</span><span class="kw">&gt;</span><span class="tx">구글 바로가기</span><span class="kw">&lt;/a&gt;</span></pre>
+        </div>
+
+        <div class="preview">
+          <p class="preview-label">미리보기</p>
+          <a href="https://google.com" target="_blank">구글 바로가기</a>
+        </div>
+      </section>
+
+      <!-- 02 링크 유형 -->
+      <section class="section" id="types">
+        <span class="section-badge badge-green">02</span>
+        <h2>링크 유형 4가지</h2>
+        <p class="desc-text"><code>href</code>에 어떤 값을 넣느냐에 따라 동작이 달라져요.</p>
+
+        <div class="cards">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-dot" style="background:#4a9eff"></div>
+              <h3>외부 링크</h3>
+            </div>
+            <p>다른 웹사이트로 이동해요. <code>https://</code>로 시작해요.</p>
+            <div class="code-wrap">
+              <div class="code-header"><span class="code-title">code</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre style="font-size:.78rem; padding:12px 14px;"><span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"https://naver.com"</span>
+   <span class="at">target</span>=<span class="vl">"_blank"</span><span class="kw">&gt;</span>
+  <span class="tx">네이버</span>
+<span class="kw">&lt;/a&gt;</span></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-dot" style="background:#3fb950"></div>
+              <h3>내부 링크</h3>
+            </div>
+            <p>같은 사이트의 다른 HTML 파일로 이동해요.</p>
+            <div class="code-wrap">
+              <div class="code-header"><span class="code-title">code</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre style="font-size:.78rem; padding:12px 14px;"><span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"about.html"</span><span class="kw">&gt;</span>
+  <span class="tx">소개 페이지</span>
+<span class="kw">&lt;/a&gt;</span></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-dot" style="background:#f0a732"></div>
+              <h3>이메일 링크</h3>
+            </div>
+            <p>클릭하면 메일 앱이 열려요. <code>mailto:</code>를 붙여요.</p>
+            <div class="code-wrap">
+              <div class="code-header"><span class="code-title">code</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre style="font-size:.78rem; padding:12px 14px;"><span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"mailto:a@b.com"</span><span class="kw">&gt;</span>
+  <span class="tx">메일 보내기</span>
+<span class="kw">&lt;/a&gt;</span></pre>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-head">
+              <div class="card-dot" style="background:#f85149"></div>
+              <h3>전화 링크</h3>
+            </div>
+            <p>모바일에서 클릭하면 전화 앱이 열려요. <code>tel:</code>을 붙여요.</p>
+            <div class="code-wrap">
+              <div class="code-header"><span class="code-title">code</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre style="font-size:.78rem; padding:12px 14px;"><span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"tel:010-1234-5678"</span><span class="kw">&gt;</span>
+  <span class="tx">전화 걸기</span>
+<span class="kw">&lt;/a&gt;</span></pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 주요 속성 -->
+      <section class="section" id="attrs">
+        <span class="section-badge badge-amber">03</span>
+        <h2>주요 속성</h2>
+        <p class="desc-text"><code>&lt;a&gt;</code> 태그에서 자주 쓰는 속성들이에요.</p>
+
+        <div class="code-wrap">
+          <table class="attr-table">
+            <thead>
+              <tr>
+                <th>속성</th>
+                <th>설명</th>
+                <th>예시 값</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>href</td>
+                <td>이동할 주소 (필수)</td>
+                <td style="font-family:var(--mono);font-size:.8rem;color:var(--text2);">"https://..."</td>
+              </tr>
+              <tr>
+                <td>target</td>
+                <td>링크 열리는 위치 설정</td>
+                <td style="font-family:var(--mono);font-size:.8rem;color:var(--text2);">"_blank" / "_self"</td>
+              </tr>
+              <tr>
+                <td>title</td>
+                <td>마우스 올리면 나오는 툴팁</td>
+                <td style="font-family:var(--mono);font-size:.8rem;color:var(--text2);">"설명 텍스트"</td>
+              </tr>
+              <tr>
+                <td>download</td>
+                <td>클릭 시 파일 다운로드</td>
+                <td style="font-family:var(--mono);font-size:.8rem;color:var(--text2);">download (값 없이)</td>
+              </tr>
+              <tr>
+                <td>rel</td>
+                <td>링크 관계 설명 (보안용)</td>
+                <td style="font-family:var(--mono);font-size:.8rem;color:var(--text2);">"noopener noreferrer"</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-title">target 속성 비교</span>
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre><span class="cm">/* 새 탭에서 열기 */</span>
+<span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"https://google.com"</span> <span class="at">target</span>=<span class="vl">"_blank"</span><span class="kw">&gt;</span><span class="tx">구글</span><span class="kw">&lt;/a&gt;</span>
+
+<span class="cm">/* 현재 탭에서 열기 (기본값) */</span>
+<span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"https://google.com"</span> <span class="at">target</span>=<span class="vl">"_self"</span><span class="kw">&gt;</span><span class="tx">구글</span><span class="kw">&lt;/a&gt;</span></pre>
+        </div>
+      </section>
+
+      <!-- 04 페이지 내 이동 -->
+      <section class="section" id="anchor">
+        <span class="section-badge badge-purple">04</span>
+        <h2>페이지 내 이동</h2>
+        <p class="desc-text">같은 페이지 안에서 특정 위치로 바로 이동할 수 있어요. <code>#아이디명</code> 형식으로 써요. 포트폴리오의 섹션 이동 버튼에 딱 맞아요!</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-title">구조</span>
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre><span class="cm">/* 1단계: 링크 만들기 — href에 #아이디 */</span>
+<span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"#section1"</span><span class="kw">&gt;</span><span class="tx">섹션1로 이동</span><span class="kw">&lt;/a&gt;</span>
+
+<span class="cm">/* 2단계: 이동할 목적지에 id 설정 */</span>
+<span class="kw">&lt;div</span> <span class="at">id</span>=<span class="vl">"section1"</span><span class="kw">&gt;</span>
+  <span class="tx">여기로 이동해요!</span>
+<span class="kw">&lt;/div&gt;</span></pre>
+        </div>
+
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          <p>부드러운 스크롤 효과를 주려면 CSS에 <strong>html { scroll-behavior: smooth; }</strong> 를 추가하면 돼요. 이 페이지 목차도 이 방식으로 만들었어요!</p>
+        </div>
+      </section>
+
+      <!-- 05 실전 예제 -->
+      <section class="section" id="practice">
+        <span class="section-badge badge-green">05</span>
+        <h2>실전 예제</h2>
+        <p class="desc-text">포트폴리오 페이지에서 바로 쓸 수 있는 코드예요.</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-title">포트폴리오 활용 예시</span>
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre><span class="cm">/* 이메일 연락 버튼 */</span>
+<span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"mailto:xxxx@naver.com"</span>
+   <span class="at">title</span>=<span class="vl">"이메일 보내기"</span><span class="kw">&gt;</span>
+  <span class="tx">연락하기</span>
+<span class="kw">&lt;/a&gt;</span>
+
+<span class="cm">/* 포트폴리오 섹션으로 스크롤 */</span>
+<span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"#works"</span><span class="kw">&gt;</span><span class="tx">포트폴리오 보기</span><span class="kw">&lt;/a&gt;</span>
+
+<span class="cm">/* GitHub 새 탭으로 열기 */</span>
+<span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"https://github.com/luriluan0-a11y"</span>
+   <span class="at">target</span>=<span class="vl">"_blank"</span>
+   <span class="at">rel</span>=<span class="vl">"noopener noreferrer"</span><span class="kw">&gt;</span>
+  <span class="tx">GitHub 바로가기</span>
+<span class="kw">&lt;/a&gt;</span>
+
+<span class="cm">/* 파일 다운로드 링크 */</span>
+<span class="kw">&lt;a</span> <span class="at">href</span>=<span class="vl">"resume.pdf"</span> <span class="at">download</span><span class="kw">&gt;</span>
+  <span class="tx">이력서 다운로드</span>
+<span class="kw">&lt;/a&gt;</span></pre>
+        </div>
+      </section>
+
+      <!-- 06 주의사항 -->
+      <section class="section" id="tips">
+        <span class="section-badge badge-red">06</span>
+        <h2>주의사항</h2>
+
+        <div class="cards">
+          <div class="card">
+            <div class="card-head">
+              <div class="card-dot" style="background:#f85149"></div>
+              <h3>보안: rel 속성 추가</h3>
+            </div>
+            <p><code>target="_blank"</code>를 쓸 때는 보안을 위해 <code>rel="noopener noreferrer"</code>도 함께 써줘야 안전해요.</p>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-dot" style="background:#f0a732"></div>
+              <h3>링크 텍스트는 명확하게</h3>
+            </div>
+            <p>"여기 클릭" 보다 "GitHub 바로가기" 처럼 어디로 이동하는지 알 수 있는 텍스트가 좋아요.</p>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-dot" style="background:#4a9eff"></div>
+              <h3>href 빠뜨리지 않기</h3>
+            </div>
+            <p><code>href</code>가 없으면 링크가 아닌 일반 텍스트처럼 동작해요. 반드시 href를 써줘야 해요.</p>
+          </div>
+          <div class="card">
+            <div class="card-head">
+              <div class="card-dot" style="background:#3fb950"></div>
+              <h3>#id는 정확히 일치해야 해요</h3>
+            </div>
+            <p>페이지 내 이동에서 href의 <code>#이름</code>과 목적지의 <code>id="이름"</code>이 정확히 같아야 해요. 대소문자도 구별해요.</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    HTML &lt;a&gt; Anchor Tag Guide &nbsp;·&nbsp; made with Claude
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+    function copyCode(btn) {
+      const pre = btn.closest('.code-wrap').querySelector('pre');
+      const text = pre.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '복사됨!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '복사';
+          btn.classList.remove('copied');
+        }, 1500);
+      });
+    }
+  </script>
+</body>
+</html>
