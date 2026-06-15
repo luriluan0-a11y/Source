@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>display: flex 완벽 가이드</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:       #0d1117;
+      --bg2:      #161b22;
+      --bg3:      #1c2333;
+      --border:   rgba(99,179,255,0.15);
+      --blue:     #4a9eff;
+      --blue-lt:  #7bbcff;
+      --blue-dk:  #1a6bd0;
+      --green:    #3fb950;
+      --amber:    #f0a732;
+      --red:      #f85149;
+      --purple:   #bc8cff;
+      --text:     #e6edf3;
+      --text2:    #8b949e;
+      --text3:    #484f58;
+      --mono:     'JetBrains Mono', monospace;
+      --sans:     'Noto Sans KR', sans-serif;
+      --serif:    'DM Serif Display', serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(74,158,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,158,255,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,17,23,.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0;
+    }
+    .nav-inner {
+      max-width: 860px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 10px;
+    }
+    .nav-logo {
+      font-family: var(--mono); font-size: .9rem;
+      color: var(--blue); text-decoration: none;
+    }
+    .nav-logo span { color: var(--text2); }
+    .nav-links { display: flex; gap: 18px; flex-wrap: wrap; }
+    .nav-links a {
+      font-size: .8rem; color: var(--text2);
+      text-decoration: none; transition: color .2s; letter-spacing: .04em;
+    }
+    .nav-links a:hover { color: var(--blue-lt); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto; padding: 72px 24px 48px;
+    }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: .75rem; color: var(--blue);
+      border: 1px solid var(--border); background: rgba(74,158,255,.06);
+      padding: 4px 12px; border-radius: 20px; margin-bottom: 20px;
+    }
+    .hero-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .hero h1 {
+      font-family: var(--serif);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1.2; margin-bottom: 16px; color: var(--text);
+    }
+    .hero h1 em { font-style: normal; color: var(--blue); }
+    .hero p { font-size: 1rem; color: var(--text2); max-width: 540px; }
+
+    /* ── LAYOUT ── */
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 860px; margin: 0 auto; padding: 0 24px 80px;
+      display: grid; grid-template-columns: 220px 1fr; gap: 40px; align-items: start;
+    }
+
+    .toc {
+      position: sticky; top: 70px;
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 18px;
+    }
+    .toc-title {
+      font-family: var(--mono); font-size: .7rem; color: var(--text3);
+      letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px;
+    }
+    .toc a {
+      display: block; padding: 6px 10px; font-size: .82rem; color: var(--text2);
+      text-decoration: none; border-radius: 6px; border-left: 2px solid transparent;
+      transition: all .2s; margin-bottom: 2px;
+    }
+    .toc a:hover { color: var(--blue-lt); background: rgba(74,158,255,.06); border-color: var(--blue); }
+
+    .content { min-width: 0; }
+
+    .section {
+      margin-bottom: 52px; opacity: 0; transform: translateY(20px);
+      transition: opacity .6s, transform .6s;
+    }
+    .section.visible { opacity: 1; transform: none; }
+
+    .section-badge {
+      display: inline-block; font-family: var(--mono); font-size: .7rem;
+      padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; border: 1px solid;
+    }
+    .badge-blue   { color: var(--blue);   background: rgba(74,158,255,.08);  border-color: rgba(74,158,255,.25); }
+    .badge-green  { color: var(--green);  background: rgba(63,185,80,.08);   border-color: rgba(63,185,80,.25); }
+    .badge-amber  { color: var(--amber);  background: rgba(240,167,50,.08);  border-color: rgba(240,167,50,.25); }
+    .badge-purple { color: var(--purple); background: rgba(188,140,255,.08); border-color: rgba(188,140,255,.25); }
+    .badge-red    { color: var(--red);    background: rgba(248,81,73,.08);   border-color: rgba(248,81,73,.25); }
+
+    .section h2 {
+      font-family: var(--serif); font-size: 1.55rem; color: var(--text);
+      margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+    }
+    .section h2::after {
+      content: ''; flex: 1; height: 1px;
+      background: linear-gradient(90deg, var(--border), transparent);
+    }
+
+    .desc-text { font-size: .92rem; color: var(--text2); margin-bottom: 20px; line-height: 1.8; }
+    .desc-text code, p code, td code, li code {
+      font-family: var(--mono); font-size: .82em; color: var(--blue-lt);
+      background: rgba(74,158,255,.08); padding: 1px 6px; border-radius: 4px;
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-wrap {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 10px; overflow: hidden; margin-bottom: 16px;
+    }
+    .code-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 16px; background: var(--bg3); border-bottom: 1px solid var(--border);
+    }
+    .code-title { font-family: var(--mono); font-size: .72rem; color: var(--text2); }
+    .copy-btn {
+      font-family: var(--mono); font-size: .68rem; color: var(--text3);
+      background: none; border: none; cursor: pointer; padding: 2px 8px;
+      border-radius: 4px; transition: color .2s, background .2s;
+    }
+    .copy-btn:hover { color: var(--blue); background: rgba(74,158,255,.1); }
+    .copy-btn.copied { color: var(--green); }
+    pre {
+      padding: 18px 20px; font-family: var(--mono); font-size: .85rem;
+      line-height: 1.9; overflow-x: auto; color: var(--text);
+    }
+    .kw { color: #ff7b72; }
+    .at { color: #79c0ff; }
+    .vl { color: #a5d6ff; }
+    .cm { color: var(--text3); font-style: italic; }
+    .tx { color: var(--green); }
+
+    /* ── PLAYGROUND ── */
+    .playground {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px; margin-bottom: 16px;
+    }
+    .controls {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px;
+    }
+    @media (max-width: 480px) { .controls { grid-template-columns: 1fr; } }
+    .control label {
+      display: block; font-family: var(--mono); font-size: .7rem;
+      color: var(--text2); margin-bottom: 6px; letter-spacing: .04em;
+    }
+    .control select, .control input[type="range"] {
+      width: 100%; background: var(--bg3); color: var(--text);
+      border: 1px solid var(--border); border-radius: 6px;
+      padding: 6px 10px; font-family: var(--mono); font-size: .8rem;
+    }
+    .control input[type="range"] { padding: 0; height: 32px; accent-color: var(--blue); }
+
+    .flex-stage {
+      height: 220px; background: var(--bg3); border: 1px dashed rgba(74,158,255,.3);
+      border-radius: 8px; padding: 14px; display: flex; transition: all .25s; gap: 12px;
+    }
+    .flex-item {
+      background: rgba(74,158,255,.15); border: 1px solid rgba(74,158,255,.4);
+      color: var(--blue-lt); border-radius: 8px; width: 70px; height: 70px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: .9rem; font-weight: 600; flex-shrink: 0;
+    }
+    .flex-item:nth-child(3) { height: 50px; }
+
+    .live-code {
+      margin-top: 14px; font-family: var(--mono); font-size: .8rem;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 16px; line-height: 1.9; color: var(--text);
+    }
+    .live-code .lv { color: var(--blue-lt); }
+
+    /* ── VISUAL PROPERTY CARDS ── */
+    .prop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 560px) { .prop-grid { grid-template-columns: 1fr; } }
+    .prop-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 10px; padding: 14px; transition: border-color .2s;
+    }
+    .prop-card:hover { border-color: rgba(74,158,255,.4); }
+    .prop-card-title {
+      font-family: var(--mono); font-size: .78rem; color: var(--blue-lt);
+      margin-bottom: 8px; font-weight: 600;
+    }
+    .mini-stage {
+      height: 64px; background: var(--bg3); border-radius: 6px;
+      display: flex; padding: 8px; gap: 6px;
+    }
+    .mini-stage.column { flex-direction: column; height: 110px; }
+    .mini-item {
+      background: rgba(74,158,255,.18); border: 1px solid rgba(74,158,255,.35);
+      color: var(--blue-lt); border-radius: 4px; width: 26px; height: 26px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: .68rem; flex-shrink: 0;
+    }
+    .mini-stage.column .mini-item { width: 30px; }
+    .prop-card p { font-size: .8rem; color: var(--text2); margin-top: 8px; line-height: 1.6; }
+
+    /* ── TIP BOX ── */
+    .tip {
+      display: flex; gap: 12px; background: rgba(74,158,255,.06);
+      border: 1px solid rgba(74,158,255,.2); border-radius: 10px;
+      padding: 14px 18px; margin-top: 16px;
+    }
+    .tip-icon { font-size: 1.1rem; margin-top: 2px; flex-shrink: 0; }
+    .tip p { font-size: .85rem; color: var(--text2); line-height: 1.7; }
+    .tip strong { color: var(--blue-lt); font-weight: 500; }
+
+    footer {
+      position: relative; z-index: 1; text-align: center; padding: 32px 24px;
+      border-top: 1px solid var(--border); font-family: var(--mono);
+      font-size: .75rem; color: var(--text3);
+    }
+
+    @media (max-width: 640px) {
+      .wrapper { grid-template-columns: 1fr; }
+      .toc { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="nav-inner">
+      <a class="nav-logo" href="#">display:<span>flex</span> 가이드</a>
+      <div class="nav-links">
+        <a href="#basic">기본 개념</a>
+        <a href="#playground">플레이그라운드</a>
+        <a href="#direction">방향</a>
+        <a href="#justify">정렬</a>
+        <a href="#practice">실전</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-tag">CSS Reference</div>
+    <h1>display: <em>flex</em><br/>완벽 가이드</h1>
+    <p>요소를 한 줄로 나란히 배치하고, 정렬·간격·줄바꿈까지 한 번에 제어하는 CSS 레이아웃 방식이에요.</p>
+  </div>
+
+  <div class="wrapper">
+
+    <aside class="toc">
+      <p class="toc-title">목차</p>
+      <a href="#basic">01. 기본 개념</a>
+      <a href="#playground">02. 플레이그라운드</a>
+      <a href="#direction">03. flex-direction</a>
+      <a href="#justify">04. justify-content</a>
+      <a href="#align">05. align-items</a>
+      <a href="#practice">06. 실전 — 가운데 정렬</a>
+    </aside>
+
+    <main class="content">
+
+      <!-- 01 기본 개념 -->
+      <section class="section" id="basic">
+        <span class="section-badge badge-blue">01</span>
+        <h2>기본 개념</h2>
+        <p class="desc-text">부모 요소(컨테이너)에 <code>display: flex</code>를 주면, 그 안의 자식 요소들이 자동으로 <strong>flex item</strong>이 되어 한 줄로 나란히 배치돼요. float처럼 직접 띄울 필요가 없어요.</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-title">기본 문법</span>
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre><span class="kw">.container</span> {
+  <span class="at">display</span>: <span class="vl">flex</span>;
+}</pre>
+        </div>
+
+        <div class="prop-grid">
+          <div class="prop-card">
+            <p class="prop-card-title">flex 컨테이너 (부모)</p>
+            <div class="mini-stage">
+              <div class="mini-item">1</div>
+              <div class="mini-item">2</div>
+              <div class="mini-item">3</div>
+            </div>
+            <p><code>display: flex</code>를 가진 요소. 내부 정렬·방향을 결정해요.</p>
+          </div>
+          <div class="prop-card">
+            <p class="prop-card-title">flex 아이템 (자식)</p>
+            <div class="mini-stage">
+              <div class="mini-item" style="background:rgba(63,185,80,.18); border-color:rgba(63,185,80,.4); color:var(--green);">1</div>
+              <div class="mini-item" style="background:rgba(63,185,80,.18); border-color:rgba(63,185,80,.4); color:var(--green);">2</div>
+              <div class="mini-item" style="background:rgba(63,185,80,.18); border-color:rgba(63,185,80,.4); color:var(--green);">3</div>
+            </div>
+            <p>컨테이너 안의 자식 요소들. 컨테이너의 설정에 따라 자동 배치돼요.</p>
+          </div>
+        </div>
+
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          <p><strong>주축(main axis)</strong>은 아이템이 나열되는 방향, <strong>교차축(cross axis)</strong>은 그 반대 방향이에요. <code>justify-content</code>는 주축, <code>align-items</code>는 교차축을 담당해요.</p>
+        </div>
+      </section>
+
+      <!-- 02 플레이그라운드 -->
+      <section class="section" id="playground">
+        <span class="section-badge badge-green">02</span>
+        <h2>플레이그라운드</h2>
+        <p class="desc-text">옵션을 바꿔보면서 박스가 어떻게 움직이는지 직접 확인해보세요.</p>
+
+        <div class="playground">
+          <div class="controls">
+            <div class="control">
+              <label>flex-direction</label>
+              <select id="pg-direction">
+                <option value="row">row</option>
+                <option value="column">column</option>
+              </select>
+            </div>
+            <div class="control">
+              <label>justify-content</label>
+              <select id="pg-justify">
+                <option value="flex-start">flex-start</option>
+                <option value="center">center</option>
+                <option value="space-between">space-between</option>
+                <option value="space-around">space-around</option>
+              </select>
+            </div>
+            <div class="control">
+              <label>align-items</label>
+              <select id="pg-align">
+                <option value="stretch">stretch</option>
+                <option value="center">center</option>
+                <option value="flex-start">flex-start</option>
+                <option value="flex-end">flex-end</option>
+              </select>
+            </div>
+            <div class="control">
+              <label>gap: <span id="pg-gap-val">12</span>px</label>
+              <input type="range" id="pg-gap" min="0" max="40" value="12" step="1" />
+            </div>
+          </div>
+
+          <div class="flex-stage" id="pg-stage">
+            <div class="flex-item">1</div>
+            <div class="flex-item">2</div>
+            <div class="flex-item">3</div>
+          </div>
+
+          <div class="live-code">.container {<br/>
+&nbsp;&nbsp;display: flex;<br/>
+&nbsp;&nbsp;flex-direction: <span class="lv" id="lc-direction">row</span>;<br/>
+&nbsp;&nbsp;justify-content: <span class="lv" id="lc-justify">flex-start</span>;<br/>
+&nbsp;&nbsp;align-items: <span class="lv" id="lc-align">stretch</span>;<br/>
+&nbsp;&nbsp;gap: <span class="lv" id="lc-gap">12</span>px;<br/>
+}</div>
+        </div>
+      </section>
+
+      <!-- 03 flex-direction -->
+      <section class="section" id="direction">
+        <span class="section-badge badge-amber">03</span>
+        <h2>flex-direction</h2>
+        <p class="desc-text">아이템을 배치할 <strong>방향</strong>을 정해요. 기본값은 <code>row</code>(가로)예요.</p>
+
+        <div class="prop-grid">
+          <div class="prop-card">
+            <p class="prop-card-title">row (기본값)</p>
+            <div class="mini-stage">
+              <div class="mini-item">1</div>
+              <div class="mini-item">2</div>
+              <div class="mini-item">3</div>
+            </div>
+            <p>왼쪽 → 오른쪽 가로 배치</p>
+          </div>
+          <div class="prop-card">
+            <p class="prop-card-title">column</p>
+            <div class="mini-stage column">
+              <div class="mini-item">1</div>
+              <div class="mini-item">2</div>
+              <div class="mini-item">3</div>
+            </div>
+            <p>위 → 아래 세로 배치</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 justify-content -->
+      <section class="section" id="justify">
+        <span class="section-badge badge-purple">04</span>
+        <h2>justify-content</h2>
+        <p class="desc-text"><strong>주축 방향</strong>(보통 가로)의 정렬을 담당해요. 아이템 사이/주변의 여백을 어떻게 분배할지 결정해요.</p>
+
+        <div class="prop-grid">
+          <div class="prop-card">
+            <p class="prop-card-title">flex-start (기본값)</p>
+            <div class="mini-stage" style="justify-content: flex-start;">
+              <div class="mini-item">1</div><div class="mini-item">2</div><div class="mini-item">3</div>
+            </div>
+            <p>왼쪽부터 차례로 정렬</p>
+          </div>
+          <div class="prop-card">
+            <p class="prop-card-title">center</p>
+            <div class="mini-stage" style="justify-content: center;">
+              <div class="mini-item">1</div><div class="mini-item">2</div><div class="mini-item">3</div>
+            </div>
+            <p>가운데로 모아서 정렬</p>
+          </div>
+          <div class="prop-card">
+            <p class="prop-card-title">space-between</p>
+            <div class="mini-stage" style="justify-content: space-between;">
+              <div class="mini-item">1</div><div class="mini-item">2</div><div class="mini-item">3</div>
+            </div>
+            <p>양 끝에 붙이고 사이는 균등 간격</p>
+          </div>
+          <div class="prop-card">
+            <p class="prop-card-title">space-around</p>
+            <div class="mini-stage" style="justify-content: space-around;">
+              <div class="mini-item">1</div><div class="mini-item">2</div><div class="mini-item">3</div>
+            </div>
+            <p>각 아이템 주변에 균등 여백</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 05 align-items -->
+      <section class="section" id="align">
+        <span class="section-badge badge-green">05</span>
+        <h2>align-items</h2>
+        <p class="desc-text"><strong>교차축 방향</strong>(보통 세로)의 정렬을 담당해요. 높이가 다른 아이템들을 어떻게 맞출지 결정해요.</p>
+
+        <div class="prop-grid">
+          <div class="prop-card">
+            <p class="prop-card-title">stretch (기본값)</p>
+            <div class="mini-stage" style="align-items: stretch;">
+              <div class="mini-item" style="height:auto;">1</div>
+              <div class="mini-item" style="height:auto;">2</div>
+              <div class="mini-item" style="height:auto;">3</div>
+            </div>
+            <p>컨테이너 높이만큼 늘어남</p>
+          </div>
+          <div class="prop-card">
+            <p class="prop-card-title">center</p>
+            <div class="mini-stage" style="align-items: center;">
+              <div class="mini-item">1</div>
+              <div class="mini-item" style="height:18px;">2</div>
+              <div class="mini-item">3</div>
+            </div>
+            <p>세로 중앙에 맞춰 정렬</p>
+          </div>
+          <div class="prop-card">
+            <p class="prop-card-title">flex-start</p>
+            <div class="mini-stage" style="align-items: flex-start;">
+              <div class="mini-item">1</div>
+              <div class="mini-item" style="height:18px;">2</div>
+              <div class="mini-item">3</div>
+            </div>
+            <p>위쪽 끝에 맞춰 정렬</p>
+          </div>
+          <div class="prop-card">
+            <p class="prop-card-title">flex-end</p>
+            <div class="mini-stage" style="align-items: flex-end;">
+              <div class="mini-item">1</div>
+              <div class="mini-item" style="height:18px;">2</div>
+              <div class="mini-item">3</div>
+            </div>
+            <p>아래쪽 끝에 맞춰 정렬</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 실전 -->
+      <section class="section" id="practice">
+        <span class="section-badge badge-red">06</span>
+        <h2>실전 — div 3개 가운데 정렬</h2>
+        <p class="desc-text">float을 쓰지 않고 flexbox로 div 3개를 가운데에 배치하는 방법이에요.</p>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-title">HTML</span>
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre><span class="kw">&lt;div</span> <span class="at">class</span>=<span class="vl">"all"</span><span class="kw">&gt;</span>
+  <span class="kw">&lt;div</span> <span class="at">class</span>=<span class="vl">"div"</span><span class="kw">&gt;</span>...<span class="kw">&lt;/div&gt;</span>
+  <span class="kw">&lt;div</span> <span class="at">class</span>=<span class="vl">"div"</span><span class="kw">&gt;</span>...<span class="kw">&lt;/div&gt;</span>
+  <span class="kw">&lt;div</span> <span class="at">class</span>=<span class="vl">"div"</span><span class="kw">&gt;</span>...<span class="kw">&lt;/div&gt;</span>
+<span class="kw">&lt;/div&gt;</span></pre>
+        </div>
+
+        <div class="code-wrap">
+          <div class="code-header">
+            <span class="code-title">CSS</span>
+            <button class="copy-btn" onclick="copyCode(this)">복사</button>
+          </div>
+          <pre><span class="kw">.all</span> {
+  <span class="at">width</span>: <span class="vl">1200px</span>;
+  <span class="at">margin</span>: <span class="vl">0 auto</span>;
+  <span class="at">display</span>: <span class="vl">flex</span>;
+  <span class="at">justify-content</span>: <span class="vl">center</span>;
+  <span class="at">gap</span>: <span class="vl">20px</span>;
+}
+
+<span class="kw">.div</span> {
+  <span class="cm">/* float: left; 는 더 이상 필요 없음 */</span>
+  <span class="at">width</span>: <span class="vl">350px</span>;
+}</pre>
+        </div>
+
+        <div class="tip">
+          <span class="tip-icon">💡</span>
+          <p><code>float: left</code>는 항상 왼쪽부터 정렬돼서 가운데 배치가 어려워요. <code>display: flex</code> + <code>justify-content: center</code>를 쓰면 한 줄로 간단히 해결돼요.</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer>
+    display: flex Guide &nbsp;·&nbsp; made with Claude
+  </footer>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+    function copyCode(btn) {
+      const pre = btn.closest('.code-wrap').querySelector('pre');
+      const text = pre.innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = '복사됨!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = '복사';
+          btn.classList.remove('copied');
+        }, 1500);
+      });
+    }
+
+    const pgStage = document.getElementById('pg-stage');
+    const pgDirection = document.getElementById('pg-direction');
+    const pgJustify = document.getElementById('pg-justify');
+    const pgAlign = document.getElementById('pg-align');
+    const pgGap = document.getElementById('pg-gap');
+
+    function updatePlayground() {
+      const direction = pgDirection.value;
+      const justify = pgJustify.value;
+      const align = pgAlign.value;
+      const gap = pgGap.value;
+
+      pgStage.style.flexDirection = direction;
+      pgStage.style.justifyContent = justify;
+      pgStage.style.alignItems = align;
+      pgStage.style.gap = gap + 'px';
+
+      document.getElementById('lc-direction').textContent = direction;
+      document.getElementById('lc-justify').textContent = justify;
+      document.getElementById('lc-align').textContent = align;
+      document.getElementById('lc-gap').textContent = gap;
+      document.getElementById('pg-gap-val').textContent = gap;
+    }
+
+    pgDirection.addEventListener('change', updatePlayground);
+    pgJustify.addEventListener('change', updatePlayground);
+    pgAlign.addEventListener('change', updatePlayground);
+    pgGap.addEventListener('input', updatePlayground);
+
+    updatePlayground();
+  </script>
+</body>
+</html>
