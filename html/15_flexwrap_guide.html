@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flex-wrap 완벽 가이드</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:      #0d1117;
+      --bg2:     #161b22;
+      --bg3:     #1c2333;
+      --border:  rgba(99,179,255,0.15);
+      --blue:    #4a9eff;
+      --blue-lt: #7bbcff;
+      --green:   #3fb950;
+      --amber:   #f0a732;
+      --red:     #f85149;
+      --purple:  #bc8cff;
+      --pink:    #ec71b0;
+      --text:    #e6edf3;
+      --text2:   #8b949e;
+      --text3:   #484f58;
+      --mono:    'JetBrains Mono', monospace;
+      --sans:    'Noto Sans KR', sans-serif;
+      --serif:   'DM Serif Display', serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(74,158,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(74,158,255,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,17,23,.88);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0;
+    }
+    .nav-inner {
+      max-width: 900px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .nav-logo { font-family: var(--mono); font-size: .9rem; color: var(--blue); text-decoration: none; }
+    .nav-logo span { color: var(--text2); }
+    .nav-links { display: flex; gap: 16px; flex-wrap: wrap; }
+    .nav-links a { font-size: .78rem; color: var(--text2); text-decoration: none; transition: color .2s; }
+    .nav-links a:hover { color: var(--blue-lt); }
+
+    /* ── HERO ── */
+    .hero { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 72px 24px 48px; }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: var(--mono); font-size: .75rem; color: var(--blue);
+      border: 1px solid var(--border); background: rgba(74,158,255,.06);
+      padding: 4px 12px; border-radius: 20px; margin-bottom: 20px;
+    }
+    .hero-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .hero h1 { font-family: var(--serif); font-size: clamp(2rem, 5vw, 3rem); line-height: 1.2; margin-bottom: 16px; }
+    .hero h1 em { font-style: normal; color: var(--blue); }
+    .hero p { font-size: 1rem; color: var(--text2); max-width: 540px; }
+
+    /* ── LAYOUT ── */
+    .wrapper {
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto; padding: 0 24px 80px;
+      display: grid; grid-template-columns: 200px 1fr; gap: 40px; align-items: start;
+    }
+    .toc { position: sticky; top: 70px; background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+    .toc-title { font-family: var(--mono); font-size: .7rem; color: var(--text3); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 12px; }
+    .toc a { display: block; padding: 6px 10px; font-size: .8rem; color: var(--text2); text-decoration: none; border-radius: 6px; border-left: 2px solid transparent; transition: all .2s; margin-bottom: 2px; }
+    .toc a:hover { color: var(--blue-lt); background: rgba(74,158,255,.06); border-color: var(--blue); }
+
+    .content { min-width: 0; }
+    .section { margin-bottom: 56px; opacity: 0; transform: translateY(20px); transition: opacity .6s, transform .6s; }
+    .section.visible { opacity: 1; transform: none; }
+
+    .section-badge { display: inline-block; font-family: var(--mono); font-size: .7rem; padding: 3px 10px; border-radius: 20px; margin-bottom: 10px; border: 1px solid; }
+    .badge-blue   { color: var(--blue);   background: rgba(74,158,255,.08);  border-color: rgba(74,158,255,.25); }
+    .badge-green  { color: var(--green);  background: rgba(63,185,80,.08);   border-color: rgba(63,185,80,.25); }
+    .badge-amber  { color: var(--amber);  background: rgba(240,167,50,.08);  border-color: rgba(240,167,50,.25); }
+    .badge-purple { color: var(--purple); background: rgba(188,140,255,.08); border-color: rgba(188,140,255,.25); }
+    .badge-red    { color: var(--red);    background: rgba(248,81,73,.08);   border-color: rgba(248,81,73,.25); }
+    .badge-pink   { color: var(--pink);   background: rgba(236,113,176,.08); border-color: rgba(236,113,176,.25); }
+
+    .section h2 { font-family: var(--serif); font-size: 1.55rem; color: var(--text); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .section h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, var(--border), transparent); }
+    .section h3 { font-size: 1rem; font-weight: 500; color: var(--blue-lt); margin: 24px 0 10px; font-family: var(--mono); }
+
+    .desc-text { font-size: .92rem; color: var(--text2); margin-bottom: 18px; line-height: 1.8; }
+    code { font-family: var(--mono); font-size: .82em; color: var(--blue-lt); background: rgba(74,158,255,.08); padding: 1px 6px; border-radius: 4px; }
+
+    /* ── CODE ── */
+    .code-wrap { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 16px; }
+    .code-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px; background: var(--bg3); border-bottom: 1px solid var(--border); }
+    .code-title { font-family: var(--mono); font-size: .72rem; color: var(--text2); }
+    .copy-btn { font-family: var(--mono); font-size: .68rem; color: var(--text3); background: none; border: none; cursor: pointer; padding: 2px 8px; border-radius: 4px; transition: color .2s, background .2s; }
+    .copy-btn:hover { color: var(--blue); background: rgba(74,158,255,.1); }
+    .copy-btn.copied { color: var(--green); }
+    pre { padding: 18px 20px; font-family: var(--mono); font-size: .85rem; line-height: 1.9; overflow-x: auto; color: var(--text); }
+    .kw { color: #ff7b72; }
+    .at { color: #79c0ff; }
+    .vl { color: #a5d6ff; }
+    .cm { color: var(--text3); font-style: italic; }
+
+    /* ── VALUE COMPARE CARDS ── */
+    .val-cards { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 20px; }
+    .val-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; transition: border-color .2s; }
+    .val-card:hover { border-color: rgba(74,158,255,.4); }
+    .val-card-header { display: flex; align-items: center; gap: 10px; padding: 14px 18px; background: var(--bg3); border-bottom: 1px solid var(--border); }
+    .val-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .val-name { font-family: var(--mono); font-size: .88rem; font-weight: 600; }
+    .val-badge { font-family: var(--mono); font-size: .68rem; padding: 2px 8px; border-radius: 10px; border: 1px solid; }
+    .default-badge { color: var(--amber); background: rgba(240,167,50,.1); border-color: rgba(240,167,50,.3); }
+    .val-card-body { padding: 16px 18px; }
+    .val-desc { font-size: .87rem; color: var(--text2); margin-bottom: 14px; line-height: 1.7; }
+
+    /* ── DEMO STAGE ── */
+    .stage-wrap { position: relative; }
+    .stage-label { font-family: var(--mono); font-size: .68rem; color: var(--text3); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+    .stage {
+      display: flex;
+      background: var(--bg3);
+      border: 1px dashed rgba(74,158,255,.3);
+      border-radius: 8px;
+      padding: 12px;
+      gap: 8px;
+      min-height: 80px;
+      overflow: hidden;
+      position: relative;
+    }
+    .stage.nowrap-stage  { flex-wrap: nowrap; }
+    .stage.wrap-stage    { flex-wrap: wrap; height: 130px; }
+    .stage.reverse-stage { flex-wrap: wrap-reverse; height: 130px; }
+
+    .box {
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: .78rem; font-weight: 600;
+      flex-shrink: 0;
+      width: 60px; height: 50px;
+      transition: all .3s;
+    }
+    .box.b1 { background: rgba(74,158,255,.18); border: 1px solid rgba(74,158,255,.45); color: var(--blue-lt); }
+    .box.b2 { background: rgba(63,185,80,.18);  border: 1px solid rgba(63,185,80,.45);  color: var(--green); }
+    .box.b3 { background: rgba(240,167,50,.18); border: 1px solid rgba(240,167,50,.45); color: var(--amber); }
+    .box.b4 { background: rgba(188,140,255,.18);border: 1px solid rgba(188,140,255,.45);color: var(--purple); }
+    .box.b5 { background: rgba(248,81,73,.18);  border: 1px solid rgba(248,81,73,.45);  color: var(--red); }
+    .box.b6 { background: rgba(236,113,176,.18);border: 1px solid rgba(236,113,176,.45);color: var(--pink); }
+
+    /* squeeze indicator for nowrap */
+    .squeeze-note { font-size: .78rem; color: var(--amber); margin-top: 8px; display: flex; align-items: center; gap: 6px; }
+    .squeeze-note::before { content: '⚠'; }
+
+    /* ── PLAYGROUND ── */
+    .playground { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+    .pg-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+    @media (max-width: 480px) { .pg-controls { grid-template-columns: 1fr; } }
+    .ctrl label { display: block; font-family: var(--mono); font-size: .7rem; color: var(--text2); margin-bottom: 6px; }
+    .ctrl select, .ctrl input[type="range"] { width: 100%; background: var(--bg3); color: var(--text); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-family: var(--mono); font-size: .8rem; }
+    .ctrl input[type="range"] { padding: 0; height: 32px; accent-color: var(--blue); }
+
+    .pg-stage {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      background: var(--bg3);
+      border: 1px dashed rgba(74,158,255,.3);
+      border-radius: 8px;
+      padding: 14px;
+      transition: all .25s;
+      min-height: 140px;
+    }
+    .pg-item {
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--mono); font-size: .8rem; font-weight: 600;
+      height: 52px;
+      flex-shrink: 0;
+      transition: width .2s;
+    }
+
+    .live-code { margin-top: 14px; font-family: var(--mono); font-size: .8rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; line-height: 1.9; color: var(--text); }
+    .lv { color: var(--blue-lt); }
+
+    /* ── align-content ── */
+    .ac-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 560px) { .ac-grid { grid-template-columns: 1fr; } }
+    .ac-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+    .ac-card .ac-title { font-family: var(--mono); font-size: .75rem; color: var(--blue-lt); margin-bottom: 8px; }
+    .ac-stage { display: flex; flex-wrap: wrap; background: var(--bg3); border-radius: 6px; height: 100px; padding: 6px; gap: 4px; }
+    .ac-box { width: 36px; height: 24px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-family: var(--mono); font-size: .65rem; flex-shrink: 0; }
+    .ac-card p { font-size: .78rem; color: var(--text2); margin-top: 8px; line-height: 1.6; }
+
+    /* ── REAL WORLD ── */
+    .rw-preview { background: var(--bg3); border: 1px dashed rgba(74,158,255,.3); border-radius: 8px; padding: 14px; margin-bottom: 14px; }
+    .rw-tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .rw-tag { background: rgba(74,158,255,.12); border: 1px solid rgba(74,158,255,.3); color: var(--blue-lt); border-radius: 20px; padding: 4px 14px; font-size: .8rem; font-family: var(--mono); }
+    .rw-cards { display: flex; flex-wrap: wrap; gap: 12px; }
+    .rw-card { flex: 1 1 120px; background: rgba(63,185,80,.08); border: 1px solid rgba(63,185,80,.2); border-radius: 8px; padding: 12px; text-align: center; font-size: .8rem; color: var(--text2); }
+    .rw-card strong { display: block; color: var(--green); font-size: .82rem; margin-bottom: 4px; }
+
+    /* ── TIP ── */
+    .tip { display: flex; gap: 12px; background: rgba(74,158,255,.06); border: 1px solid rgba(74,158,255,.2); border-radius: 10px; padding: 14px 18px; margin-top: 16px; }
+    .tip-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 2px; }
+    .tip p { font-size: .85rem; color: var(--text2); line-height: 1.7; }
+    .tip strong { color: var(--blue-lt); }
+
+    /* ── SUMMARY TABLE ── */
+    .sum-table { width: 100%; border-collapse: collapse; }
+    .sum-table th { text-align: left; font-family: var(--mono); font-size: .72rem; color: var(--text3); padding: 8px 14px; border-bottom: 1px solid var(--border); letter-spacing: .08em; text-transform: uppercase; }
+    .sum-table td { padding: 10px 14px; font-size: .85rem; border-bottom: 1px solid rgba(99,179,255,.06); vertical-align: middle; }
+    .sum-table tr:last-child td { border-bottom: none; }
+    .sum-table td:first-child { font-family: var(--mono); color: var(--blue-lt); }
+    .sum-table td:nth-child(2) { color: var(--text2); }
+
+    footer { position: relative; z-index: 1; text-align: center; padding: 32px 24px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: .75rem; color: var(--text3); }
+
+    @media (max-width: 640px) {
+      .wrapper { grid-template-columns: 1fr; }
+      .toc { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#">flex-<span>wrap</span> 가이드</a>
+    <div class="nav-links">
+      <a href="#intro">개요</a>
+      <a href="#values">값 3가지</a>
+      <a href="#playground">플레이그라운드</a>
+      <a href="#align-content">align-content</a>
+      <a href="#real">실전 예제</a>
+      <a href="#summary">요약</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="hero-tag">CSS Flexbox</div>
+  <h1><em>flex-wrap</em><br/>완벽 가이드</h1>
+  <p>flex 컨테이너 안에서 아이템이 한 줄에 다 들어가지 않을 때, 다음 줄로 넘길지 말지를 결정하는 속성이에요.</p>
+</div>
+
+<div class="wrapper">
+
+  <aside class="toc">
+    <p class="toc-title">목차</p>
+    <a href="#intro">01. 개요</a>
+    <a href="#values">02. 값 3가지</a>
+    <a href="#playground">03. 플레이그라운드</a>
+    <a href="#align-content">04. align-content</a>
+    <a href="#real">05. 실전 예제</a>
+    <a href="#summary">06. 요약</a>
+  </aside>
+
+  <main class="content">
+
+    <!-- 01 개요 -->
+    <section class="section" id="intro">
+      <span class="section-badge badge-blue">01</span>
+      <h2>개요</h2>
+      <p class="desc-text">flex 컨테이너는 기본적으로 자식 아이템을 <strong>한 줄에 모두 집어넣으려</strong> 해요. 아이템이 너무 많거나 넓으면 강제로 줄어들거나 컨테이너 밖으로 넘쳐요. <code>flex-wrap</code>을 사용하면 이 동작을 제어할 수 있어요.</p>
+
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-title">문법</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+        <pre><span class="kw">.container</span> {
+  <span class="at">display</span>: <span class="vl">flex</span>;
+  <span class="at">flex-wrap</span>: <span class="vl">nowrap</span>;    <span class="cm">/* 기본값 */</span>
+  <span class="at">flex-wrap</span>: <span class="vl">wrap</span>;
+  <span class="at">flex-wrap</span>: <span class="vl">wrap-reverse</span>;
+}</pre>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <p><strong>flex-flow</strong> 단축 속성으로 <code>flex-direction</code>과 <code>flex-wrap</code>을 한 번에 쓸 수 있어요.<br/>예: <code>flex-flow: row wrap;</code></p>
+      </div>
+    </section>
+
+    <!-- 02 값 3가지 -->
+    <section class="section" id="values">
+      <span class="section-badge badge-green">02</span>
+      <h2>값 3가지</h2>
+      <p class="desc-text">아래 아이템 6개(1~6)를 기준으로 각 값이 어떻게 다른지 비교해보세요.</p>
+
+      <div class="val-cards">
+
+        <!-- nowrap -->
+        <div class="val-card">
+          <div class="val-card-header">
+            <div class="val-dot" style="background:var(--amber)"></div>
+            <span class="val-name" style="color:var(--amber)">nowrap</span>
+            <span class="val-badge default-badge">기본값</span>
+          </div>
+          <div class="val-card-body">
+            <p class="val-desc">아이템을 <strong>한 줄에 강제로 배치</strong>해요. 공간이 부족하면 아이템이 줄어들거나 컨테이너 밖으로 삐져나와요.</p>
+            <div class="stage-label">결과</div>
+            <div class="stage nowrap-stage">
+              <div class="box b1">1</div>
+              <div class="box b2">2</div>
+              <div class="box b3">3</div>
+              <div class="box b4">4</div>
+              <div class="box b5">5</div>
+              <div class="box b6">6</div>
+            </div>
+            <p class="squeeze-note">아이템이 줄어들거나 밖으로 넘칠 수 있어요</p>
+            <div class="code-wrap" style="margin-top:12px; margin-bottom:0;">
+              <div class="code-header"><span class="code-title">CSS</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre style="padding:10px 14px; font-size:.8rem;"><span class="kw">.container</span> {
+  <span class="at">display</span>: <span class="vl">flex</span>;
+  <span class="at">flex-wrap</span>: <span class="vl">nowrap</span>; <span class="cm">/* 기본값이라 생략 가능 */</span>
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- wrap -->
+        <div class="val-card">
+          <div class="val-card-header">
+            <div class="val-dot" style="background:var(--green)"></div>
+            <span class="val-name" style="color:var(--green)">wrap</span>
+          </div>
+          <div class="val-card-body">
+            <p class="val-desc">공간이 부족하면 아이템을 <strong>다음 줄로 내려보내요</strong>. 줄이 늘어날수록 위→아래 방향으로 쌓여요.</p>
+            <div class="stage-label">결과</div>
+            <div class="stage wrap-stage">
+              <div class="box b1">1</div>
+              <div class="box b2">2</div>
+              <div class="box b3">3</div>
+              <div class="box b4">4</div>
+              <div class="box b5">5</div>
+              <div class="box b6">6</div>
+            </div>
+            <div class="code-wrap" style="margin-top:12px; margin-bottom:0;">
+              <div class="code-header"><span class="code-title">CSS</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre style="padding:10px 14px; font-size:.8rem;"><span class="kw">.container</span> {
+  <span class="at">display</span>: <span class="vl">flex</span>;
+  <span class="at">flex-wrap</span>: <span class="vl">wrap</span>;
+}</pre>
+            </div>
+          </div>
+        </div>
+
+        <!-- wrap-reverse -->
+        <div class="val-card">
+          <div class="val-card-header">
+            <div class="val-dot" style="background:var(--purple)"></div>
+            <span class="val-name" style="color:var(--purple)">wrap-reverse</span>
+          </div>
+          <div class="val-card-body">
+            <p class="val-desc"><code>wrap</code>과 동일하게 줄바꿈이 되지만, 줄이 쌓이는 방향이 반대예요. <strong>아래→위 방향</strong>으로 쌓여요.</p>
+            <div class="stage-label">결과</div>
+            <div class="stage reverse-stage">
+              <div class="box b1">1</div>
+              <div class="box b2">2</div>
+              <div class="box b3">3</div>
+              <div class="box b4">4</div>
+              <div class="box b5">5</div>
+              <div class="box b6">6</div>
+            </div>
+            <div class="code-wrap" style="margin-top:12px; margin-bottom:0;">
+              <div class="code-header"><span class="code-title">CSS</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+              <pre style="padding:10px 14px; font-size:.8rem;"><span class="kw">.container</span> {
+  <span class="at">display</span>: <span class="vl">flex</span>;
+  <span class="at">flex-wrap</span>: <span class="vl">wrap-reverse</span>;
+}</pre>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 03 플레이그라운드 -->
+    <section class="section" id="playground">
+      <span class="section-badge badge-amber">03</span>
+      <h2>플레이그라운드</h2>
+      <p class="desc-text">아이템 너비와 개수를 바꿔보면서 <code>flex-wrap</code>의 효과를 직접 확인해보세요.</p>
+
+      <div class="playground">
+        <div class="pg-controls">
+          <div class="ctrl">
+            <label>flex-wrap</label>
+            <select id="pg-wrap">
+              <option value="nowrap">nowrap</option>
+              <option value="wrap" selected>wrap</option>
+              <option value="wrap-reverse">wrap-reverse</option>
+            </select>
+          </div>
+          <div class="ctrl">
+            <label>justify-content</label>
+            <select id="pg-justify">
+              <option value="flex-start">flex-start</option>
+              <option value="center">center</option>
+              <option value="space-between">space-between</option>
+              <option value="space-around">space-around</option>
+            </select>
+          </div>
+          <div class="ctrl">
+            <label>아이템 너비: <span id="pg-w-val">80</span>px</label>
+            <input type="range" id="pg-w" min="40" max="180" value="80" step="10" />
+          </div>
+          <div class="ctrl">
+            <label>아이템 개수: <span id="pg-n-val">6</span>개</label>
+            <input type="range" id="pg-n" min="2" max="10" value="6" step="1" />
+          </div>
+        </div>
+
+        <div class="pg-stage" id="pg-stage"></div>
+
+        <div class="live-code">.container {<br/>
+&nbsp;&nbsp;display: flex;<br/>
+&nbsp;&nbsp;flex-wrap: <span class="lv" id="lc-wrap">wrap</span>;<br/>
+&nbsp;&nbsp;justify-content: <span class="lv" id="lc-justify">flex-start</span>;<br/>
+&nbsp;&nbsp;gap: 8px;<br/>
+}<br/>
+.item {<br/>
+&nbsp;&nbsp;width: <span class="lv" id="lc-w">80</span>px;<br/>
+}</div>
+      </div>
+    </section>
+
+    <!-- 04 align-content -->
+    <section class="section" id="align-content">
+      <span class="section-badge badge-purple">04</span>
+      <h2>align-content</h2>
+      <p class="desc-text"><code>flex-wrap: wrap</code>으로 줄이 여러 개 생겼을 때, 그 <strong>줄들 사이 간격을 어떻게 배치할지</strong>를 결정하는 속성이에요. 줄이 하나뿐이면 효과가 없어요.</p>
+
+      <div class="ac-grid">
+        <div class="ac-card">
+          <p class="ac-title">flex-start</p>
+          <div class="ac-stage" style="align-content: flex-start;">
+            <div class="ac-box b1">1</div><div class="ac-box b2">2</div><div class="ac-box b3">3</div>
+            <div class="ac-box b4">4</div><div class="ac-box b5">5</div><div class="ac-box b6">6</div>
+          </div>
+          <p>줄들을 위쪽에 모아서 배치</p>
+        </div>
+        <div class="ac-card">
+          <p class="ac-title">center</p>
+          <div class="ac-stage" style="align-content: center;">
+            <div class="ac-box b1">1</div><div class="ac-box b2">2</div><div class="ac-box b3">3</div>
+            <div class="ac-box b4">4</div><div class="ac-box b5">5</div><div class="ac-box b6">6</div>
+          </div>
+          <p>줄들을 세로 중앙에 배치</p>
+        </div>
+        <div class="ac-card">
+          <p class="ac-title">space-between</p>
+          <div class="ac-stage" style="align-content: space-between;">
+            <div class="ac-box b1">1</div><div class="ac-box b2">2</div><div class="ac-box b3">3</div>
+            <div class="ac-box b4">4</div><div class="ac-box b5">5</div><div class="ac-box b6">6</div>
+          </div>
+          <p>첫 줄과 끝 줄을 양 끝에 고정</p>
+        </div>
+        <div class="ac-card">
+          <p class="ac-title">stretch (기본값)</p>
+          <div class="ac-stage" style="align-content: stretch;">
+            <div class="ac-box b1" style="height:auto;">1</div><div class="ac-box b2" style="height:auto;">2</div><div class="ac-box b3" style="height:auto;">3</div>
+            <div class="ac-box b4" style="height:auto;">4</div><div class="ac-box b5" style="height:auto;">5</div><div class="ac-box b6" style="height:auto;">6</div>
+          </div>
+          <p>각 줄이 균등하게 늘어남</p>
+        </div>
+      </div>
+
+      <div class="code-wrap" style="margin-top:16px;">
+        <div class="code-header"><span class="code-title">CSS</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+        <pre><span class="kw">.container</span> {
+  <span class="at">display</span>: <span class="vl">flex</span>;
+  <span class="at">flex-wrap</span>: <span class="vl">wrap</span>;          <span class="cm">/* 줄이 여러 개여야 효과가 있음 */</span>
+  <span class="at">align-content</span>: <span class="vl">flex-start</span>; <span class="cm">/* flex-start | center | space-between | stretch */</span>
+  <span class="at">height</span>: <span class="vl">300px</span>;              <span class="cm">/* 컨테이너 높이가 있어야 차이가 보임 */</span>
+}</pre>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <p><code>align-items</code>는 한 줄 안에서 아이템들의 세로 정렬을 담당하고, <code>align-content</code>는 <strong>여러 줄 전체</strong>의 배치를 담당해요. 헷갈리기 쉬우니 꼭 구분해두세요!</p>
+      </div>
+    </section>
+
+    <!-- 05 실전 예제 -->
+    <section class="section" id="real">
+      <span class="section-badge badge-red">05</span>
+      <h2>실전 예제</h2>
+
+      <h3># 태그 목록 — 자동 줄바꿈</h3>
+      <p class="desc-text">태그가 많아도 자동으로 줄바꿈돼서 깔끔하게 정리돼요.</p>
+      <div class="rw-preview">
+        <div class="rw-tags">
+          <span class="rw-tag">HTML</span><span class="rw-tag">CSS</span><span class="rw-tag">JavaScript</span>
+          <span class="rw-tag">React</span><span class="rw-tag">Flexbox</span><span class="rw-tag">Grid</span>
+          <span class="rw-tag">반응형</span><span class="rw-tag">웹디자인</span><span class="rw-tag">프론트엔드</span>
+        </div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-title">CSS</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+        <pre><span class="kw">.tag-list</span> {
+  <span class="at">display</span>: <span class="vl">flex</span>;
+  <span class="at">flex-wrap</span>: <span class="vl">wrap</span>;
+  <span class="at">gap</span>: <span class="vl">8px</span>;
+}</pre>
+      </div>
+
+      <h3># 카드 그리드 — 반응형 줄바꿈</h3>
+      <p class="desc-text">화면이 좁아지면 카드가 자동으로 아래로 내려가는 반응형 레이아웃이에요.</p>
+      <div class="rw-preview">
+        <div class="rw-cards">
+          <div class="rw-card"><strong>Card 01</strong>설명 텍스트</div>
+          <div class="rw-card"><strong>Card 02</strong>설명 텍스트</div>
+          <div class="rw-card"><strong>Card 03</strong>설명 텍스트</div>
+          <div class="rw-card"><strong>Card 04</strong>설명 텍스트</div>
+        </div>
+      </div>
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-title">CSS</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+        <pre><span class="kw">.card-list</span> {
+  <span class="at">display</span>: <span class="vl">flex</span>;
+  <span class="at">flex-wrap</span>: <span class="vl">wrap</span>;
+  <span class="at">gap</span>: <span class="vl">12px</span>;
+}
+
+<span class="kw">.card</span> {
+  <span class="at">flex</span>: <span class="vl">1 1 120px</span>; <span class="cm">/* 최소 120px, 공간이 남으면 균등 확장 */</span>
+}</pre>
+      </div>
+
+      <div class="tip">
+        <span class="tip-icon">💡</span>
+        <p><code>flex: 1 1 120px</code>에서 <strong>120px</strong>이 기준 너비예요. 이 값보다 공간이 부족하면 다음 줄로 내려가고, 남으면 균등하게 넓어져요. 이 값을 조절하면 한 줄에 들어오는 카드 수를 제어할 수 있어요.</p>
+      </div>
+    </section>
+
+    <!-- 06 요약 -->
+    <section class="section" id="summary">
+      <span class="section-badge badge-pink">06</span>
+      <h2>요약</h2>
+
+      <div class="code-wrap">
+        <table class="sum-table">
+          <thead>
+            <tr>
+              <th>값</th>
+              <th>동작</th>
+              <th>언제 써요?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>nowrap</td>
+              <td>한 줄 강제 유지 (기본값)</td>
+              <td>한 줄 레이아웃, 네비게이션 바</td>
+            </tr>
+            <tr>
+              <td>wrap</td>
+              <td>공간 부족 시 다음 줄로</td>
+              <td>카드 그리드, 태그 목록, 반응형 레이아웃</td>
+            </tr>
+            <tr>
+              <td>wrap-reverse</td>
+              <td>wrap과 같되 줄 쌓임 방향 반대</td>
+              <td>채팅 메시지처럼 아래부터 쌓이는 UI</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-header"><span class="code-title">flex-flow 단축 속성</span><button class="copy-btn" onclick="copyCode(this)">복사</button></div>
+        <pre><span class="cm">/* flex-direction + flex-wrap을 한 줄로 */</span>
+<span class="kw">.container</span> {
+  <span class="at">flex-flow</span>: <span class="vl">row wrap</span>;           <span class="cm">/* 가로 방향 + 줄바꿈 */</span>
+  <span class="at">flex-flow</span>: <span class="vl">column wrap</span>;        <span class="cm">/* 세로 방향 + 줄바꿈 */</span>
+  <span class="at">flex-flow</span>: <span class="vl">row wrap-reverse</span>;   <span class="cm">/* 가로 방향 + 역방향 줄바꿈 */</span>
+}</pre>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer>
+  flex-wrap Guide &nbsp;·&nbsp; made with Claude
+</footer>
+
+<script>
+  /* ── scroll animation ── */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+    });
+  }, { threshold: 0.06 });
+  document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+  /* ── copy ── */
+  function copyCode(btn) {
+    const pre = btn.closest('.code-wrap').querySelector('pre');
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '복사됨!'; btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = '복사'; btn.classList.remove('copied'); }, 1500);
+    });
+  }
+
+  /* ── playground ── */
+  const colors = [
+    { bg: 'rgba(74,158,255,.18)',  border: 'rgba(74,158,255,.45)', color: '#7bbcff' },
+    { bg: 'rgba(63,185,80,.18)',   border: 'rgba(63,185,80,.45)',  color: '#3fb950' },
+    { bg: 'rgba(240,167,50,.18)',  border: 'rgba(240,167,50,.45)', color: '#f0a732' },
+    { bg: 'rgba(188,140,255,.18)', border: 'rgba(188,140,255,.45)',color: '#bc8cff' },
+    { bg: 'rgba(248,81,73,.18)',   border: 'rgba(248,81,73,.45)',  color: '#f85149' },
+    { bg: 'rgba(236,113,176,.18)', border: 'rgba(236,113,176,.45)',color: '#ec71b0' },
+    { bg: 'rgba(74,158,255,.18)',  border: 'rgba(74,158,255,.45)', color: '#7bbcff' },
+    { bg: 'rgba(63,185,80,.18)',   border: 'rgba(63,185,80,.45)',  color: '#3fb950' },
+    { bg: 'rgba(240,167,50,.18)',  border: 'rgba(240,167,50,.45)', color: '#f0a732' },
+    { bg: 'rgba(188,140,255,.18)', border: 'rgba(188,140,255,.45)',color: '#bc8cff' },
+  ];
+
+  const pgStage   = document.getElementById('pg-stage');
+  const pgWrap    = document.getElementById('pg-wrap');
+  const pgJustify = document.getElementById('pg-justify');
+  const pgW       = document.getElementById('pg-w');
+  const pgN       = document.getElementById('pg-n');
+
+  function buildItems() {
+    const n = +pgN.value;
+    const w = +pgW.value;
+    pgStage.innerHTML = '';
+    for (let i = 0; i < n; i++) {
+      const c = colors[i % colors.length];
+      const div = document.createElement('div');
+      div.className = 'pg-item';
+      div.textContent = i + 1;
+      div.style.cssText = `width:${w}px; background:${c.bg}; border:1px solid ${c.border}; color:${c.color};`;
+      pgStage.appendChild(div);
+    }
+  }
+
+  function updatePg() {
+    const wrap    = pgWrap.value;
+    const justify = pgJustify.value;
+    const w       = pgW.value;
+    const n       = pgN.value;
+
+    pgStage.style.flexWrap        = wrap;
+    pgStage.style.justifyContent  = justify;
+
+    document.getElementById('lc-wrap').textContent    = wrap;
+    document.getElementById('lc-justify').textContent = justify;
+    document.getElementById('lc-w').textContent       = w;
+    document.getElementById('pg-w-val').textContent   = w;
+    document.getElementById('pg-n-val').textContent   = n;
+
+    buildItems();
+  }
+
+  [pgWrap, pgJustify].forEach(el => el.addEventListener('change', updatePg));
+  [pgW, pgN].forEach(el => el.addEventListener('input', updatePg));
+
+  updatePg();
+</script>
+</body>
+</html>
