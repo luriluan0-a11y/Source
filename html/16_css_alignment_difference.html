@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS align-items: flex-end vs end 차이점 정리</title>
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            background-color: #fafafa;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        h1 {
+            font-size: 24pt;
+            color: #1a202c;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
+            margin-top: 0;
+        }
+        h2 {
+            font-size: 16pt;
+            color: #2d3748;
+            margin-top: 30px;
+            border-left: 4px solid #4a5568;
+            padding-left: 10px;
+        }
+        h3 {
+            font-size: 13pt;
+            color: #4a5568;
+            margin-top: 20px;
+        }
+        p, li {
+            font-size: 11pt;
+            color: #4a5568;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        code {
+            font-family: SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            background-color: #edf2f7;
+            color: #e53e3e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10pt;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            text-align: left;
+            font-size: 11pt;
+        }
+        th {
+            background-color: #f7fafc;
+            color: #2d3748;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #fcfcfc;
+        }
+        .highlight-box {
+            background-color: #ebf8ff;
+            border-left: 4px solid #3182ce;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .highlight-box p {
+            margin: 0;
+            font-weight: 500;
+            color: #2b6cb0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CSS align-items: flex-end와 end의 차이점</h1>
+        <p>CSS Flexible Box Layout(Flexbox)과 Grid Layout에서 <code>align-items: flex-end;</code>와 <code>align-items: end;</code>는 외형상 유사하게 작동하는 것처럼 보이지만, <strong>지원하는 레이아웃 시스템</strong>과 <strong>기준이 되는 축(Axis)</strong>에서 중요한 차이점이 있습니다.</p>
+
+        <h2>1. 한눈에 보는 핵심 차이</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>특징</th>
+                    <th><code>align-items: flex-end;</code></th>
+                    <th><code>align-items: end;</code></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>주요 대상</strong></td>
+                    <td><strong>Flexbox</strong> (<code>display: flex;</code>)</td>
+                    <td><strong>Grid / Block / Alignment</strong> 규격</td>
+                </tr>
+                <tr>
+                    <td><strong>정렬 기준</strong></td>
+                    <td>Flex 라인의 <strong>flex-end</strong> (교차 축의 끝)</td>
+                    <td>글자 흐름/방향에 따른 <strong>block-end</strong> (끝)</td>
+                </tr>
+                <tr>
+                    <td><strong>Grid에서의 동작</strong></td>
+                    <td>Flexbox 전용이므로 Grid에서는 작동하지 않음</td>
+                    <td>Grid 셀 안에서 완벽하게 작동함</td>
+                </tr>
+                <tr>
+                    <td><strong>호환성</strong></td>
+                    <td>구형 브라우저까지 폭넓게 지원</td>
+                    <td>비교적 최신 스펙 (현대 브라우저는 모두 지원)</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h2>2. 왜 두 개가 따로 존재할까?</h2>
+        
+        <h3>💡 flex-end (Flexbox 전용)</h3>
+        <ul>
+            <li><strong>Flexbox 레거시:</strong> Flexbox가 처음 등장했을 때, 정렬 방향은 부모의 <code>flex-direction</code>에 따라 유연하게 바뀌어야 했습니다. 그래서 Flexbox만의 고유한 기준점인 <code>flex-start</code>와 <code>flex-end</code>가 만들어졌습니다.</li>
+            <li><strong>작동 원리:</strong> <code>flex-direction: column;</code>이나 <code>row;</code>에 따라 교차 축(Cross Axis)의 시작점과 끝점을 기준으로 아이템을 정렬합니다.</li>
+        </ul>
+
+        <h3>💡 end (CSS Box Alignment 표준)</h3>
+        <ul>
+            <li><strong>새로운 표준 규격:</strong> 이후 CSS에 Grid 레이아웃이 도입되면서, Flexbox뿐만 아니라 전반적인 CSS 레이아웃에 공통으로 쓸 수 있는 통합 정렬 규칙(<strong>CSS Box Alignment Module</strong>)이 필요해졌습니다. 이때 도입된 범용 키워드가 바로 <code>end</code>입니다.</li>
+            <li><strong>작동 원리:</strong> 글자 쓰기 방향(Writing Mode)의 <strong>블록 축(Block Axis) 끝점</strong>을 기준으로 정렬합니다. 보통 위에서 아래로 글을 쓰는 한국어/영어 환경에서는 '아래쪽'이 됩니다.</li>
+        </ul>
+
+        <h2>3. 실무에서의 실질적인 차이점 (주의할 점)</h2>
+        <ul>
+            <li><strong>Flexbox 컨테이너 안에서:</strong> 현대 브라우저(Chrome, Safari, Firefox 등)는 <code>display: flex;</code> 환경에서 <code>align-items: end;</code>를 써도 <code>flex-end</code>처럼 알아서 해석해 줍니다. 하지만 아주 오래된 구형 브라우저나 일부 환경에서는 <code>end</code>를 인식하지 못할 수 있으므로, <strong>Flexbox를 쓸 때는 <code>flex-end</code>를 쓰는 것이 가장 안전</strong>합니다.</li>
+            <li><strong>Grid 컨테이너 안에서:</strong> <code>display: grid;</code> 환경에서는 <code>flex-end</code>를 사용할 수 없습니다. <strong>Grid에서는 반드시 <code>end</code>를 사용</strong>해야 감싸고 있는 셀(Cell)의 아래쪽으로 아이템이 정렬됩니다.</li>
+        </ul>
+
+        <div class="highlight-box">
+            <p>📌 요약하자면!</p>
+            <ul style="margin: 5px 0 0 0; padding-left: 20px;">
+                <li><strong>Flexbox(<code>display: flex;</code>)</strong>를 쓸 때는 안전하게 <strong><code>flex-end</code></strong>를 쓰세요.</li>
+                <li><strong>Grid(<code>display: grid;</code>)</strong>를 쓸 때는 표준 스펙인 <strong><code>end</code></strong>를 쓰세요.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
