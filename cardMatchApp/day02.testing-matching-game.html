@@ -287,7 +287,7 @@
 
 <!-- Screen 2: Game Screen -->
 <div class="screen" id="game-screen">
-  <h1>단어를 맞춰보세요!</h1>
+  <h1>카드를 뒤집어 단어와 뜻을 맞춰보세요!</h1>
   
   <div class="stats">
     <span>🎯 매칭 <b id="matchCount">0</b> / 8</span>
@@ -376,7 +376,7 @@ function initGame() {
 
     el.innerHTML = `
       <div class="card-face card-back-face">
-        <img class="back-img" src="card-back.svg" alt="카드 뒷면">
+        <img class="back-img" src="https://luriluan0-a11y.github.io/Source/cardMatchApp/card-back.png" alt="카드 뒷면">
       </div>
       <div class="card-face card-front-face ${card.type === 'term' ? 'term' : ''}">
         <span class="card-text">${card.text.replace(/\n/g, '<br>')}</span>
