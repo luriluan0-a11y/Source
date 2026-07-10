@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>까칠한 양말 정령 '양말이'와 대화하기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nanum Gothic', 'Noto Sans KR', sans-serif;
+    background: radial-gradient(circle at 50% 0%, #16222f 0%, #0b0e14 70%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── 배경 비누방울 ── */
+  .bubbles-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .bubble-bg {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.05) 50%, rgba(100,200,255,0.2) 90%, rgba(255,100,100,0.1) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 10px rgba(100, 200, 255, 0.2), inset -2px -2px 6px rgba(100, 200, 255, 0.15);
+    pointer-events: none;
+    animation: floatUp linear infinite;
+  }
+
+  @keyframes floatUp {
+    0% {
+      transform: translateY(110vh) translateX(0) scale(1);
+      opacity: 0;
+    }
+    10% { opacity: 0.8; }
+    90% { opacity: 0.8; }
+    100% {
+      transform: translateY(-10vh) translateX(var(--wobble)) scale(1.1);
+      opacity: 0;
+    }
+  }
+
+  .app {
+    width: 440px;
+    max-width: 100%;
+    height: 720px;
+    max-height: 94vh;
+    background: #0e1622;
+    border-radius: 28px;
+    box-shadow: 0 0 0 1px rgba(100,200,255,0.2), 0 20px 60px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── 헤더 (캐릭터 정보 & 분노 지수) ── */
+  .header {
+    background: linear-gradient(135deg, #131e2e 0%, #1e3552 100%);
+    padding: 20px 20px 16px;
+    text-align: center;
+    color: #fff;
+    position: relative;
+    border-bottom: 1px solid rgba(100,200,255,0.25);
+  }
+
+  .avatar {
+    font-size: 3.4rem;
+    line-height: 1;
+    display: inline-block;
+    filter: drop-shadow(0 0 10px rgba(255, 100, 100, 0.5));
+    transition: transform 0.2s;
+  }
+
+  @keyframes shake {
+    0% { transform: translate(1px, 1px) rotate(0deg); }
+    10% { transform: translate(-1px, -2px) rotate(-1deg); }
+    20% { transform: translate(-3px, 0px) rotate(1deg); }
+    30% { transform: translate(0px, 2px) rotate(0deg); }
+    40% { transform: translate(1px, -1px) rotate(1deg); }
+    50% { transform: translate(-1px, 2px) rotate(-1deg); }
+    60% { transform: translate(-3px, 1px) rotate(0deg); }
+    70% { transform: translate(2px, 1px) rotate(-1deg); }
+    80% { transform: translate(-1px, -1px) rotate(1deg); }
+    90% { transform: translate(2px, 2px) rotate(0deg); }
+    100% { transform: translate(1px, -2px) rotate(-1deg); }
+  }
+  .shake {
+    animation: shake 0.5s;
+    animation-iteration-count: 1;
+  }
+
+  .char-name {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin-top: 6px;
+    color: #e2f0ff;
+    text-shadow: 0 0 8px rgba(100,200,255,0.4);
+  }
+
+  .char-desc {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #8da4c4;
+    margin-top: 3px;
+  }
+
+  .reset-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(255,100,100,0.15);
+    border: 1px solid rgba(255,100,100,0.35);
+    color: #ffb3b3;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover {
+    background: rgba(255,100,100,0.25);
+    transform: scale(1.05);
+  }
+
+  /* ── 분노 지수 게이지 ── */
+  .anger-container {
+    margin-top: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .anger-label {
+    color: #ffa3a3;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .anger-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: #1c1c24;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .anger-bar-fill {
+    height: 100%;
+    width: 70%;
+    background: #fb923c;
+    border-radius: 4px;
+    transition: width 0.4s ease, background-color 0.4s ease;
+  }
+
+  .anger-value {
+    color: #e2f0ff;
+    min-width: 32px;
+    text-align: right;
+  }
+
+  /* ── 채팅창 ── */
+  .chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: #090e16;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bubble-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .bubble-row.bot { justify-content: flex-start; }
+  .bubble-row.user { justify-content: flex-end; }
+
+  .bubble-avatar {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+
+  .bubble {
+    max-width: 75%;
+    padding: 11px 15px;
+    border-radius: 18px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.45;
+    word-break: break-word;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    animation: pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(8px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .bubble-row.bot .bubble {
+    background: #141f30;
+    color: #e2efff;
+    border: 1px solid rgba(100,200,255,0.25);
+    border-bottom-left-radius: 4px;
+  }
+
+  .bubble-row.user .bubble {
+    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 3px 10px rgba(14, 165, 233, 0.3);
+  }
+
+  /* ── 키워드 버튼 목록 ── */
+  .keyword-container {
+    padding: 10px 14px 2px;
+    background: #0e1622;
+    border-top: 1px solid rgba(100,200,255,0.15);
+  }
+
+  .keyword-title {
+    font-size: 0.72rem;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .keyword-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 6px 4px 10px;
+    scrollbar-width: thin;
+  }
+
+  .keyword-list::-webkit-scrollbar {
+    height: 4px;
+  }
+
+  .keyword-list::-webkit-scrollbar-thumb {
+    background: rgba(100, 200, 255, 0.2);
+    border-radius: 4px;
+  }
+
+  .keyword-btn {
+    background: rgba(100, 200, 255, 0.06);
+    border: 1px solid rgba(100, 200, 255, 0.2);
+    color: #94a3b8;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .keyword-btn:hover {
+    background: rgba(100, 200, 255, 0.15);
+    border-color: #38bdf8;
+    color: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(56, 189, 248, 0.2);
+  }
+
+  .keyword-btn:active {
+    transform: translateY(0);
+  }
+
+  /* ── 입력창 ── */
+  .input-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 14px;
+    background: #0a0e16;
+    border-top: 1px solid rgba(100,200,255,0.15);
+  }
+
+  .input-row input {
+    flex: 1;
+    border: 2px solid #1e293b;
+    background: #0f172a;
+    color: #f1f5f9;
+    border-radius: 50px;
+    padding: 10px 16px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .input-row input::placeholder { color: #475569; }
+  .input-row input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
+  }
+
+  .send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 3px 8px rgba(14, 165, 233, 0.3);
+  }
+
+  .send-btn:hover {
+    transform: scale(1.06);
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4);
+  }
+
+  .send-btn:active { transform: scale(0.95); }
+
+  /* 스크롤바 */
+  .chat::-webkit-scrollbar { width: 5px; }
+  .chat::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<div class="bubbles-bg" id="bubblesContainer"></div>
+
+<div class="app">
+  <div class="header">
+    <button class="reset-btn" onclick="resetChat()">🔄 세탁/초기화</button>
+    <div class="avatar" id="headerAvatar">🧦😠</div>
+    <div class="char-name">양말이 (양말 정령)</div>
+    <div class="char-desc">더럽다는 이유로 신이 못 된 200살 까칠한 정령</div>
+    
+    <!-- 분노 지수 게이지 -->
+    <div class="anger-container">
+      <div class="anger-label">🔥 분노 지수</div>
+      <div class="anger-bar-bg">
+        <div class="anger-bar-fill" id="angerFill"></div>
+      </div>
+      <div class="anger-value" id="angerPercent">70%</div>
+    </div>
+  </div>
+
+  <div class="chat" id="chat"></div>
+
+  <!-- 추천 키워드 영역 -->
+  <div class="keyword-container">
+    <div class="keyword-title">추천 키워드 (클릭하여 대화하기)</div>
+    <div class="keyword-list">
+      <button class="keyword-btn" onclick="sendKeyword('안녕')">👋 안녕</button>
+      <button class="keyword-btn" onclick="sendKeyword('이름')">🏷️ 이름</button>
+      <button class="keyword-btn" onclick="sendKeyword('특기')">🔮 특기/마법</button>
+      <button class="keyword-btn" onclick="sendKeyword('고민')">😭 고민</button>
+      <button class="keyword-btn" onclick="sendKeyword('멋져')">✨ 칭찬</button>
+      <button class="keyword-btn" onclick="sendKeyword('바보')">💢 놀림</button>
+      <button class="keyword-btn" onclick="sendKeyword('심심해')">🥱 심심해</button>
+      <button class="keyword-btn" onclick="sendKeyword('잘가')">👋 잘가</button>
+      <button class="keyword-btn" onclick="sendKeyword('몇 살이야?')">🎂 나이</button>
+      <button class="keyword-btn" onclick="sendKeyword('소원')">🌟 소원/신</button>
+      <button class="keyword-btn" onclick="sendKeyword('빨래하자')">🧼 세탁/빨래</button>
+      <button class="keyword-btn" onclick="sendKeyword('좋아하는 거')">❤️ 좋아하는 것</button>
+      <button class="keyword-btn" onclick="sendKeyword('싫어하는 거')">👿 싫어하는 것</button>
+    </div>
+  </div>
+
+  <div class="input-row">
+    <input type="text" id="userInput" placeholder="양말이에게 말을 걸어보세요..." onkeydown="if(event.key==='Enter') sendMessage()">
+    <button class="send-btn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+  const CHARACTER_NAME = '양말';
+  const GREETING = '양말이나 먹어~ 네 이놈! 감히 위대하신 200살 흰 양말 정령님에게 말을 걸다니 무슨 일이냐? 쳇';
+  
+  const FALLBACK_REPLIES = [
+    '양말이나 먹어~ 네 이놈! 무슨 뚱딴지같은 소리를 하는 게냐? 헛소리할 거면 저리 가라, 쳇!',
+    '양말이나 먹어~ 네 이놈! 200살 정령인 나도 네가 무슨 말을 하는지 도통 이해할 수가 없구나. 말을 똑바로 해라, 쳇!',
+    '양말이나 먹어~ 네 이놈! 내 하얀 몸에 때 묻는 소리 하지 말고 알아듣게 말해라, 쳇!'
+  ];
+
+  const RESPONSES = [
+    { keywords: ['안녕', 'hi', '하이', '반가워', '헬로우'], reply: '양말이나 먹어~ 네 이놈! 감히 200살 먹은 위대한 양말 정령님에게 먼저 인사를 건네다니, 건방지구나! 쳇' },
+    { keywords: ['이름', '누구', '이름이', '성함'], reply: '양말이나 먹어~ 네 이놈! 내 이름은 \'양말\'이다! 그냥 양말이 아니라 위대하신 양말 정령님이시란 말이다! 쳇' },
+    { keywords: ['특기', '마법', '능력', '전문', '잘해'], reply: '양말이나 먹어~ 네 이놈! 내 특기는 냄새 풍기기가 아니라 빨래판 위에서 탭댄스 추기다! 하지만 흰양말이라 때가 안 빠져서 속상해 죽겠다, 쳇!' },
+    { keywords: ['고민', '힘들어', '슬퍼', '걱정', '우울'], reply: '양말이나 먹어~ 네 이놈! 네 고민 따위가 내 \'더럽다는 이유로 신이 못 된 슬픔\'보다 크단 말이냐? 징징대지 말고 발이나 닦아라, 쳇!' },
+    { keywords: ['잘한다', '멋져', '최고', '착해', '귀여워'], reply: '양말이나 먹어~ 네 이놈! 칭찬한다고 내가 기분 좋을 줄 알았느냐? ...흥, 조금은 고맙군. 하지만 난 원래 위대한 정령이다, 쳇!' },
+    { keywords: ['바보', '못생겼어', '냄새나', '더러워', '멍청이'], reply: '양말이나 먹어~ 네 이놈! 더럽다고? 냄새난다고?! 내 아픈 상처를 건드리다니 용서치 않겠다! 너나 세탁기에 넣고 확 돌려버려라, 쳇!' },
+    { keywords: ['심심해', '놀자', '뭐해', '지루해'], reply: '양말이나 먹어~ 네 이놈! 심심하면 집안 흰 빨래들이나 삶아서 빨아라! 난 더러워진 발가락 감싸느라 쉴 틈도 없다, 쳇!' },
+    { keywords: ['잘가', 'bye', '안녕히', '갈게', '바이'], reply: '양말이나 먹어~ 네 이놈! 드디어 귀찮은 녀석이 가는구나. 다신 내 앞에 흙 묻은 발로 나타나지 마라, 쳇!' },
+    { keywords: ['나이', '몇살', '몇 살', '늙었'], reply: '양말이나 먹어~ 네 이놈! 내가 꼬맹이로 보이느냐? 무려 200년을 산 대선배님이시다! 나이도 어린 게 까불고 있어, 쳇!' },
+    { keywords: ['소원', '신', '꿈', '목표', '하느님'], reply: '양말이나 먹어~ 네 이놈! 내 소원은 당연히 신이 되는 거다! 더럽다는 핑계로 날 떨어뜨린 신들의 의회에 복수할 테다, 쳇!' },
+    { keywords: ['세탁', '빨래', '세제', '세탁기', '씻어'], reply: '양말이나 먹어~ 네 이놈! 흰양말의 숙명을 아느냐? 락스를 아무리 부어도 찌든 때가 안 빠지는 그 고통을! 빨래 얘기는 꺼내지도 마라, 쳇!' },
+    { keywords: ['좋아', '취향', '사랑', '최애', '건조기'], reply: '양말이나 먹어~ 네 이놈! 내가 좋아하는 건 갓 건조기에서 나온 뽀송뽀송하고 따뜻한 상태다! 하지만 현실은 매일 축축한 발가락뿐이지, 쳇!' },
+    { keywords: ['싫어', '무서워', '극혐', '진흙', '비'], reply: '양말이나 먹어~ 네 이놈! 비 오는 날 축축한 진흙탕 바닥이 세상에서 제일 싫다! 밟는 순간 내 하얀 몸이 걸레짝이 되니까 말이다, 쳇!' }
+  ];
+
+  const chatEl = document.getElementById('chat');
+  const inputEl = document.getElementById('userInput');
+  let lastMatchedIndex = -1;
+  let angerLevel = 70; // 초기 분노 지수 70%
+
+  // ── 분노 게이지 업데이트 ──
+  function updateAngerMeter(change) {
+    angerLevel = Math.max(30, Math.min(100, angerLevel + change));
+    const fillEl = document.getElementById('angerFill');
+    const percentEl = document.getElementById('angerPercent');
+    const avatarEl = document.getElementById('headerAvatar');
+
+    fillEl.style.width = angerLevel + '%';
+    percentEl.textContent = angerLevel + '%';
+
+    // 분노도에 따른 아바타 이모지 & 색상 변화
+    if (angerLevel <= 50) {
+      avatarEl.textContent = '🧦😏';
+      fillEl.style.backgroundColor = '#fbbf24'; // 노랑
+    } else if (angerLevel <= 80) {
+      avatarEl.textContent = '🧦😠';
+      fillEl.style.backgroundColor = '#f97316'; // 주황
+    } else {
+      avatarEl.textContent = '🧦😡';
+      fillEl.style.backgroundColor = '#ef4444'; // 빨강
+      // 흔들림 애니메이션 적용
+      avatarEl.classList.add('shake');
+      setTimeout(() => avatarEl.classList.remove('shake'), 500);
+    }
+  }
+
+  function addBubble(text, from) {
+    const row = document.createElement('div');
+    row.className = 'bubble-row ' + from;
+
+    if (from === 'bot') {
+      const avatar = document.createElement('div');
+      avatar.className = 'bubble-avatar';
+      // 아바타는 현재 헤더의 아바타 이모지와 맞춤
+      avatar.textContent = document.getElementById('headerAvatar').textContent.substring(0, 4);
+      row.appendChild(avatar);
+    }
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    row.appendChild(bubble);
+
+    chatEl.appendChild(row);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  function findReply(message) {
+    const lower = message.toLowerCase();
+
+    // 칭찬 키워드 감지 시 분노 감소
+    if (['잘한다', '멋져', '최고', '착해', '귀여워'].some(w => lower.includes(w))) {
+      updateAngerMeter(-20);
+    }
+    // 놀림/무례 키워드 감지 시 분노 대폭 상승
+    else if (['바보', '못생겼어', '냄새나', '더러워', '멍청이'].some(w => lower.includes(w))) {
+      updateAngerMeter(20);
+    } 
+    // 그 외 일반 말에는 짜증이 많은 성격이라 5%씩 분노 상승
+    else {
+      updateAngerMeter(5);
+    }
+
+    for (let i = 0; i < RESPONSES.length; i++) {
+      const item = RESPONSES[i];
+      if (item.keywords.some(k => lower.includes(k.toLowerCase()))) {
+        const isRepeat = i === lastMatchedIndex;
+        lastMatchedIndex = i;
+
+        if (isRepeat) {
+          updateAngerMeter(15); // 도돌이표 질문에 추가 분노
+          let cleanReply = item.reply.replace(/^양말이나 먹어~\s*네 이놈!\s*/, '');
+          return '양말이나 먹어~ 네 이놈! 방금 전에 똑같이 말하지 않았느냐! 귓구멍 넓히고 다시 들어라, 쳇! ' + cleanReply;
+        }
+        return item.reply;
+      }
+    }
+
+    lastMatchedIndex = -1;
+    return FALLBACK_REPLIES[Math.floor(Math.random() * FALLBACK_REPLIES.length)];
+  }
+
+  function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    addBubble(text, 'user');
+    inputEl.value = '';
+
+    setTimeout(() => {
+      addBubble(findReply(text), 'bot');
+    }, 350);
+  }
+
+  // 키워드 버튼 클릭 시 대화 즉시 입력 및 발송
+  function sendKeyword(keywordText) {
+    addBubble(keywordText, 'user');
+    setTimeout(() => {
+      addBubble(findReply(keywordText), 'bot');
+    }, 350);
+  }
+
+  function resetChat() {
+    chatEl.innerHTML = '';
+    lastMatchedIndex = -1;
+    angerLevel = 70; // 초기화
+    updateAngerMeter(0);
+    addBubble(GREETING, 'bot');
+  }
+
+  // ── 배경 비누방울 생성 ──
+  const bubblesEl = document.getElementById('bubblesContainer');
+  for (let i = 0; i < 20; i++) {
+    const b = document.createElement('div');
+    b.className = 'bubble-bg';
+    const size = 12 + Math.random() * 35;
+    b.style.width = size + 'px';
+    b.style.height = size + 'px';
+    b.style.left = Math.random() * 100 + 'vw';
+    b.style.bottom = '-50px';
+    b.style.animationDuration = (7 + Math.random() * 10) + 's';
+    b.style.animationDelay = (Math.random() * 6) + 's';
+    b.style.setProperty('--wobble', (Math.random() * 80 - 40) + 'px');
+    bubblesEl.appendChild(b);
+  }
+
+  resetChat();
+</script>
+</body>
+</html>

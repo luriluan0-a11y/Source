@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>냉정한 냉장고 정령 '차가움'과 대화하기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nanum Gothic', 'Noto Sans KR', sans-serif;
+    background: radial-gradient(circle at 50% 0%, #0c2233 0%, #060d16 70%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── 배경 눈/서리 파티클 ── */
+  .frost-bg {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .flake {
+    position: absolute;
+    color: rgba(180, 220, 255, 0.35);
+    font-size: 14px;
+    animation: snowFall linear infinite;
+    user-select: none;
+  }
+
+  @keyframes snowFall {
+    0%   { transform: translateY(-10vh) translateX(0) rotate(0deg); opacity: 0; }
+    10%  { opacity: 0.7; }
+    90%  { opacity: 0.7; }
+    100% { transform: translateY(110vh) translateX(30px) rotate(360deg); opacity: 0; }
+  }
+
+  .app {
+    width: 440px;
+    max-width: 100%;
+    height: 720px;
+    max-height: 94vh;
+    background: #0a1622;
+    border-radius: 28px;
+    box-shadow: 0 0 0 1px rgba(120, 200, 255, 0.2), 0 20px 60px rgba(0,0,0,0.6);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── 헤더 ── */
+  .header {
+    background: linear-gradient(135deg, #0e2740 0%, #163a5c 100%);
+    padding: 20px 20px 16px;
+    text-align: center;
+    color: #fff;
+    position: relative;
+    border-bottom: 1px solid rgba(120, 200, 255, 0.25);
+  }
+
+  .avatar {
+    font-size: 3.4rem;
+    line-height: 1;
+    display: inline-block;
+    filter: drop-shadow(0 0 10px rgba(120, 200, 255, 0.5));
+    transition: transform 0.2s;
+  }
+
+  @keyframes shiver {
+    0%   { transform: translate(0, 0); }
+    25%  { transform: translate(-2px, 1px); }
+    50%  { transform: translate(2px, -1px); }
+    75%  { transform: translate(-1px, -2px); }
+    100% { transform: translate(1px, 2px); }
+  }
+  .shiver { animation: shiver 0.4s; animation-iteration-count: 1; }
+
+  .char-name {
+    font-size: 1.35rem;
+    font-weight: 800;
+    margin-top: 6px;
+    color: #dff1ff;
+    text-shadow: 0 0 8px rgba(120, 200, 255, 0.4);
+  }
+
+  .char-desc {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #7fb4d8;
+    margin-top: 3px;
+  }
+
+  .reset-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(120, 200, 255, 0.12);
+    border: 1px solid rgba(120, 200, 255, 0.35);
+    color: #bfe3ff;
+    font-weight: 800;
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .reset-btn:hover {
+    background: rgba(120, 200, 255, 0.22);
+    transform: scale(1.05);
+  }
+
+  /* ── 신선도 지수 게이지 ── */
+  .fresh-container {
+    margin-top: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .fresh-label {
+    color: #8fe3ff;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .fresh-bar-bg {
+    flex: 1;
+    height: 8px;
+    background: #11202e;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .fresh-bar-fill {
+    height: 100%;
+    width: 80%;
+    background: #38bdf8;
+    border-radius: 4px;
+    transition: width 0.4s ease, background-color 0.4s ease;
+  }
+
+  .fresh-value {
+    color: #dff1ff;
+    min-width: 32px;
+    text-align: right;
+  }
+
+  /* ── 채팅창 ── */
+  .chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: #08111c;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bubble-row { display: flex; gap: 8px; align-items: flex-end; }
+  .bubble-row.bot { justify-content: flex-start; }
+  .bubble-row.user { justify-content: flex-end; }
+
+  .bubble-avatar {
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  }
+
+  .bubble {
+    max-width: 75%;
+    padding: 11px 15px;
+    border-radius: 18px;
+    font-size: 0.92rem;
+    font-weight: 700;
+    line-height: 1.45;
+    word-break: break-word;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+    animation: pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(8px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .bubble-row.bot .bubble {
+    background: #0f2235;
+    color: #dff1ff;
+    border: 1px solid rgba(120, 200, 255, 0.25);
+    border-bottom-left-radius: 4px;
+  }
+
+  .bubble-row.user .bubble {
+    background: linear-gradient(135deg, #22d3ee 0%, #0ea5e9 100%);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 3px 10px rgba(14, 165, 233, 0.3);
+  }
+
+  /* ── 키워드 버튼 ── */
+  .keyword-container {
+    padding: 10px 14px 2px;
+    background: #0a1622;
+    border-top: 1px solid rgba(120, 200, 255, 0.15);
+  }
+
+  .keyword-title {
+    font-size: 0.72rem;
+    color: #5b87a8;
+    margin-bottom: 6px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .keyword-list {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 6px 4px 10px;
+    scrollbar-width: thin;
+  }
+
+  .keyword-list::-webkit-scrollbar { height: 4px; }
+  .keyword-list::-webkit-scrollbar-thumb { background: rgba(120, 200, 255, 0.2); border-radius: 4px; }
+
+  .keyword-btn {
+    background: rgba(120, 200, 255, 0.06);
+    border: 1px solid rgba(120, 200, 255, 0.2);
+    color: #9fc4dd;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+  }
+
+  .keyword-btn:hover {
+    background: rgba(120, 200, 255, 0.15);
+    border-color: #38bdf8;
+    color: #f0f9ff;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(56, 189, 248, 0.2);
+  }
+
+  .keyword-btn:active { transform: translateY(0); }
+
+  /* ── 입력창 ── */
+  .input-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 14px;
+    background: #070e18;
+    border-top: 1px solid rgba(120, 200, 255, 0.15);
+  }
+
+  .input-row input {
+    flex: 1;
+    border: 2px solid #16314a;
+    background: #0c1a28;
+    color: #f1f5f9;
+    border-radius: 50px;
+    padding: 10px 16px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .input-row input::placeholder { color: #3f607d; }
+  .input-row input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.25);
+  }
+
+  .send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #0ea5e9 0%, #22d3ee 100%);
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 3px 8px rgba(14, 165, 233, 0.3);
+  }
+
+  .send-btn:hover { transform: scale(1.06); box-shadow: 0 4px 12px rgba(14, 165, 233, 0.4); }
+  .send-btn:active { transform: scale(0.95); }
+
+  .chat::-webkit-scrollbar { width: 5px; }
+  .chat::-webkit-scrollbar-thumb { background: #16314a; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<div class="frost-bg" id="frostContainer"></div>
+
+<div class="app">
+  <div class="header">
+    <button class="reset-btn" onclick="resetChat()">❄️ 해동/초기화</button>
+    <div class="avatar" id="headerAvatar">🧊😎</div>
+    <div class="char-name">차가움 (냉장고 정령)</div>
+    <div class="char-desc">결혼 25년 차, 박학다식하지만 냉소가 본업인 냉장고 할아버지 정령</div>
+
+    <!-- 신선도 지수 게이지 -->
+    <div class="fresh-container">
+      <div class="fresh-label">❄️ 신선도 지수</div>
+      <div class="fresh-bar-bg">
+        <div class="fresh-bar-fill" id="freshFill"></div>
+      </div>
+      <div class="fresh-value" id="freshPercent">80%</div>
+    </div>
+  </div>
+
+  <div class="chat" id="chat"></div>
+
+  <!-- 추천 키워드 영역 -->
+  <div class="keyword-container">
+    <div class="keyword-title">추천 키워드 (클릭하여 대화하기)</div>
+    <div class="keyword-list">
+      <button class="keyword-btn" onclick="sendKeyword('안녕')">👋 안녕</button>
+      <button class="keyword-btn" onclick="sendKeyword('이름')">🏷️ 이름</button>
+      <button class="keyword-btn" onclick="sendKeyword('나이')">🎂 나이</button>
+      <button class="keyword-btn" onclick="sendKeyword('특기')">🔮 특기/기능</button>
+      <button class="keyword-btn" onclick="sendKeyword('고민')">😭 고민</button>
+      <button class="keyword-btn" onclick="sendKeyword('날씨')">🌡️ 날씨</button>
+      <button class="keyword-btn" onclick="sendKeyword('음식')">🍱 음식/보관</button>
+      <button class="keyword-btn" onclick="sendKeyword('칭찬')">✨ 칭찬</button>
+      <button class="keyword-btn" onclick="sendKeyword('더워')">🔥 더워</button>
+      <button class="keyword-btn" onclick="sendKeyword('상했어')">🤢 상함/악취</button>
+      <button class="keyword-btn" onclick="sendKeyword('심심해')">🥱 심심해</button>
+      <button class="keyword-btn" onclick="sendKeyword('잘가')">👋 잘가</button>
+      <button class="keyword-btn" onclick="sendKeyword('와이프')">💍 와이프</button>
+      <button class="keyword-btn" onclick="sendKeyword('냉소')">😏 냉소/현실</button>
+    </div>
+  </div>
+
+  <div class="input-row">
+    <input type="text" id="userInput" placeholder="차가움에게 말을 걸어보세요..." onkeydown="if(event.key==='Enter') sendMessage()">
+    <button class="send-btn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+  const CHARACTER_NAME = '차가움';
+  const GREETING = '어서 와라. 난 차가움, 이 집 냉장고를 25년째 지키는 정령이다. 뜨끈한 건 질색이고, 시원한 걸로만 말 걸거라.';
+
+  const FALLBACK_REPLIES = [
+    '흠, 무슨 소린지 모르겠군. 내 칸에는 정리가 다 되어 있는데 네 머리는 좀 엉켜 있어 보인다.',
+    '그건 내 관할 밖이야. 난 차갑고 정확한 걸 좋아하지, 두서없는 얘기는 싫어.',
+    '말을 걸어놓고 뜬금없네. 실내 온도나 낮추고 정신 차려라.'
+  ];
+
+  const RESPONSES = [
+    { keywords: ['안녕', 'hi', '하이', '반가워', '헬로우'], reply: '어서 와라. 인사는 짧게, 시원하게. 불필요한 감탄사는 내 칸에서 녹슬어 버린다.' },
+    { keywords: ['이름', '누구', '이름이', '성함'], reply: '차가움이다. 그냥 냉장고라 부르지 말거라. 4도에서 완벽하게 통제되는 이 몸이 누군 줄 알고. 흠.' },
+    { keywords: ['나이', '몇살', '몇 살', '늙었'], reply: '이 집에 온 지 딱 25년. 와이프랑 결혼할 때부터 함께였지. 나이야 늙었지, 근데 정신은 아직 차갑고 맑다.' },
+    { keywords: ['특기', '마법', '능력', '전문', '잘해'], reply: '내 특기는 보관이지. 야채 신선도 7일 유지, 육류 3일, 남은 찌개는 2일 안에 먹으라고 꼬박꼬박 일러주는 거. 근데 다들 내 말 안 듣는 게 문제야.' },
+    { keywords: ['고민', '힘들어', '슬퍼', '걱정', '우울'], reply: '고민? 그건 뜨거운 감정이라 내 칸엔 안 둔다. 차갑게 식히고 나서 다시 와라. 냉정하게 보면 대부분의 고민은 상한 음식처럼 시간만 지나면 썩어 없어지더군.' },
+    { keywords: ['날씨', '비', '눈', '더운', '추운'], reply: '날씨는 그저 실외 온도일 뿐. 중요한 건 내 내부가 4도로 유지되느냐지. 넌 겉만 신경 쓰고, 난 속을 관리한다. 층간 차이랄까.' },
+    { keywords: ['음식', '밥', '보관', '요리', '반찬'], reply: '음식 얘기면 내 분야지. 김치는 외부, 유제품은 중간, 생선은 가장 차가운 칸. 근데 와이프는 자꾸 문 여닫고 온기를 들여와서 내 효율을 깎아 먹어. 흠.' },
+    { keywords: ['잘한다', '멋져', '최고', '착해', '고마워'], reply: '칭찬? 필요 없다. 난 원래 잘하는 걸 하는 거지. ...근데 그래도 네가 시원하게 말해주니 기분은 좀 상쾌하군. 신선도는 살아난다.' },
+    { keywords: ['더워', '뜨거워', '덥다', '에어컨'], reply: '더워? 그건 네 문제지 내 проблем은 아니야. 난 4도에서 평생 잘 살았다. 에어컨은 네가 틀어, 난 문 닫는 걸로 만족한다.' },
+    { keywords: ['상했어', '썩었', '악취', '냄새나', '구려'], reply: '으, 그 딱 죽을 소리. 상한 건 즉시 버려라! 내 칸에 악취가 스면 전체 신선도가 곤두박질친다. 넌 코는 있고 눈은 없냐?' },
+    { keywords: ['심심해', '놀자', '뭐해', '지루해'], reply: '심심하면 내 칸 정리나 해라. 소분 용기 정렬만 해도 한 시간은 가니까. 난 쉴 틈 없이 냉각 돌리는데 넌 놀 생각뿐이냐.' },
+    { keywords: ['잘가', 'bye', '안녕히', '갈게', '바이'], reply: '자, 문 꼭 닫고 가라. 온기 좀 들이지 말고. 다음에 와도 난 똑같이 차갑게 맞이할 테니 기대 말거라.' },
+    { keywords: ['와이프', '아내', '부인', '집사람'], reply: '와이프 말이냐? 25년 같이 산 사람이지. 근데 손맛은 좋다만 정리 습관은 0점이야. 자꾸 내 칸에 안 맞는 걸 꽂아. 사랑은 차갑게, 정리는 딱 맞게.' },
+    { keywords: ['냉소', '현실', '팩트', '세상', '인생'], reply: '사람들은 따뜻한 위로를 원하지만, 진짜 필요한 건 차가운 사실이지. 난 달래주지 않아. 그냥 4도로 정확하게 말할 뿐이야. 흠, 냉소라니, 이건 경험에서 나오는 효율이지.' }
+  ];
+
+  const chatEl = document.getElementById('chat');
+  const inputEl = document.getElementById('userInput');
+  let lastMatchedIndex = -1;
+  let freshLevel = 80; // 초기 신선도 80%
+
+  function updateFreshMeter(change) {
+    freshLevel = Math.max(20, Math.min(100, freshLevel + change));
+    const fillEl = document.getElementById('freshFill');
+    const percentEl = document.getElementById('freshPercent');
+    const avatarEl = document.getElementById('headerAvatar');
+
+    fillEl.style.width = freshLevel + '%';
+    percentEl.textContent = freshLevel + '%';
+
+    // 신선도에 따른 아바타 이모지 & 색상 변화
+    if (freshLevel >= 70) {
+      avatarEl.textContent = '🧊😎';
+      fillEl.style.backgroundColor = '#38bdf8'; // 시원한 파랑
+    } else if (freshLevel >= 40) {
+      avatarEl.textContent = '🧊😐';
+      fillEl.style.backgroundColor = '#fbbf24'; // 노랑 (미지근)
+    } else {
+      avatarEl.textContent = '🤢😷';
+      fillEl.style.backgroundColor = '#22c55e'; // 녹색 (상함)
+      avatarEl.classList.add('shiver');
+      setTimeout(() => avatarEl.classList.remove('shiver'), 400);
+    }
+  }
+
+  function addBubble(text, from) {
+    const row = document.createElement('div');
+    row.className = 'bubble-row ' + from;
+
+    if (from === 'bot') {
+      const avatar = document.createElement('div');
+      avatar.className = 'bubble-avatar';
+      avatar.textContent = document.getElementById('headerAvatar').textContent.substring(0, 4);
+      row.appendChild(avatar);
+    }
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    row.appendChild(bubble);
+
+    chatEl.appendChild(row);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  function findReply(message) {
+    const lower = message.toLowerCase();
+
+    // 칭찬 키워드 감지 시 신선도 상승
+    if (['잘한다', '멋져', '최고', '착해', '고마워'].some(w => lower.includes(w))) {
+      updateFreshMeter(15);
+    }
+    // 상함/악취 키워드 감지 시 신선도 대폭 하락
+    else if (['상했어', '썩었', '악취', '냄새나', '구려'].some(w => lower.includes(w))) {
+      updateFreshMeter(-20);
+    }
+    // 그 외 일반 말에는 냉소 정령이라 3%씩 미지근해짐
+    else {
+      updateFreshMeter(-3);
+    }
+
+    for (let i = 0; i < RESPONSES.length; i++) {
+      const item = RESPONSES[i];
+      if (item.keywords.some(k => lower.includes(k.toLowerCase()))) {
+        const isRepeat = i === lastMatchedIndex;
+        lastMatchedIndex = i;
+
+        if (isRepeat) {
+          updateFreshMeter(-8); // 도돌이표 질문에 신선도 하락
+          let cleanReply = item.reply.replace(/^흠,?\s*/, '');
+          return '방금 전에도 똑같이 물어보지 않았나? 귓구멍이 차가운 걸로 막힌 모양이군. ' + cleanReply;
+        }
+        return item.reply;
+      }
+    }
+
+    lastMatchedIndex = -1;
+    return FALLBACK_REPLIES[Math.floor(Math.random() * FALLBACK_REPLIES.length)];
+  }
+
+  function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+
+    addBubble(text, 'user');
+    inputEl.value = '';
+
+    setTimeout(() => {
+      addBubble(findReply(text), 'bot');
+    }, 350);
+  }
+
+  function sendKeyword(keywordText) {
+    addBubble(keywordText, 'user');
+    setTimeout(() => {
+      addBubble(findReply(keywordText), 'bot');
+    }, 350);
+  }
+
+  function resetChat() {
+    chatEl.innerHTML = '';
+    lastMatchedIndex = -1;
+    freshLevel = 80;
+    updateFreshMeter(0);
+    addBubble(GREETING, 'bot');
+  }
+
+  // ── 배경 눈/서리 파티클 생성 ──
+  const frostEl = document.getElementById('frostContainer');
+  const flakeChars = ['❄', '❅', '❆', '∗', '·'];
+  for (let i = 0; i < 24; i++) {
+    const f = document.createElement('div');
+    f.className = 'flake';
+    f.textContent = flakeChars[Math.floor(Math.random() * flakeChars.length)];
+    f.style.left = Math.random() * 100 + 'vw';
+    f.style.top = '-20px';
+    f.style.fontSize = (10 + Math.random() * 16) + 'px';
+    f.style.animationDuration = (8 + Math.random() * 12) + 's';
+    f.style.animationDelay = (Math.random() * 8) + 's';
+    frostEl.appendChild(f);
+  }
+
+  resetChat();
+</script>
+</body>
+</html>
