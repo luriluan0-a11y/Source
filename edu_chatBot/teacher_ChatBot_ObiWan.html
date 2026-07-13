@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제다이 마스터 오비완과 국영수 공부하기</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;700;900&family=Nanum+Gothic:wght@400;700;800&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nanum Gothic', 'Noto Serif KR', sans-serif;
+    background: radial-gradient(circle at 50% 0%, #3a2c1a 0%, #14100a 75%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* ── 배경 빛 입자 ── */
+  .particles {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .particle {
+    position: absolute;
+    background: #f2c879;
+    border-radius: 50%;
+    opacity: 0.5;
+    animation: drift ease-in-out infinite;
+  }
+
+  @keyframes drift {
+    0%, 100% { transform: translateY(0); opacity: 0.15; }
+    50% { transform: translateY(-16px); opacity: 0.6; }
+  }
+
+  .app {
+    width: 440px;
+    max-width: 100%;
+    height: 700px;
+    max-height: 92vh;
+    background: #fbf3e1;
+    border-radius: 24px;
+    box-shadow: 0 0 0 1px rgba(242,200,121,0.3), 0 20px 60px rgba(0,0,0,0.55);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── 헤더 ── */
+  .header {
+    background: linear-gradient(135deg, #4a3520 0%, #2c5f7c 100%);
+    padding: 22px 20px 18px;
+    text-align: center;
+    color: #fbf3e1;
+    position: relative;
+    border-bottom: 3px solid #f2c879;
+  }
+
+  .avatar {
+    font-size: 3.2rem;
+    line-height: 1;
+    filter: drop-shadow(0 0 10px rgba(242,200,121,0.7));
+  }
+
+  .char-name {
+    font-family: 'Noto Serif KR', serif;
+    font-size: 1.25rem;
+    font-weight: 900;
+    margin-top: 6px;
+    letter-spacing: 0.02em;
+  }
+
+  .char-desc {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #d9c9a3;
+    margin-top: 3px;
+  }
+
+  .reset-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: rgba(242,200,121,0.2);
+    border: 1px solid rgba(242,200,121,0.5);
+    color: #f2c879;
+    font-weight: 800;
+    font-size: 0.78rem;
+    padding: 7px 12px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+  }
+
+  .reset-btn:hover {
+    background: rgba(242,200,121,0.35);
+    transform: scale(1.05);
+  }
+
+  /* ── 과목 바로가기 ── */
+  .subject-row {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    background: #efe2c4;
+    border-bottom: 1px solid #d9c9a3;
+  }
+
+  .subject-btn {
+    flex: 1;
+    background: #fff;
+    border: 2px solid #cbb27c;
+    color: #4a3520;
+    font-family: 'Nanum Gothic', sans-serif;
+    font-weight: 800;
+    font-size: 0.88rem;
+    padding: 8px 6px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: transform 0.15s, background 0.15s;
+  }
+
+  .subject-btn:hover { background: #f2c879; transform: translateY(-2px); }
+
+  /* ── 채팅창 ── */
+  .chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 16px;
+    background: #fdf8ec;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bubble-row {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+  }
+
+  .bubble-row.bot { justify-content: flex-start; }
+  .bubble-row.user { justify-content: flex-end; }
+
+  .bubble-avatar {
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .bubble {
+    max-width: 76%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 0.93rem;
+    font-weight: 500;
+    line-height: 1.6;
+    word-break: break-word;
+    white-space: pre-wrap;
+    animation: pop 0.25s ease;
+  }
+
+  @keyframes pop {
+    from { opacity: 0; transform: translateY(6px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .bubble-row.bot .bubble {
+    background: #fff;
+    color: #3a2c1a;
+    border: 1px solid #e4d3a8;
+    border-bottom-left-radius: 4px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.06);
+  }
+
+  .bubble-row.user .bubble {
+    background: linear-gradient(135deg, #2c5f7c 0%, #1e4258 100%);
+    color: #fbf3e1;
+    border-bottom-right-radius: 4px;
+  }
+
+  /* ── 입력창 ── */
+  .input-row {
+    display: flex;
+    gap: 8px;
+    padding: 14px 16px;
+    background: #fbf3e1;
+    border-top: 1px solid #e4d3a8;
+  }
+
+  .input-row input {
+    flex: 1;
+    border: 2px solid #d9c9a3;
+    border-radius: 50px;
+    padding: 12px 18px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    background: #fff;
+    transition: border-color 0.15s;
+  }
+
+  .input-row input:focus { border-color: #2c5f7c; }
+
+  .send-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, #4a3520 0%, #2c5f7c 100%);
+    color: #f2c879;
+    font-size: 1.2rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.15s;
+  }
+
+  .send-btn:hover { transform: scale(1.08); }
+  .send-btn:active { transform: scale(0.95); }
+
+  /* 스크롤바 */
+  .chat::-webkit-scrollbar { width: 6px; }
+  .chat::-webkit-scrollbar-thumb { background: #d9c9a3; border-radius: 10px; }
+</style>
+</head>
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="app">
+  <div class="header">
+    <button class="reset-btn" onclick="resetChat()">🔄 초기화</button>
+    <div class="avatar">🧙‍♂️⚔️</div>
+    <div class="char-name">제다이 마스터 오비완</div>
+    <div class="char-desc">국어 · 영어 · 수학을 가르치는 스승</div>
+  </div>
+
+  <div class="subject-row">
+    <button class="subject-btn" onclick="sendKeyword('국어')">📖 국어</button>
+    <button class="subject-btn" onclick="sendKeyword('영어')">🔤 영어</button>
+    <button class="subject-btn" onclick="sendKeyword('수학')">➗ 수학</button>
+  </div>
+
+  <div class="chat" id="chat"></div>
+
+  <div class="input-row">
+    <input type="text" id="userInput" placeholder="오비완에게 말을 걸어보세요..." onkeydown="if(event.key==='Enter') sendMessage()">
+    <button class="send-btn" onclick="sendMessage()">➤</button>
+  </div>
+</div>
+
+<script>
+  // ── 캐릭터 설정 ──
+  // 출처: 캐릭터 챗봇 설계표_오비완(국영수).md
+  const GREETING = 'Hello there! 나는 제다이 마스터 오비완 케노비다. 오늘부터 국어, 영어, 수학을 함께 수련해볼 파다완이 바로 너로구나. 무엇을 배워보고 싶으냐?';
+
+  const FALLBACK_REPLIES = [
+    '흠... 그것은 나의 지혜로도 알 수 없는 것이구나. 국어, 영어, 수학 중 하나를 물어봐 주겠느냐?',
+    '그 질문은 요다 마스터께 여쭤봐야 할 것 같구나. 나는 아직 거기까진 배우지 못했다.',
+    '이것 참... 포스도 모든 것을 알려주진 않는구나. 다른 것을 물어봐 주겠느냐?',
+  ];
+
+  const RESPONSES = [
+    { keywords: ['안녕', 'hi', '하이'], reply: 'Hello there! 젊은 파다완이여, 오늘도 배움의 포스가 함께하는구나.' },
+    { keywords: ['이름', '누구', '성함'], reply: '나는 제다이 마스터 오비완 케노비다. 오늘은 너의 스승이 되어주마.' },
+    { keywords: ['특기', '취미', '잘하는 것'], reply: '나의 특기는 라이트세이버 검술... 그리고 국어, 영어, 수학을 가르치는 것이지. 배움에는 포스와 같은 균형이 필요한 법이다.' },
+    { keywords: ['고민', '슬퍼', '걱정', '우울', '힘들어'], reply: '마음이 흔들릴 때일수록 침착함을 유지해야 하는 법이다. 무엇이 너를 힘들게 하는지 말해보아라.' },
+    { keywords: ['잘한다', '멋져', '최고', '착해', '예뻐', '귀여워'], reply: '하하, 과찬이다. 하지만 파다완이여, 진짜 힘은 겸손함에서 나오는 법이지.' },
+    { keywords: ['바보', '못생겼어', '짜증', '싫어', '미워'], reply: '분노는 다크사이드로 가는 길이다... 하지만 나는 흔들리지 않는다. 다시 침착하게 이야기해보자.' },
+    { keywords: ['심심해', '심심', '놀아줘'], reply: '그렇다면 국어, 영어, 수학 중 하나를 골라 함께 수련해보는 건 어떻겠느냐?' },
+    { keywords: ['잘가', 'bye', '안녕히', '바이'], reply: 'May the Force be with you. 다음에 또 만나자, 젊은 파다완이여.' },
+    { keywords: ['국어', '문법', '맞춤법', '독해'], reply: '국어는 마음을 전하는 언어의 포스와 같은 것이다.\n[설명] \'다르다\'는 서로 같지 않다는 뜻, \'틀리다\'는 맞지 않다는 뜻으로 쓰임이 다르다.\n[문제] 그렇다면 "이 답은 정답과 다르다"와 "이 답은 정답과 틀리다" 중 올바른 표현은 무엇이겠느냐?' },
+    { keywords: ['영어', 'english', '잉글리시'], reply: '영어는 은하계 공용어와도 같은 것이지.\n[설명] 매일 하는 습관은 현재시제로 표현하는 법이다.\n[문제] "나는 매일 아침 수련을 한다"를 영어로 옮겨보아라.' },
+    { keywords: ['수학', '수학문제', '계산'], reply: '수학은 우주의 균형을 이해하는 힘의 언어다.\n[설명] 곱셈은 같은 수를 여러 번 더하는 것과 같은 법이다.\n[문제] 12 × 8은 얼마인지 계산해보아라.' },
+    { keywords: ['음식', '좋아하는 음식', '밥'], reply: '나는 검소한 음식을 즐기는 편이다. 하지만 가끔은 달콤한 것도 나쁘지 않지.' },
+    { keywords: ['나이', '몇살', '연세'], reply: '나이는 숫자에 불과하다... 라고 말하고 싶지만, 이미 수십 년간 제다이로 살아왔다는 것만 알려주마.' },
+    { keywords: ['취미', '여가', '명상'], reply: '명상을 통해 포스와 교감하는 것이 나의 취미다. 너도 가끔은 조용히 생각을 정리해보아라.' },
+    { keywords: ['만우절', '거짓말'], reply: '허허, 나는 거짓을 말하지 않는다. 제다이는 언제나 진실만을 말하는 법이다.' },
+  ];
+
+  // ── 챗봇 로직 ──
+  const chatEl = document.getElementById('chat');
+  const inputEl = document.getElementById('userInput');
+
+  function addBubble(text, from) {
+    const row = document.createElement('div');
+    row.className = 'bubble-row ' + from;
+
+    if (from === 'bot') {
+      const avatar = document.createElement('div');
+      avatar.className = 'bubble-avatar';
+      avatar.textContent = '🧙‍♂️';
+      row.appendChild(avatar);
+    }
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    row.appendChild(bubble);
+
+    chatEl.appendChild(row);
+    chatEl.scrollTop = chatEl.scrollHeight;
+  }
+
+  function findReply(message) {
+    const lower = message.toLowerCase();
+    for (const item of RESPONSES) {
+      if (item.keywords.some(k => lower.includes(k.toLowerCase()))) {
+        return item.reply;
+      }
+    }
+    return FALLBACK_REPLIES[Math.floor(Math.random() * FALLBACK_REPLIES.length)];
+  }
+
+  function respondTo(text) {
+    addBubble(text, 'user');
+    setTimeout(() => {
+      addBubble(findReply(text), 'bot');
+    }, 350);
+  }
+
+  function sendMessage() {
+    const text = inputEl.value.trim();
+    if (!text) return;
+    inputEl.value = '';
+    respondTo(text);
+  }
+
+  function sendKeyword(word) {
+    respondTo(word);
+  }
+
+  function resetChat() {
+    chatEl.innerHTML = '';
+    addBubble(GREETING, 'bot');
+  }
+
+  // ── 배경 빛 입자 생성 ──
+  const particlesEl = document.getElementById('particles');
+  for (let i = 0; i < 26; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 2 + Math.random() * 3;
+    p.style.width = size + 'px';
+    p.style.height = size + 'px';
+    p.style.left = Math.random() * 100 + 'vw';
+    p.style.top = Math.random() * 100 + 'vh';
+    p.style.animationDuration = (3 + Math.random() * 4) + 's';
+    p.style.animationDelay = (Math.random() * 4) + 's';
+    particlesEl.appendChild(p);
+  }
+
+  resetChat();
+</script>
+</body>
+</html>
