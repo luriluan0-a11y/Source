@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>방탈출 게임 기획서 작성기</title>
+<style>
+  :root {
+    --bg: #1b1230;
+    --panel: #241a3d;
+    --panel-2: #2d2150;
+    --border: #4a3a75;
+    --accent: #b48cff;
+    --accent-2: #7c5cff;
+    --text: #eee6ff;
+    --text-dim: #a99ecb;
+    --danger: #ff6b81;
+    --ok: #6bffb0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Pretendard", "Malgun Gothic", "Segoe UI", sans-serif;
+    background: radial-gradient(circle at top, #2a1c4a 0%, var(--bg) 60%);
+    color: var(--text);
+    padding: 32px 16px 80px;
+  }
+  .wrap { max-width: 780px; margin: 0 auto; }
+  h1 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 4px;
+    background: linear-gradient(90deg, #ffd76b, #ff8bcb, #7c5cff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .subtitle {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 28px;
+  }
+  section.card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.25);
+  }
+  section.card > h2 {
+    margin: 0 0 4px;
+    font-size: 1.1rem;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .hint {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    margin: 0 0 14px;
+    line-height: 1.5;
+  }
+  label {
+    display: block;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin: 12px 0 6px;
+    color: var(--text);
+  }
+  label:first-of-type { margin-top: 0; }
+  input[type="text"], textarea, select {
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    padding: 10px 12px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    resize: vertical;
+  }
+  input[type="text"]:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: var(--accent-2);
+    box-shadow: 0 0 0 3px rgba(124,92,255,0.25);
+  }
+  textarea { min-height: 64px; }
+  .example {
+    color: var(--text-dim);
+    font-size: 0.78rem;
+    margin-top: 4px;
+  }
+  .puzzle-block {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  .puzzle-block .puzzle-title {
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 6px;
+    font-size: 0.95rem;
+  }
+  .remove-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: transparent;
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    border-radius: 6px;
+    padding: 4px 10px;
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+  .remove-btn:hover { background: rgba(255,107,129,0.15); }
+  .add-btn {
+    display: block;
+    width: 100%;
+    background: transparent;
+    border: 1.5px dashed var(--accent-2);
+    color: var(--accent);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .add-btn:hover { background: rgba(124,92,255,0.12); }
+  .empty-note {
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-bottom: 12px;
+  }
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .checkbox-row input { width: auto; }
+  .checkbox-row label { margin: 0; }
+  .download-btn {
+    display: block;
+    width: 100%;
+    background: linear-gradient(90deg, #7c5cff, #ff8bcb);
+    border: none;
+    color: #1b1230;
+    font-weight: 800;
+    font-size: 1rem;
+    padding: 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 12px;
+    box-shadow: 0 6px 20px rgba(124,92,255,0.35);
+  }
+  .download-btn:hover { filter: brightness(1.08); }
+  .status-msg {
+    text-align: center;
+    color: var(--ok);
+    font-size: 0.85rem;
+    height: 1.2em;
+    margin-top: 8px;
+  }
+  .action-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+  .fill-example-btn {
+    flex: 2;
+    background: rgba(107, 255, 176, 0.12);
+    border: 1.5px solid var(--ok);
+    color: var(--ok);
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 13px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .fill-example-btn:hover { background: rgba(107, 255, 176, 0.22); }
+  .reset-btn {
+    flex: 1;
+    background: rgba(255, 107, 129, 0.1);
+    border: 1.5px solid var(--danger);
+    color: var(--danger);
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 13px;
+    border-radius: 12px;
+    cursor: pointer;
+  }
+  .reset-btn:hover { background: rgba(255, 107, 129, 0.2); }
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 14px;
+  }
+  .photo-card {
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--panel-2);
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.15s;
+    position: relative;
+  }
+  .photo-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .photo-card.selected { border-color: var(--ok); box-shadow: 0 0 0 3px rgba(107,255,176,0.25); }
+  .photo-card .thumb-wrap { position: relative; width: 100%; aspect-ratio: 4 / 3; overflow: hidden; }
+  .photo-card img.thumb { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .photo-card .zoom-hint {
+    position: absolute;
+    bottom: 6px;
+    right: 6px;
+    background: rgba(0,0,0,0.55);
+    color: #fff;
+    font-size: 0.72rem;
+    padding: 2px 7px;
+    border-radius: 6px;
+  }
+  .photo-card .selected-badge {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: var(--ok);
+    color: #0f2417;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 6px;
+    display: none;
+  }
+  .photo-card.selected .selected-badge { display: block; }
+  .photo-card .photo-label {
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 8px 6px 2px;
+    color: var(--text);
+  }
+  .photo-card .select-btn {
+    display: block;
+    width: calc(100% - 16px);
+    margin: 8px auto 10px;
+    background: transparent;
+    border: 1px solid var(--accent-2);
+    color: var(--accent);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 4px;
+    border-radius: 7px;
+    cursor: pointer;
+  }
+  .photo-card .select-btn:hover { background: rgba(124,92,255,0.15); }
+  .photo-card.selected .select-btn {
+    border-color: var(--ok);
+    color: var(--ok);
+    background: rgba(107,255,176,0.1);
+  }
+  .photo-none-note {
+    color: var(--text-dim);
+    font-size: 0.82rem;
+    margin-top: 12px;
+  }
+  .lightbox-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10, 6, 20, 0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .lightbox-overlay.open { display: flex; }
+  .lightbox-box {
+    max-width: 92vw;
+    max-height: 88vh;
+    text-align: center;
+  }
+  .lightbox-box img {
+    max-width: 100%;
+    max-height: 76vh;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  }
+  .lightbox-box .lightbox-caption {
+    color: var(--text);
+    margin-top: 12px;
+    font-size: 0.95rem;
+  }
+  .lightbox-close {
+    margin-top: 14px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 18px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>방탈출 게임 기획서 작성기</h1>
+  <p class="subtitle">항목을 입력하고 하단에서 마크다운 파일로 다운로드하세요.</p>
+
+  <div class="action-row">
+    <button type="button" class="fill-example-btn" id="fillExampleBtn">✨ 예시대로 채우기 (뭘 써야 할지 모르겠으면 눌러보세요!)</button>
+    <button type="button" class="reset-btn" id="resetBtn">🔄 초기화</button>
+  </div>
+
+  <section class="card">
+    <h2>배경 사진 선택</h2>
+    <p class="hint">방탈출 게임의 배경이 될 사진을 골라보세요. 사진을 클릭하면 크게 볼 수 있고, "이걸로 선택" 버튼을 누르면 선택됩니다.</p>
+    <div class="photo-grid" id="photoGrid"></div>
+    <p class="photo-none-note" id="photoNoneNote">선택된 배경이 없습니다.</p>
+  </section>
+
+  <section class="card">
+    <h2>기본 정보</h2>
+    <label for="gameTitle">게임 제목</label>
+    <input type="text" id="gameTitle" placeholder="예) 왕으로부터의 탈주">
+
+    <label for="synopsis">시놉시스 (플레이어가 왜 방탈출을 해야 하는지)</label>
+    <textarea id="synopsis" placeholder="예) 나는 삐에로인데 왕을 웃기지 못해 결국 감옥에 갇히게 되었다. 아... 나를 기다리고 있는 프랑소와즈를 위해서라도 빨리 이곳을 탈출해야 하는데..."></textarea>
+  </section>
+
+  <section class="card">
+    <h2>오브젝트 / 퍼즐</h2>
+    <p class="hint">
+      화면에 등장하는 오브젝트를 추가하세요. 종류를 <b>대화</b>로 선택하면 클릭 시 나오는 대사만 적으면 되고,
+      <b>퍼즐</b>로 선택하면 퍼즐의 규칙과 정답(또는 다음 힌트)을 적으면 됩니다.
+    </p>
+    <div id="puzzleList"></div>
+    <p class="empty-note" id="emptyNote">아직 추가된 오브젝트가 없습니다. 아래 버튼을 눌러 추가하세요.</p>
+    <button type="button" class="add-btn" id="addPuzzleBtn">+ 오브젝트 추가</button>
+  </section>
+
+  <section class="card">
+    <h2>엔딩</h2>
+    <label for="endingText">모든 퍼즐을 풀고 탈출했을 때 보여줄 문구</label>
+    <textarea id="endingText" placeholder="예) 퍼즐을 다 풀고 방을 탈출해 주인공은 프랑소와즈와 만나 행복하게 살았습니다."></textarea>
+  </section>
+
+  <section class="card">
+    <h2>Game Over</h2>
+    <label for="gameOverText">실패했을 때 보여줄 문구</label>
+    <textarea id="gameOverText" placeholder="예) 방을 탈출하지 못했습니다. 다시 도전하세요."></textarea>
+    <div class="checkbox-row" style="margin-top:12px;">
+      <input type="checkbox" id="retryBtn" checked>
+      <label for="retryBtn">재도전 버튼 추가</label>
+    </div>
+  </section>
+
+  <button type="button" class="download-btn" id="downloadBtn">📄 마크다운 파일 다운로드</button>
+  <p class="status-msg" id="statusMsg"></p>
+</div>
+
+<div class="lightbox-overlay" id="lightboxOverlay">
+  <div class="lightbox-box">
+    <img id="lightboxImg" src="" alt="">
+    <p class="lightbox-caption" id="lightboxCaption"></p>
+    <button type="button" class="lightbox-close" id="lightboxClose">닫기</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const puzzleList = document.getElementById('puzzleList');
+  const emptyNote = document.getElementById('emptyNote');
+  const addPuzzleBtn = document.getElementById('addPuzzleBtn');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const statusMsg = document.getElementById('statusMsg');
+  const fillExampleBtn = document.getElementById('fillExampleBtn');
+  let puzzleSeq = 0;
+  let selectedBackground = null;
+
+  // ---------- 배경 사진 선택 ----------
+  const IMG_BASE = 'https://luriluan0-a11y.github.io/Source/escapeRoom/';
+  const backgrounds = [
+    { file: 'abandoned_psychiatric_hospital_bg.png', label: '정신병원' },
+    { file: 'bright_whimsical_toy_shop_bg.png', label: '장난감의 방' },
+    { file: 'haunted_victorian_mansion_bg.png', label: '귀신의 저택' },
+    { file: 'modern_smart_room_bg.png', label: '미래 저택' },
+    { file: 'pirate_cartographer_room_bg.png', label: '해적의 방' },
+    { file: 'underground_prison_escape_bg.png', label: '감옥' }
+  ];
+
+  const photoGrid = document.getElementById('photoGrid');
+  const photoNoneNote = document.getElementById('photoNoneNote');
+  const lightboxOverlay = document.getElementById('lightboxOverlay');
+  const lightboxImg = document.getElementById('lightboxImg');
+  const lightboxCaption = document.getElementById('lightboxCaption');
+  const lightboxClose = document.getElementById('lightboxClose');
+
+  function openLightbox(bg) {
+    lightboxImg.src = IMG_BASE + bg.file;
+    lightboxImg.alt = bg.label;
+    lightboxCaption.textContent = bg.label;
+    lightboxOverlay.classList.add('open');
+  }
+
+  function closeLightbox() {
+    lightboxOverlay.classList.remove('open');
+  }
+
+  lightboxClose.addEventListener('click', closeLightbox);
+  lightboxOverlay.addEventListener('click', (e) => {
+    if (e.target === lightboxOverlay) closeLightbox();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeLightbox();
+  });
+
+  function renderPhotoGrid() {
+    photoGrid.innerHTML = '';
+    backgrounds.forEach((bg) => {
+      const card = document.createElement('div');
+      card.className = 'photo-card' + (selectedBackground === bg.file ? ' selected' : '');
+      card.innerHTML = `
+        <div class="thumb-wrap">
+          <img class="thumb" src="${IMG_BASE + bg.file}" alt="${bg.label}" loading="lazy">
+          <span class="selected-badge">선택됨</span>
+          <span class="zoom-hint">🔍 크게보기</span>
+        </div>
+        <div class="photo-label">${bg.label}</div>
+        <button type="button" class="select-btn">${selectedBackground === bg.file ? '✓ 선택됨' : '이걸로 선택'}</button>
+      `;
+      card.querySelector('.thumb-wrap').addEventListener('click', () => openLightbox(bg));
+      card.querySelector('.select-btn').addEventListener('click', () => {
+        selectedBackground = bg.file;
+        renderPhotoGrid();
+      });
+      photoGrid.appendChild(card);
+    });
+    photoNoneNote.style.display = selectedBackground ? 'none' : 'block';
+  }
+
+  renderPhotoGrid();
+
+  function updateEmptyNote() {
+    emptyNote.style.display = puzzleList.children.length === 0 ? 'block' : 'none';
+  }
+
+  function renumber() {
+    Array.from(puzzleList.children).forEach((block, i) => {
+      block.querySelector('.puzzle-title').textContent = '퍼즐 ' + (i + 1);
+    });
+  }
+
+  function addPuzzle(prefill) {
+    puzzleSeq += 1;
+    const id = puzzleSeq;
+    const block = document.createElement('div');
+    block.className = 'puzzle-block';
+    block.dataset.id = id;
+    block.innerHTML = `
+      <button type="button" class="remove-btn">삭제</button>
+      <div class="puzzle-title">퍼즐</div>
+
+      <label>오브젝트 이름</label>
+      <input type="text" class="obj-name" placeholder="예) 고양이 / 짝 맞추기 게임 / 자물쇠">
+
+      <label>오브젝트 종류</label>
+      <select class="obj-type">
+        <option value="대화">대화 (클릭하면 대사만 출력)</option>
+        <option value="퍼즐">퍼즐 (풀어야 힌트/비밀번호 획득)</option>
+      </select>
+
+      <label class="content-label">대사 내용</label>
+      <textarea class="obj-content" placeholder="예) 야아옹~ 나도 이 곳을 나가고 싶다."></textarea>
+      <p class="example content-example">예) 대화형 오브젝트는 클릭 시 이 대사가 표시됩니다.</p>
+    `;
+    puzzleList.appendChild(block);
+
+    const removeBtn = block.querySelector('.remove-btn');
+    const nameInput = block.querySelector('.obj-name');
+    const typeSelect = block.querySelector('.obj-type');
+    const contentLabel = block.querySelector('.content-label');
+    const contentArea = block.querySelector('.obj-content');
+    const contentExample = block.querySelector('.content-example');
+
+    removeBtn.addEventListener('click', () => {
+      block.remove();
+      renumber();
+      updateEmptyNote();
+    });
+
+    function applyTypeLabels() {
+      if (typeSelect.value === '퍼즐') {
+        contentLabel.textContent = '퍼즐 설명 (규칙, 정답/힌트, 실패 시 결과)';
+        contentArea.placeholder = '예) 4개의 카드가 나오고 카드를 한 번 뒤집은 후 기억해서 짝을 맞춰야 한다. 틀리면 카드의 공격을 받아 Game Over, 맞추면 비밀번호를 획득한다.';
+        contentExample.textContent = '예) 퍼즐형 오브젝트는 클릭 시 퍼즐 화면으로 전환됩니다.';
+      } else {
+        contentLabel.textContent = '대사 내용';
+        contentArea.placeholder = '예) 야아옹~ 나도 이 곳을 나가고 싶다.';
+        contentExample.textContent = '예) 대화형 오브젝트는 클릭 시 이 대사가 표시됩니다.';
+      }
+    }
+
+    typeSelect.addEventListener('change', applyTypeLabels);
+
+    if (prefill) {
+      nameInput.value = prefill.name || '';
+      typeSelect.value = prefill.type || '대화';
+      contentArea.value = prefill.content || '';
+      applyTypeLabels();
+    }
+
+    renumber();
+    updateEmptyNote();
+  }
+
+  addPuzzleBtn.addEventListener('click', () => addPuzzle());
+
+  // 기본으로 하나는 추가해 시작 (예시처럼 최소 1개)
+  addPuzzle();
+
+  // ---------- 예시로 전체 채우기 (글쓰기가 어려운 사용자를 위한 원클릭 채우기) ----------
+  function fillExample() {
+    document.getElementById('gameTitle').value = '왕으로부터의 탈주';
+    document.getElementById('synopsis').value =
+      '나는 삐에로인데 왕을 웃기지 못해 결국 감옥에 갇히게 되었다. 아... 나를 기다리고 있는 프랑소와즈를 위해서라도 빨리 이곳을 탈출해야 하는데 대체 이 방은 어떻게 열리는 거지? 변태같은 왕이 이곳에 퍼즐을 풀면 나갈 수 있다고 했다. 잘못 건드리면 함정도 있다는데 나는 왜 이런 시련을 겪게 된 것인가... 하지만 기운을 내자. 탈출해서 반드시 프랑소와즈를 만나야겠어!!!';
+    document.getElementById('endingText').value =
+      '퍼즐을 다 풀고 방을 탈출해 주인공은 프랑소와즈와 만나 행복하게 살았습니다.';
+    document.getElementById('gameOverText').value =
+      '방을 탈출하지 못했습니다. 다시 도전하세요.';
+    document.getElementById('retryBtn').checked = true;
+
+    // 기존 오브젝트를 모두 지우고 예시 3개로 교체
+    puzzleList.innerHTML = '';
+    puzzleSeq = 0;
+    addPuzzle({ name: '고양이', type: '대화', content: '야아옹~ 나도 이 곳을 나가고 싶다.' });
+    addPuzzle({ name: '짝 맞추기 게임', type: '퍼즐', content: '4개의 카드가 나오고 카드를 한 번 뒤집은 후 기억해서 짝을 맞춰야 한다. 틀리면 카드의 공격을 받아 Game Over, 맞추면 비밀번호를 획득한다.' });
+    addPuzzle({ name: '자물쇠', type: '퍼즐', content: '앞에서 얻은 비밀번호를 입력해서 자물쇠를 열면 방을 탈출할 수 있다.' });
+
+    selectedBackground = 'underground_prison_escape_bg.png';
+    renderPhotoGrid();
+
+    statusMsg.textContent = '예시 내용을 채웠습니다. 마음에 들면 그대로 다운로드하거나, 자유롭게 수정하세요!';
+    setTimeout(() => { statusMsg.textContent = ''; }, 4000);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  fillExampleBtn.addEventListener('click', fillExample);
+
+  // ---------- 초기화 ----------
+  const resetBtn = document.getElementById('resetBtn');
+
+  function resetForm() {
+    document.getElementById('gameTitle').value = '';
+    document.getElementById('synopsis').value = '';
+    document.getElementById('endingText').value = '';
+    document.getElementById('gameOverText').value = '';
+    document.getElementById('retryBtn').checked = true;
+
+    puzzleList.innerHTML = '';
+    puzzleSeq = 0;
+    addPuzzle();
+
+    selectedBackground = null;
+    renderPhotoGrid();
+
+    statusMsg.textContent = '입력한 내용을 모두 초기화했습니다.';
+    setTimeout(() => { statusMsg.textContent = ''; }, 3000);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  resetBtn.addEventListener('click', resetForm);
+
+  function escapeForFilename(str) {
+    return str.replace(/[\\/:*?"<>|]/g, '').trim();
+  }
+
+  function buildMarkdown() {
+    const title = document.getElementById('gameTitle').value.trim() || '(제목 미입력)';
+    const synopsis = document.getElementById('synopsis').value.trim() || '(시놉시스 미입력)';
+    const ending = document.getElementById('endingText').value.trim() || '(엔딩 문구 미입력)';
+    const gameOver = document.getElementById('gameOverText').value.trim() || '(Game Over 문구 미입력)';
+    const retry = document.getElementById('retryBtn').checked;
+
+    const blocks = Array.from(puzzleList.children);
+    let puzzleMd = '';
+    blocks.forEach((block, i) => {
+      const name = block.querySelector('.obj-name').value.trim() || '(이름 미입력)';
+      const type = block.querySelector('.obj-type').value;
+      const content = block.querySelector('.obj-content').value.trim() || '(내용 미입력)';
+      puzzleMd += `### 퍼즐 ${i + 1}\n`;
+      puzzleMd += `- 오브젝트 이름: ${name}\n`;
+      puzzleMd += `- 오브젝트 종류: ${type}\n`;
+      puzzleMd += `- 내용: ${content}\n\n`;
+    });
+    if (blocks.length === 0) {
+      puzzleMd = '(등록된 오브젝트 없음)\n\n';
+    }
+
+    const bgObj = backgrounds.find((b) => b.file === selectedBackground);
+    const bgLabel = bgObj ? bgObj.label : '(선택 안 함)';
+
+    return `# 게임 기획서
+
+## 게임 제목
+${title}
+
+## 배경 사진
+${bgLabel}
+
+## 시놉시스
+${synopsis}
+
+## 퍼즐 목록 (총 ${blocks.length}개)
+
+${puzzleMd}## 엔딩
+${ending}
+
+## Game Over
+- 재도전 버튼: ${retry ? '있음' : '없음'}
+- 문구: ${gameOver}
+`;
+  }
+
+  downloadBtn.addEventListener('click', () => {
+    const md = buildMarkdown();
+    const titleRaw = document.getElementById('gameTitle').value.trim();
+    const filename = (titleRaw ? escapeForFilename(titleRaw) : '방탈출_게임_기획서') + '.md';
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    statusMsg.textContent = `"${filename}" 다운로드 완료!`;
+    setTimeout(() => { statusMsg.textContent = ''; }, 3000);
+  });
+})();
+</script>
+</body>
+</html>
