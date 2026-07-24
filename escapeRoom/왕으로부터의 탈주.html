@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>왕으로부터의 탈주</title>
+<style>
+  :root {
+    --ok: #6bffb0;
+    --danger: #ff6b81;
+    --accent: #ffd76b;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    height: 100%;
+    background: #05030a;
+    font-family: "Pretendard", "Malgun Gothic", "Segoe UI", sans-serif;
+    color: #eee6ff;
+    overflow: hidden;
+  }
+
+  /* ---------- 배경 씬 ---------- */
+  #scene {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    max-width: 1400px;
+    aspect-ratio: 16 / 9;
+    margin: 0 auto;
+    background-image: url('https://luriluan0-a11y.github.io/Source/escapeRoom/underground_prison_escape_bg.png');
+    background-size: cover;
+    background-position: center;
+    overflow: hidden;
+  }
+  @media (max-height: 700px) {
+    #scene { aspect-ratio: auto; height: 100%; }
+  }
+
+  #topBar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 14px 20px;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.65), transparent);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 5;
+  }
+  #topBar h1 {
+    font-size: 1.1rem;
+    margin: 0;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+  }
+  #statusPill {
+    font-size: 0.8rem;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 5px 12px;
+    border-radius: 999px;
+  }
+
+  /* ---------- 오브젝트(핫스팟) ---------- */
+  .hotspot {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+  }
+  .hotspot .icon {
+    font-size: 3rem;
+    filter: drop-shadow(0 6px 10px rgba(0,0,0,0.7));
+    animation: bob 2.4s ease-in-out infinite;
+  }
+  .hotspot:nth-of-type(2) .icon { animation-delay: 0.4s; }
+  .hotspot:nth-of-type(3) .icon { animation-delay: 0.8s; }
+  .hotspot .obj-label {
+    font-size: 0.72rem;
+    background: rgba(0,0,0,0.55);
+    padding: 2px 9px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .hotspot:hover .icon { animation-play-state: paused; transform: scale(1.15); }
+  .hotspot.solved .icon { filter: drop-shadow(0 0 10px var(--ok)); }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(0deg); }
+    50% { transform: translateY(-10px) rotate(-4deg); }
+  }
+
+  /* ---------- 오버레이 공통 ---------- */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5, 3, 10, 0.86);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 50;
+  }
+  .overlay.open { display: flex; }
+  .panel {
+    background: #1b1230;
+    border: 1px solid #4a3a75;
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 460px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  }
+  .panel h2 {
+    margin-top: 0;
+    font-size: 1.3rem;
+  }
+  .panel p {
+    line-height: 1.6;
+    color: #d8ceef;
+    font-size: 0.95rem;
+  }
+  .btn {
+    border: none;
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  .btn-primary { background: linear-gradient(90deg, #7c5cff, #ff8bcb); color: #1b1230; }
+  .btn-ghost { background: transparent; border: 1px solid #4a3a75; color: #eee6ff; }
+
+  /* ---------- 카드 짝 맞추기 ---------- */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin: 18px 0;
+  }
+  .card {
+    aspect-ratio: 1;
+    background: #2d2150;
+    border: 1px solid #4a3a75;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .card.flipped { background: #3a2c66; }
+  .card.matched { background: rgba(107,255,176,0.15); border-color: var(--ok); cursor: default; }
+  .card.hidden-face { font-size: 1.4rem; color: #8a7bb5; }
+
+  /* ---------- 자물쇠 입력 ---------- */
+  #lockInput {
+    width: 100%;
+    text-align: center;
+    letter-spacing: 6px;
+    font-size: 1.3rem;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #4a3a75;
+    background: #2d2150;
+    color: #eee6ff;
+    margin-top: 8px;
+  }
+  #lockInput:focus { outline: none; border-color: #7c5cff; }
+  .error-msg { color: var(--danger); font-size: 0.85rem; height: 1.2em; margin-top: 8px; }
+  .shake { animation: shake 0.35s; }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-8px); }
+    75% { transform: translateX(8px); }
+  }
+</style>
+</head>
+<body>
+
+<div id="scene">
+  <div id="topBar">
+    <h1>👑 왕으로부터의 탈주</h1>
+    <span id="statusPill">🔑 비밀번호: 미확보</span>
+  </div>
+
+  <button type="button" class="hotspot" style="left:16%; top:70%;" data-obj="cat">
+    <span class="icon">🐱</span>
+    <span class="obj-label">고양이</span>
+  </button>
+
+  <button type="button" class="hotspot" style="left:50%; top:58%;" data-obj="cards">
+    <span class="icon">🎴</span>
+    <span class="obj-label">짝 맞추기 게임</span>
+  </button>
+
+  <button type="button" class="hotspot" style="left:83%; top:60%;" data-obj="lock">
+    <span class="icon">🔒</span>
+    <span class="obj-label">자물쇠</span>
+  </button>
+</div>
+
+<!-- 인트로 -->
+<div class="overlay open" id="introOverlay">
+  <div class="panel">
+    <h2>👑 왕으로부터의 탈주</h2>
+    <p>나는 삐에로인데 왕을 웃기지 못해 결국 감옥에 갇히게 되었다. 아... 나를 기다리고 있는 프랑소와즈를 위해서라도 빨리 이곳을 탈출해야 하는데 대체 이 방은 어떻게 열리는 거지? 변태같은 왕이 이곳에 퍼즐을 풀면 나갈 수 있다고 했다. 잘못 건드리면 함정도 있다는데 나는 왜 이런 시련을 겪게 된 것인가... 하지만 기운을 내자. 탈출해서 반드시 프랑소와즈를 만나야겠어!!!</p>
+    <button type="button" class="btn btn-primary" id="startBtn">게임 시작</button>
+  </div>
+</div>
+
+<!-- 대화 모달 -->
+<div class="overlay" id="dialogueOverlay">
+  <div class="panel">
+    <h2>🐱 고양이</h2>
+    <p id="dialogueText"></p>
+    <button type="button" class="btn btn-ghost" data-close="dialogueOverlay">닫기</button>
+  </div>
+</div>
+
+<!-- 카드 짝 맞추기 모달 -->
+<div class="overlay" id="cardOverlay">
+  <div class="panel">
+    <h2>🎴 짝 맞추기 게임</h2>
+    <p>카드 2장을 뒤집어 같은 그림을 찾으세요. 짝이 틀리면 바로 Game Over입니다!</p>
+    <div class="card-grid" id="cardGrid"></div>
+    <button type="button" class="btn btn-ghost" data-close="cardOverlay">닫기</button>
+  </div>
+</div>
+
+<!-- 자물쇠 모달 -->
+<div class="overlay" id="lockOverlay">
+  <div class="panel">
+    <h2>🔒 자물쇠</h2>
+    <p>비밀번호를 입력하고 자물쇠를 열어 방을 탈출하세요.</p>
+    <input type="text" id="lockInput" inputmode="numeric" maxlength="4" placeholder="****">
+    <p class="error-msg" id="lockError"></p>
+    <button type="button" class="btn btn-primary" id="lockSubmitBtn">열기</button>
+    <button type="button" class="btn btn-ghost" data-close="lockOverlay">닫기</button>
+  </div>
+</div>
+
+<!-- 엔딩 모달 -->
+<div class="overlay" id="endingOverlay">
+  <div class="panel">
+    <h2>🎉 탈출 성공!</h2>
+    <p>퍼즐을 다 풀고 방을 탈출해 주인공은 프랑소와즈와 만나 행복하게 살았습니다.</p>
+    <button type="button" class="btn btn-primary" id="restartFromEndingBtn">처음부터 다시 하기</button>
+  </div>
+</div>
+
+<!-- Game Over 모달 -->
+<div class="overlay" id="gameOverOverlay">
+  <div class="panel">
+    <h2>💀 Game Over</h2>
+    <p>방을 탈출하지 못했습니다. 다시 도전하세요.</p>
+    <button type="button" class="btn btn-primary" id="retryBtn">재도전</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  const SECRET_CODE = '4127';
+
+  const state = {
+    passwordKnown: false,
+    cardsMatchedPairs: 0
+  };
+
+  const overlays = {
+    intro: document.getElementById('introOverlay'),
+    dialogue: document.getElementById('dialogueOverlay'),
+    card: document.getElementById('cardOverlay'),
+    lock: document.getElementById('lockOverlay'),
+    ending: document.getElementById('endingOverlay'),
+    gameOver: document.getElementById('gameOverOverlay')
+  };
+
+  function openOverlay(el) { el.classList.add('open'); }
+  function closeOverlay(el) { el.classList.remove('open'); }
+
+  document.querySelectorAll('[data-close]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      closeOverlay(document.getElementById(btn.dataset.close));
+    });
+  });
+
+  document.getElementById('startBtn').addEventListener('click', () => {
+    closeOverlay(overlays.intro);
+  });
+
+  // ---------- 오브젝트 클릭 ----------
+  document.querySelectorAll('.hotspot').forEach((el) => {
+    el.addEventListener('click', () => {
+      const obj = el.dataset.obj;
+      if (obj === 'cat') openCat();
+      if (obj === 'cards') openCardGame();
+      if (obj === 'lock') openLock();
+    });
+  });
+
+  // ---------- 고양이 (대화) ----------
+  function openCat() {
+    document.getElementById('dialogueText').textContent = '야아옹~ 나도 이 곳을 나가고 싶다.';
+    openOverlay(overlays.dialogue);
+  }
+
+  // ---------- 짝 맞추기 게임 (퍼즐) ----------
+  const cardGrid = document.getElementById('cardGrid');
+  let cardsData = [];
+  let firstPick = null;
+  let lockBoard = false;
+
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
+  }
+
+  function setupCardGame() {
+    cardsData = shuffle(['🔑', '🔑', '🗝️', '🗝️']);
+    firstPick = null;
+    lockBoard = false;
+    state.cardsMatchedPairs = 0;
+    cardGrid.innerHTML = '';
+    cardsData.forEach((symbol, idx) => {
+      const card = document.createElement('div');
+      card.className = 'card hidden-face';
+      card.dataset.idx = idx;
+      card.textContent = '?';
+      card.addEventListener('click', () => onCardClick(card, symbol, idx));
+      cardGrid.appendChild(card);
+    });
+  }
+
+  function onCardClick(card, symbol, idx) {
+    if (lockBoard) return;
+    if (card.classList.contains('flipped') || card.classList.contains('matched')) return;
+
+    card.classList.remove('hidden-face');
+    card.classList.add('flipped');
+    card.textContent = symbol;
+
+    if (firstPick === null) {
+      firstPick = { card, symbol, idx };
+      return;
+    }
+
+    lockBoard = true;
+    if (firstPick.symbol === symbol && firstPick.idx !== idx) {
+      card.classList.add('matched');
+      firstPick.card.classList.add('matched');
+      state.cardsMatchedPairs += 1;
+      firstPick = null;
+      lockBoard = false;
+      if (state.cardsMatchedPairs === 2) {
+        onCardGameWin();
+      }
+    } else {
+      setTimeout(() => {
+        closeOverlay(overlays.card);
+        openOverlay(overlays.gameOver);
+      }, 700);
+    }
+  }
+
+  function onCardGameWin() {
+    state.passwordKnown = true;
+    document.getElementById('statusPill').textContent = '🔑 비밀번호: 확보 (' + SECRET_CODE + ')';
+    document.querySelector('[data-obj="cards"]').classList.add('solved');
+    setTimeout(() => {
+      alert('비밀번호를 획득했습니다: ' + SECRET_CODE + '\n자물쇠에 입력하세요!');
+      closeOverlay(overlays.card);
+    }, 300);
+  }
+
+  function openCardGame() {
+    if (state.cardsMatchedPairs < 2) setupCardGame();
+    openOverlay(overlays.card);
+  }
+
+  // ---------- 자물쇠 (퍼즐) ----------
+  const lockInput = document.getElementById('lockInput');
+  const lockError = document.getElementById('lockError');
+
+  function openLock() {
+    lockInput.value = '';
+    lockError.textContent = '';
+    openOverlay(overlays.lock);
+    lockInput.focus();
+  }
+
+  document.getElementById('lockSubmitBtn').addEventListener('click', submitLock);
+  lockInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submitLock();
+  });
+
+  function submitLock() {
+    if (!state.passwordKnown) {
+      lockError.textContent = '아직 비밀번호를 모릅니다. 짝 맞추기 게임을 먼저 풀어보세요.';
+      return;
+    }
+    if (lockInput.value.trim() === SECRET_CODE) {
+      closeOverlay(overlays.lock);
+      openOverlay(overlays.ending);
+    } else {
+      lockError.textContent = '비밀번호가 틀렸습니다.';
+      lockInput.classList.add('shake');
+      setTimeout(() => lockInput.classList.remove('shake'), 350);
+    }
+  }
+
+  // ---------- 재도전 / 다시 시작 ----------
+  function restartGame() {
+    state.passwordKnown = false;
+    state.cardsMatchedPairs = 0;
+    document.getElementById('statusPill').textContent = '🔑 비밀번호: 미확보';
+    document.querySelector('[data-obj="cards"]').classList.remove('solved');
+    Object.values(overlays).forEach(closeOverlay);
+    openOverlay(overlays.intro);
+  }
+
+  document.getElementById('retryBtn').addEventListener('click', restartGame);
+  document.getElementById('restartFromEndingBtn').addEventListener('click', restartGame);
+})();
+</script>
+</body>
+</html>
