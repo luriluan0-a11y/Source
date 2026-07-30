@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>엄미새 (엄마 사랑 종합 앱) 기획서 작성기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #140d16;
+      --bg-card: rgba(38, 24, 39, 0.75);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --accent-rose: #f43f5e;
+      --accent-pink: #fb7185;
+      --accent-gold: #f59e0b;
+      --accent-cream: #fef3c7;
+      --text-main: #fff1f2;
+      --text-muted: #fda4af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: radial-gradient(circle at 50% -10%, #4c0519 0%, #140d16 70%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 5rem;
+    }
+
+    header {
+      background: rgba(20, 13, 22, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-card);
+      padding: 1.25rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-rose), var(--accent-gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-reset {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .btn-reset:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: #fff;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, var(--accent-rose), var(--accent-gold));
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 2.5rem auto 0;
+      padding: 0 1.5rem;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-sub {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .form-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .form-section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent-pink);
+    }
+
+    .preset-bar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .chip-preset {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-card);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip-preset:hover {
+      background: var(--accent-rose);
+      color: #fff;
+      border-color: var(--accent-rose);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #ffe4e6;
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(20, 13, 22, 0.7);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-rose);
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.25);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .item-card {
+      background: rgba(20, 13, 22, 0.6);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <span>💖</span> 엄미새 기획서 작성기
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-reset" onclick="resetForm()">🔄 초기화</button>
+      <button class="btn btn-download" onclick="downloadMarkdown()">📥 마크다운 다운로드</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1 class="page-title">엄마 사랑 종합 앱 기획서 만들기</h1>
+    <p class="page-sub">당일치기 데이트 코스, 선물 5선, 인생 10문 10답을 구성하여 마크다운 기획서를 다운로드하세요.</p>
+
+    <!-- Presets -->
+    <div class="form-section">
+      <div class="form-section-title">⚡ 빠른 예시로 채우기</div>
+      <div class="preset-bar">
+        <div class="chip-preset" onclick="loadPreset('healing')">🌸 엄마와 함께하는 자연 힐링 하루</div>
+        <div class="chip-preset" onclick="loadPreset('city')">🏛️ 엄마와 떠나는 도심 감성 힐링 데이트</div>
+      </div>
+    </div>
+
+    <!-- Basic Info -->
+    <div class="form-section">
+      <div class="form-section-title">📌 1. 기본 정보 설정</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">앱 제목</label>
+          <input type="text" id="appTitle" class="form-control" placeholder="예: 세상에서 가장 사랑하는 엄마를 위한 하루">
+        </div>
+        <div class="form-group">
+          <label class="form-label">작성자 (자녀 닉네임)</label>
+          <input type="text" id="author" class="form-control" placeholder="예: 사랑하는 큰 딸/아들">
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">엄마 닉네임 / 애칭</label>
+          <input type="text" id="momName" class="form-control" placeholder="예: 울 예쁜 여왕님 영희씨">
+        </div>
+        <div class="form-group">
+          <label class="form-label">첫 화면 인사말 메시지</label>
+          <input type="text" id="introMsg" class="form-control" placeholder="엄마! 늘 고맙고 사랑해, 오늘 하루는 오직 엄마만을 위한 날이야 💖">
+        </div>
+      </div>
+    </div>
+
+    <!-- Date Course -->
+    <div class="form-section">
+      <div class="form-section-title">🚗 2. 엄마와 함께하는 당일치기 데이트 코스 (4단계)</div>
+      <div id="courseList">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Gifts Top 5 -->
+    <div class="form-section">
+      <div class="form-section-title">🎁 3. 엄마 만족도 200% 추천 선물 BEST 5</div>
+      <div id="giftList">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- 10 Questions -->
+    <div class="form-section">
+      <div class="form-section-title">💌 4. 엄마에게 꼭 물어봐야 할 인생 10문 10답</div>
+      <div id="qList">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Download CTA -->
+    <div style="text-align: center; margin-top: 3rem;">
+      <button class="btn btn-download" style="padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 50px;" onclick="downloadMarkdown()">
+        📥 마크다운 기획서 파일(.md) 다운로드
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    const PRESETS = {
+      healing: {
+        title: "세상에서 가장 사랑하는 엄마를 위한 하루",
+        author: "사랑하는 자녀 루크",
+        momName: "울 예쁜 여왕님 영희씨",
+        introMsg: "엄마! 늘 고맙고 사랑해, 오늘 하루는 오직 엄마만을 위한 최고로 힐링하는 날이야 💖",
+        courses: [
+          { time: "09:30 AM", place: "감성 한옥 다도 찻집", desc: "고즈넉한 한옥에서 따뜻한 연잎차와 수제 다과 먹으며 도란도란 대화 나누기", tip: "엄마 좋아하는 차 취향 사전 파악!" },
+          { time: "11:30 AM", place: "아침고요 수목원 꽃길 산책", desc: "제철 꽃들과 울창한 숲길을 걸으며 엄마 예쁜 인스타 인생샷 100장 찍어드리기", tip: "편안한 운동화 필수 준비!" },
+          { time: "02:00 PM", place: "정갈한 수제 한정식 맛집", desc: "엄마 좋아하는 자극적이지 않고 건강한 자연식 정갈한 한상 차림", tip: "사전 창가 프라이빗 룸 예약 완료!" },
+          { time: "04:30 PM", place: "숲속 온천 족욕 스파", desc: "피로가 싹 풀리는 따뜻한 족욕과 아로마 어깨 마사지로 힐링 마무리", tip: "은은한 라벤더 아로마 오일 추천!" }
+        ],
+        gifts: [
+          { name: "① 맞춤 건강검진 & 항노화 영양제", reason: "엄마 건강이 세상에서 제일 중요하니까!", tip: "프리미엄 관절 & 루테인 영양제 구성", msg: "엄마 오래오래 건강하게 우리 곁에 있어줘!" },
+          { name: "② 엄마 취향 저격 힐링 효도 여행 쿠폰", reason: "늘 가족 위해 양보했던 엄마의 시간 찾기", tip: "제주도/남해 풀빌라 자유 이용권", msg: "가고 싶은 곳 어디든 딸/아들이 다 쏠게!" },
+          { name: "③ 고급 실크 스카프 & 캐시미어 가디건", reason: "외출할 때 언제나 돋보이는 명품 센스", tip: "엄마 톤에 딱 맞는 핑크 펄 실크 스카프", msg: "입을 때마다 내 생각하기 약속!" },
+          { name: "④ 정성 손편지 & 프리저브드 생화 플라워 박스", reason: "시들지 않는 꽃처럼 영원한 자녀의 마음 전달", tip: "용돈 봉투 살포시 동봉", msg: "말로 다 표현 못하게 감사하고 사랑해요!" },
+          { name: "⑤ 스마트 헬스케어 수면/걸음 수 워치", reason: "매일 부모님 건강 지수를 실시간 챙겨드리기", tip: "글자 큼직하게 세팅해드리기", msg: "하루 만 보 걸으며 늘 건강 챙기자!" }
+        ],
+        questions: [
+          "1. 엄마의 가장 눈부셨던 20대 시절 꿈은 무엇이었나요?",
+          "2. 내가 세상에 태어났을 때 제일 먼저 든 기분이나 생각이 궁금해요!",
+          "3. 엄마의 인생 영화나 평생 가슴에 남은 최애 노래는 무엇인가요?",
+          "4. 힘들거나 위기가 올 때 엄마를 다시 일어서게 한 힘은 무엇이었나요?",
+          "5. 아빠와 처음 만나서 연애할 때 가장 설렜던 순간은 언제였나요?",
+          "6. 엄마가 살면서 가장 보람차고 자부심을 느꼈던 순간은 언제인가요?",
+          "7. 만약 다시 20살로 돌아간다면 꼭 해보고 싶은 자유로운 도전은?",
+          "8. 우리 가족과 함께 꼭 떠나보고 싶은 꿈의 버킷리스트 여행지는?",
+          "9. 나를 키우면서 가장 고마웠거나 미안했던 순간이 있었나요?",
+          "10. 사랑하는 자녀에게 평생 가슴에 남겨주고 싶은 따뜻한 한 마디는?"
+        ]
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPreset('healing');
+    });
+
+    function loadPreset(key) {
+      const p = PRESETS[key] || PRESETS.healing;
+      document.getElementById('appTitle').value = p.title;
+      document.getElementById('author').value = p.author;
+      document.getElementById('momName').value = p.momName;
+      document.getElementById('introMsg').value = p.introMsg;
+
+      // Courses
+      const courseContainer = document.getElementById('courseList');
+      courseContainer.innerHTML = '';
+      p.courses.forEach((c, idx) => {
+        const div = document.createElement('div');
+        div.className = 'item-card';
+        div.innerHTML = `
+          <div class="grid-2" style="margin-bottom: 0.5rem;">
+            <input type="text" class="form-control c-time" value="${c.time}">
+            <input type="text" class="form-control c-place" value="${c.place}">
+          </div>
+          <input type="text" class="form-control c-desc" value="${c.desc}" style="margin-bottom: 0.5rem;">
+          <input type="text" class="form-control c-tip" value="${c.tip}">
+        `;
+        courseContainer.appendChild(div);
+      });
+
+      // Gifts
+      const giftContainer = document.getElementById('giftList');
+      giftContainer.innerHTML = '';
+      p.gifts.forEach(g => {
+        const div = document.createElement('div');
+        div.className = 'item-card';
+        div.innerHTML = `
+          <input type="text" class="form-control g-name" value="${g.name}" style="margin-bottom: 0.5rem; font-weight:700;">
+          <div class="grid-2" style="margin-bottom: 0.5rem;">
+            <input type="text" class="form-control g-reason" value="${g.reason}">
+            <input type="text" class="form-control g-tip" value="${g.tip}">
+          </div>
+          <input type="text" class="form-control g-msg" value="${g.msg}">
+        `;
+        giftContainer.appendChild(div);
+      });
+
+      // Questions
+      const qContainer = document.getElementById('qList');
+      qContainer.innerHTML = '';
+      p.questions.forEach((q, idx) => {
+        const div = document.createElement('div');
+        div.className = 'item-card';
+        div.innerHTML = `
+          <label class="form-label">질문 ${idx+1}</label>
+          <input type="text" class="form-control q-text" value="${q}">
+        `;
+        qContainer.appendChild(div);
+      });
+    }
+
+    function resetForm() {
+      if (confirm('초기화하시겠습니까?')) {
+        document.getElementById('appTitle').value = '';
+      }
+    }
+
+    function downloadMarkdown() {
+      const title = document.getElementById('appTitle').value.trim() || '엄마 사랑 종합 앱';
+      const author = document.getElementById('author').value.trim() || '자녀';
+      const momName = document.getElementById('momName').value.trim() || '엄마';
+      const introMsg = document.getElementById('introMsg').value.trim() || '사랑합니다';
+
+      // Gather Courses
+      let courseMd = '';
+      document.querySelectorAll('#courseList .item-card').forEach((card, idx) => {
+        const time = card.querySelector('.c-time').value;
+        const place = card.querySelector('.c-place').value;
+        const desc = card.querySelector('.c-desc').value;
+        const tip = card.querySelector('.c-tip').value;
+        courseMd += `### 코스 ${idx+1}: [${time}] ${place}\n- **활동**: ${desc}\n- **팁**: ${tip}\n\n`;
+      });
+
+      // Gather Gifts
+      let giftMd = '';
+      document.querySelectorAll('#giftList .item-card').forEach((card, idx) => {
+        const name = card.querySelector('.g-name').value;
+        const reason = card.querySelector('.g-reason').value;
+        const tip = card.querySelector('.g-tip').value;
+        const msg = card.querySelector('.g-msg').value;
+        giftMd += `| ${idx+1} | ${name} | ${reason} | ${tip} | ${msg} |\n`;
+      });
+
+      // Gather Questions
+      let qMd = '';
+      document.querySelectorAll('#qList .item-card').forEach((card, idx) => {
+        const qText = card.querySelector('.q-text').value;
+        qMd += `${idx+1}. ${qText}\n`;
+      });
+
+      const mdContent = `// 웹앱 구현 규칙:
+// 1. [당일치기 데이트 코스], [감동 선물 5선], [엄마 인생 10문 10답] 3개 탭으로 전환되는 탭 UI를 구축해줘.
+// 2. 10문 10답 질문마다 자녀와 엄마가 대답을 입력하고 보관할 수 있는 인터랙티브 대화 카드를 제작해줘.
+// 3. 답변을 완성하거나 하트 버튼을 클릭하면 Canvas 분홍빛 하트 파티클 이펙트와 감동 편지 카드가 발급되도록 연출해줘.
+
+# AI 엄마 사랑 종합 웹앱 (엄미새) 기획서
+
+## 1. 기본 정보
+- **앱 제목**: ${title}
+- **기획자 (자녀)**: ${author}
+- **엄마 닉네임**: ${momName}
+- **첫 인사말**: ${introMsg}
+
+## 2. 엄마와 함께 떠나는 당일치기 데이트 코스 (4단계)
+
+${courseMd}
+## 3. 엄마 만족도 200% 추천 선물 BEST 5
+
+| # | 선물명 | 추천 이유 | 선택 팁 | 감동 편지 한 줄 |
+|---|---|---|---|---|
+${giftMd}
+## 4. 엄마에게 꼭 물어봐야 할 인생 10문 10답
+
+${qMd}
+## 5. 엔딩 및 감동 연출
+- **하트 파티클**: 답변 완료 시 Pink Heart Canvas Confetti 파티클 폭죽 연출
+- **감동 보증서 카드**: 엄마에게 전달할 예쁜 일러스트 편지 카드 자동 생성
+`;
+
+      const blob = new Blob([mdContent], { type: 'text/markdown;charset=utf-8;' });
+      const link = document.createElement('a');
+      const cleanTitle = title.replace(/[/\\?%*:|"<>]/g, '_');
+      link.href = URL.createObjectURL(blob);
+      link.download = `엄마사랑_기획서_${cleanTitle}.md`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+  </script>
+</body>
+</html>

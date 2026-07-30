@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>세상에서 가장 사랑하는 엄마를 위한 하루 — 엄미새 종합 앱</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #140d16;
+      --bg-card: rgba(38, 24, 39, 0.85);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --accent-rose: #f43f5e;
+      --accent-pink: #fb7185;
+      --accent-gold: #f59e0b;
+      --accent-cream: #fef3c7;
+      --text-main: #fff1f2;
+      --text-muted: #fda4af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #140d16;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(244, 63, 94, 0.25) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.2) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(20, 13, 22, 0.9) 0px, transparent 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Top Nav Header */
+    header {
+      padding: 1.25rem 2rem;
+      background: rgba(20, 13, 22, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-card);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-content {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 900;
+      font-size: 1.25rem;
+    }
+
+    .brand-badge {
+      background: linear-gradient(135deg, var(--accent-rose), var(--accent-gold));
+      padding: 0.35rem 0.8rem;
+      border-radius: 12px;
+      color: #fff;
+      font-size: 1.1rem;
+    }
+
+    .nav-tabs {
+      display: flex;
+      gap: 0.5rem;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 0.35rem;
+      border-radius: 50px;
+      border: 1px solid var(--border-card);
+    }
+
+    .tab-btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 50px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .tab-btn.active {
+      background: linear-gradient(135deg, var(--accent-rose), var(--accent-gold));
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
+    }
+
+    /* Container */
+    .container {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Tab Sections */
+    .tab-section {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeIn 0.35s ease forwards;
+    }
+
+    .tab-section.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card Panels */
+    .card-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 28px;
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #fff, var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .section-sub {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    /* 1. Date Course Timeline */
+    .timeline-container {
+      position: relative;
+      padding-left: 2rem;
+    }
+
+    .timeline-container::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 10px;
+      bottom: 10px;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--accent-rose), var(--accent-gold));
+      border-radius: 3px;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 2rem;
+      background: rgba(20, 13, 22, 0.6);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 1.5rem;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -2.35rem;
+      top: 1.5rem;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent-rose);
+      border: 4px solid var(--bg-dark);
+      box-shadow: 0 0 15px var(--accent-rose);
+    }
+
+    .timeline-time {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 800;
+      color: var(--accent-gold);
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .timeline-place {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .timeline-desc {
+      color: var(--text-main);
+      font-size: 1rem;
+      margin-bottom: 0.75rem;
+      line-height: 1.6;
+    }
+
+    .timeline-tip {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px dashed rgba(245, 158, 11, 0.4);
+      color: var(--accent-cream);
+      padding: 0.5rem 1rem;
+      border-radius: 12px;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* 2. Gifts Grid */
+    .gifts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .gift-card {
+      background: rgba(20, 13, 22, 0.6);
+      border: 1px solid var(--border-card);
+      border-radius: 24px;
+      padding: 1.75rem;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .gift-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--accent-pink);
+      box-shadow: 0 10px 30px rgba(244, 63, 94, 0.3);
+    }
+
+    .gift-num {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background: rgba(244, 63, 94, 0.2);
+      color: var(--accent-pink);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+
+    .gift-name {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .gift-reason {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      margin-bottom: 1rem;
+    }
+
+    .gift-msg-box {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-card);
+      border-radius: 14px;
+      padding: 0.85rem;
+      font-size: 0.9rem;
+      color: var(--accent-cream);
+      font-style: italic;
+    }
+
+    /* 3. 10 Questions Grid */
+    .q-progress-box {
+      background: rgba(20, 13, 22, 0.6);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .q-bar-bg {
+      flex: 1;
+      height: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .q-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent-rose), var(--accent-gold));
+      transition: width 0.4s ease;
+    }
+
+    .q-card {
+      background: rgba(20, 13, 22, 0.6);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .q-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #fff;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .q-input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 70px;
+    }
+
+    .q-input:focus {
+      outline: none;
+      border-color: var(--accent-rose);
+      box-shadow: 0 0 0 3px rgba(244, 63, 94, 0.25);
+    }
+
+    /* 4. Heart Letter Certificate */
+    .letter-card {
+      background: linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(245, 158, 11, 0.15));
+      border: 2px solid rgba(244, 63, 94, 0.4);
+      border-radius: 32px;
+      padding: 3.5rem 2rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .heart-big {
+      font-size: 4.5rem;
+      margin-bottom: 1rem;
+      animation: pulseHeart 1.2s infinite alternate ease-in-out;
+    }
+
+    @keyframes pulseHeart {
+      from { transform: scale(1); }
+      to { transform: scale(1.15); }
+    }
+
+    .btn-heart-burst {
+      background: linear-gradient(135deg, var(--accent-rose), var(--accent-gold));
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 900;
+      padding: 1.1rem 3rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(244, 63, 94, 0.4);
+      transition: all 0.25s ease;
+      margin-top: 2rem;
+    }
+
+    .btn-heart-burst:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 40px rgba(245, 158, 11, 0.6);
+    }
+
+    /* Canvas */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 150;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Header -->
+  <header>
+    <div class="header-content">
+      <div class="brand">
+        <span class="brand-badge">💖 엄미새</span>
+        <span>엄마를 위한 사랑 종합 앱</span>
+      </div>
+
+      <!-- Nav Tabs -->
+      <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('tabCourse', this)">🚗 데이트 코스</button>
+        <button class="tab-btn" onclick="switchTab('tabGifts', this)">🎁 선물 BEST 5</button>
+        <button class="tab-btn" onclick="switchTab('tabQuestions', this)">💌 인생 10문 10답</button>
+        <button class="tab-btn" onclick="switchTab('tabLetter', this)">💖 마음 편지</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- TAB 1: DATE COURSE -->
+    <div id="tabCourse" class="tab-section active">
+      <div class="card-panel">
+        <div class="section-header">
+          <div class="section-title">🚗 엄마와 함께하는 당일치기 힐링 데이트</div>
+          <div class="section-sub">엄마의 웃음꽃이 피어나는 특별한 당일치기 타임라인 일정</div>
+        </div>
+
+        <div class="timeline-container">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">09:30 AM</div>
+            <div class="timeline-place">🍵 감성 한옥 다도 찻집</div>
+            <div class="timeline-desc">고즈넉한 한옥에서 따뜻한 연잎차와 수제 다과를 나누며 도란도란 대화 나누기</div>
+            <div class="timeline-tip">💡 엄마 맞춤 팁: 엄마가 좋아하는 차 취향을 미리 파악해보세요!</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">11:30 AM</div>
+            <div class="timeline-place">🌸 아침고요 수목원 꽃길 산책</div>
+            <div class="timeline-desc">제철 꽃들과 울창한 숲길을 걸으며 엄마의 예쁜 인생샷 100장 찍어드리기</div>
+            <div class="timeline-tip">💡 엄마 맞춤 팁: 편안한 운동화를 선물하거나 챙겨주세요!</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">02:00 PM</div>
+            <div class="timeline-place">🍱 정갈한 수제 한정식 맛집</div>
+            <div class="timeline-desc">엄마가 좋아하는 자극적이지 않고 정갈한 자연식 한정식 한상 차림</div>
+            <div class="timeline-tip">💡 엄마 맞춤 팁: 사전 프라이빗 룸 예약으로 조용한 식사를 즐기세요!</div>
+          </div>
+
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">04:30 PM</div>
+            <div class="timeline-place">♨️ 숲속 온천 족욕 스파</div>
+            <div class="timeline-desc">피로가 싹 풀리는 따뜻한 족욕과 라벤더 아로마 어깨 마사지로 힐링 마무리</div>
+            <div class="timeline-tip">💡 엄마 맞춤 팁: 은은한 어깨 안마로 부모님의 피로를 날려주세요!</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: GIFTS BEST 5 -->
+    <div id="tabGifts" class="tab-section">
+      <div class="card-panel">
+        <div class="section-header">
+          <div class="section-title">🎁 엄마 만족도 200% 추천 선물 BEST 5</div>
+          <div class="section-sub">실용성과 감동을 동시에 사로잡은 최고의 선물과 마음 메시지</div>
+        </div>
+
+        <div class="gifts-grid">
+          <div class="gift-card">
+            <div>
+              <span class="gift-num">GIFT 01</span>
+              <div class="gift-name">맞춤 건강검진 & 항노화 영양제</div>
+              <div class="gift-reason">엄마의 건강이 우리 가족에겐 세상 가장 큰 보물! 관절 & 루테인 영양제 세트</div>
+            </div>
+            <div class="gift-msg-box">💌 "엄마, 오래오래 건강하게 우리 곁에 항상 있어줘!"</div>
+          </div>
+
+          <div class="gift-card">
+            <div>
+              <span class="gift-num">GIFT 02</span>
+              <div class="gift-name">힐링 효도 여행 자유 이용권</div>
+              <div class="gift-reason">늘 가족을 위해 양보했던 엄마만의 힐링 시간을 선물하기 (제주도/남해 풀빌라)</div>
+            </div>
+            <div class="gift-msg-box">💌 "엄마 가고 싶은 여행지 어디든 다 쏠게!"</div>
+          </div>
+
+          <div class="gift-card">
+            <div>
+              <span class="gift-num">GIFT 03</span>
+              <div class="gift-name">고급 실크 스카프 & 가디건</div>
+              <div class="gift-reason">모임이나 외출할 때 언제나 엄마를 돋보이게 해주는 기품 있는 명품 선물</div>
+            </div>
+            <div class="gift-msg-box">💌 "입고 나갈 때마다 내 생각하기 약속!"</div>
+          </div>
+
+          <div class="gift-card">
+            <div>
+              <span class="gift-num">GIFT 04</span>
+              <div class="gift-name">손편지 & 프리저브드 플라워 박스</div>
+              <div class="gift-reason">시들지 않는 생화 꽃상자 속 살포시 전하는 진심 어린 자녀의 손편지와 마음</div>
+            </div>
+            <div class="gift-msg-box">💌 "말로 다 표현 못하게 감사하고 사랑해요!"</div>
+          </div>
+
+          <div class="gift-card">
+            <div>
+              <span class="gift-num">GIFT 05</span>
+              <div class="gift-name">스마트 헬스케어 수면/걸음 워치</div>
+              <div class="gift-reason">매일 부모님의 수면 질과 심박수, 하루 걸음 수를 간편하게 케어해드리기</div>
+            </div>
+            <div class="gift-msg-box">💌 "하루 만 보 걸으며 늘 건강 챙기자!"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: 10 QUESTIONS INTERVIEW -->
+    <div id="tabQuestions" class="tab-section">
+      <div class="card-panel">
+        <div class="section-header">
+          <div class="section-title">💌 엄마에게 꼭 물어봐야 할 인생 10문 10답</div>
+          <div class="section-sub">엄마의 눈부신 청춘과 이야기를 들으며 가슴속 깊이 기록해보세요</div>
+        </div>
+
+        <div class="q-progress-box">
+          <span style="font-weight: 800;">답변 완성도: <span id="qCount">0</span>/10</span>
+          <div class="q-bar-bg">
+            <div id="qBarFill" class="q-bar-fill"></div>
+          </div>
+        </div>
+
+        <div id="qGrid">
+          <div class="q-card">
+            <div class="q-title">🌸 Q1. 엄마의 가장 눈부셨던 20대 시절 꿈은 무엇이었나요?</div>
+            <textarea class="q-input" oninput="saveQuestion(1, this.value)" placeholder="엄마의 대답을 기록해보세요..."></textarea>
+          </div>
+
+          <div class="q-card">
+            <div class="q-title">👶 Q2. 내가 세상에 태어났을 때 제일 먼저 든 기분이나 생각이 궁금해요!</div>
+            <textarea class="q-input" oninput="saveQuestion(2, this.value)" placeholder="엄마의 대답을 기록해보세요..."></textarea>
+          </div>
+
+          <div class="q-card">
+            <div class="q-title">🎵 Q3. 엄마의 인생 영화나 평생 가슴에 남은 최애 노래는 무엇인가요?</div>
+            <textarea class="q-input" oninput="saveQuestion(3, this.value)" placeholder="엄마의 대답을 기록해보세요..."></textarea>
+          </div>
+
+          <div class="q-card">
+            <div class="q-title">💪 Q4. 힘들거나 위기가 올 때 엄마를 다시 일어서게 한 힘은 무엇이었나요?</div>
+            <textarea class="q-input" oninput="saveQuestion(4, this.value)" placeholder="엄마의 대답을 기록해보세요..."></textarea>
+          </div>
+
+          <div class="q-card">
+            <div class="q-title">💕 Q5. 아빠와 처음 만나서 연애할 때 가장 설렜던 순간은 언제였나요?</div>
+            <textarea class="q-input" oninput="saveQuestion(5, this.value)" placeholder="엄마의 대답을 기록해보세요..."></textarea>
+          </div>
+
+          <div class="q-card">
+            <div class="q-title">👑 Q6. 엄마가 살면서 가장 보람차고 자부심을 느꼈던 순간은 언제인가요?</div>
+            <textarea class="q-input" oninput="saveQuestion(6, this.value)" placeholder="엄마의 대답을 기록해보세요..."></textarea>
+          </div>
+
+          <div class="q-card">
+            <div class="q-title">🚀 Q7. 만약 다시 20살로 돌아간다면 꼭 해보고 싶은 자유로운 도전은?</div>
+            <textarea class="q-input" oninput="saveQuestion(7, this.value)" placeholder="엄마의 대답을 기록해보세요..."></textarea>
+          </div>
+
+          <div class="q-card">
+            <div class="q-title">✈️ Q8. 우리 가족과 함께 꼭 떠나보고 싶은 꿈의 버킷리스트 여행지는?</div>
+            <textarea class="q-input" oninput="saveQuestion(8, this.value)" placeholder="엄마의 대답을 기록해보세요..."></textarea>
+          </div>
+
+          <div class="q-card">
+            <div class="q-title">🌻 Q9. 나를 키우면서 가장 고마웠거나 미안했던 순간이 있었나요?</div>
+            <textarea class="q-input" oninput="saveQuestion(9, this.value)" placeholder="엄마의 대답을 기록해보세요..."></textarea>
+          </div>
+
+          <div class="q-card">
+            <div class="q-title">💖 Q10. 사랑하는 자녀에게 평생 가슴에 남겨주고 싶은 따뜻한 한 마디는?</div>
+            <textarea class="q-input" oninput="saveQuestion(10, this.value)" placeholder="엄마의 대답을 기록해보세요..."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: HEART LETTER -->
+    <div id="tabLetter" class="tab-section">
+      <div class="letter-card">
+        <div class="heart-big">💖</div>
+        <h1 style="font-size: 2.3rem; font-weight: 900; color: #fff; margin-bottom: 1rem;">엄마! 항상 감사하고 사랑합니다</h1>
+        <p style="font-size: 1.15rem; color: var(--accent-cream); max-width: 650px; margin: 0 auto 2rem; line-height: 1.8;">
+          자식 키우느라 늘 자신보다 가족을 먼저 생각했던 엄마의 눈부신 세월을 기억합니다.<br>
+          오늘 하루도, 내일도 엄마의 삶이 누구보다 환하게 빛나길 항상 응원할게요!
+        </p>
+
+        <button class="btn-heart-burst" onclick="triggerHeartBurst()">💖 엄마 사랑해요! (하트 세레머니)</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // LocalStorage State for Questions
+    const answers = JSON.parse(localStorage.getItem('mom_answers') || '{}');
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Restore saved answers
+      const inputs = document.querySelectorAll('.q-input');
+      inputs.forEach((input, idx) => {
+        const qNum = idx + 1;
+        if (answers[qNum]) {
+          input.value = answers[qNum];
+        }
+      });
+      updateQProgress();
+    });
+
+    function switchTab(tabId, btn) {
+      document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+      document.getElementById(tabId).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    function saveQuestion(qNum, value) {
+      answers[qNum] = value.trim();
+      localStorage.setItem('mom_answers', JSON.stringify(answers));
+      updateQProgress();
+    }
+
+    function updateQProgress() {
+      let count = 0;
+      for (let i = 1; i <= 10; i++) {
+        if (answers[i] && answers[i].length > 0) count++;
+      }
+      document.getElementById('qCount').textContent = count;
+      document.getElementById('qBarFill').style.width = `${(count / 10) * 100}%`;
+
+      if (count === 10) {
+        triggerHeartBurst();
+      }
+    }
+
+    // ----------------------------------------------------
+    // HEART CONFETTI CANVAS ANIMATION
+    // ----------------------------------------------------
+    let heartActive = false;
+    function triggerHeartBurst() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#f43f5e', '#fb7185', '#f59e0b', '#fda4af', '#fff1f2'];
+
+      for (let i = 0; i < 120; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: Math.random() * 14 + 10,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speedY: Math.random() * 4 + 2,
+          speedX: Math.random() * 2 - 1,
+          rot: Math.random() * 360,
+          rotSpeed: Math.random() * 4 - 2
+        });
+      }
+
+      heartActive = true;
+      let frameCount = 0;
+
+      function drawHeart(x, y, size, color, rot) {
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate((rot * Math.PI) / 180);
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        const topCurveHeight = size * 0.3;
+        ctx.moveTo(0, topCurveHeight);
+        ctx.bezierCurveTo(0, 0, -size / 2, 0, -size / 2, topCurveHeight);
+        ctx.bezierCurveTo(-size / 2, (size + topCurveHeight) / 2, 0, size, 0, size);
+        ctx.bezierCurveTo(0, size, size / 2, (size + topCurveHeight) / 2, size / 2, topCurveHeight);
+        ctx.bezierCurveTo(size / 2, 0, 0, 0, 0, topCurveHeight);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+
+      function render() {
+        if (!heartActive) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach(p => {
+          p.y += p.speedY;
+          p.x += p.speedX;
+          p.rot += p.rotSpeed;
+
+          drawHeart(p.x, p.y, p.size, p.color, p.rot);
+
+          if (p.y > canvas.height) {
+            p.y = -10;
+            p.x = Math.random() * canvas.width;
+          }
+        });
+
+        frameCount++;
+        if (frameCount < 250) {
+          requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          heartActive = false;
+        }
+      }
+
+      render();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>엄마를 위한 사랑 가득 웹앱 (엄미새) — 특강 가이드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #140d16;
+      --bg-card: rgba(38, 24, 39, 0.75);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --accent-rose: #f43f5e;
+      --accent-pink: #fb7185;
+      --accent-gold: #f59e0b;
+      --accent-cream: #fef3c7;
+      --text-main: #fff1f2;
+      --text-muted: #fda4af;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: radial-gradient(circle at 50% -10%, #4c0519 0%, #140d16 70%, #030712 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: rgba(20, 13, 22, 0.85);
+      border-bottom: 1px solid var(--border-card);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--accent-rose), var(--accent-gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-rose), var(--accent-gold));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 900;
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.4);
+    }
+
+    nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s ease;
+    }
+
+    nav a:hover {
+      color: var(--text-main);
+    }
+
+    .btn-cta {
+      background: linear-gradient(135deg, var(--accent-rose), var(--accent-gold));
+      color: #fff;
+      padding: 0.6rem 1.3rem;
+      border-radius: 50px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 6rem;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem 3rem;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.4rem 1.2rem;
+      background: rgba(244, 63, 94, 0.15);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: var(--accent-pink);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent-rose), var(--accent-pink), var(--accent-gold));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      padding: 0.85rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    section {
+      margin-top: 5rem;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .card-feature {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 24px;
+      padding: 2rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .card-feature:hover {
+      transform: translateY(-6px);
+      border-color: rgba(244, 63, 94, 0.4);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+    }
+
+    .feature-icon {
+      font-size: 2.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature-title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      color: #fff;
+    }
+
+    .feature-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .cta-box {
+      text-align: center;
+      background: radial-gradient(circle at center, rgba(244, 63, 94, 0.2) 0%, rgba(20, 13, 22, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 28px;
+      padding: 3.5rem 1.5rem;
+      margin-top: 5rem;
+    }
+
+    .cta-box h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .cta-box p {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 1.05rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      border-top: 1px solid var(--border-card);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Nav -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">💖</div>
+      <span>엄미새 특강</span>
+    </div>
+    <nav>
+      <a href="#goal">오늘의 목표</a>
+      <a href="#features">3대 핵심 기능</a>
+      <a href="mom_app.html" target="_blank">샘플 앱 실행 📱</a>
+      <a href="mom_paper.html" class="btn-cta">기획서 작성하기 💌</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="badge">경기공유학교 2026 · 가족과 함께하는 AI 바이브코딩</div>
+      <h1>세상에서 가장 소중한<br><span>엄마를 위한 사랑 종합 웹앱 (엄미새)</span></h1>
+      <p>엄마와의 당일치기 힐링 데이트 코스, 감동 200% 선물 BEST 5, 그리고 평생 가슴에 남을 엄마 인생 10문 10답을 기획하고 선물해보세요!</p>
+      <div class="hero-actions">
+        <a href="mom_paper.html" class="btn-cta" style="padding: 0.9rem 2.2rem; font-size: 1.05rem;">
+          💌 엄마 선물 기획서 작성하기
+        </a>
+        <a href="mom_app.html" target="_blank" class="btn-secondary">
+          💖 샘플 앱 바로 체험하기
+        </a>
+      </div>
+    </div>
+
+    <!-- Section 1: Features -->
+    <section id="features">
+      <div class="section-title">✨ 엄미새 앱 3대 핵심 모듈</div>
+      <div class="section-desc">엄마에게 전달할 세 가지 따뜻한 추억 선물 코스</div>
+      <div class="grid-3">
+        <div class="card-feature">
+          <div class="feature-icon">🚗</div>
+          <div class="feature-title">1. 당일치기 힐링 데이트 코스</div>
+          <div class="feature-desc">
+            수목원 산책, 한옥 다도 찻집, 온천 스파, 정갈한 한정식 등 엄마 취향저격 당일치기 코스를 타임라인으로 보여줍니다.
+          </div>
+        </div>
+
+        <div class="card-feature">
+          <div class="feature-icon">🎁</div>
+          <div class="feature-title">2. 엄마 만족 200% 선물 BEST 5</div>
+          <div class="feature-desc">
+            맞춤 건강검진, 효도 여행 쿠폰, 실크 스카프, 꽃상자 편지, 스마트 워치 등 감동 팁과 마음 편지가 함께 담긴 선물 카드.
+          </div>
+        </div>
+
+        <div class="card-feature">
+          <div class="feature-icon">💌</div>
+          <div class="feature-title">3. 엄마 인생 10문 10답 인터뷰</div>
+          <div class="feature-desc">
+            엄마의 20대 청춘과 꿈, 나를 태어났을 때의 기분 등 평생 간직할 엄마의 이야기를 인터뷰 카드로 기록하고 하트 세레머니를 선사합니다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <div class="cta-box">
+      <h2>엄마에게 세상에 하나뿐인 웹앱을 선물하세요!</h2>
+      <p>기획서 작성기 웹앱에서 원클릭 예시를 로딩하고 마크다운 다운로드를 해보세요.</p>
+      <a href="mom_paper.html" class="btn-cta" style="padding: 1rem 2.5rem; font-size: 1.15rem;">
+        🚀 엄미새 기획서 작성기 시작하기
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    경기공유학교 2026 · 가족과 함께하는 AI 바이브코딩 (유한대학교) | Mom Total App
+  </footer>
+
+</body>
+</html>
