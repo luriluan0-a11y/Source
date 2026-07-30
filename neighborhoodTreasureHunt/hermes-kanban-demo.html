@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hermes Kanban — work queue demo</title>
+<style>
+:root{--bg:#0b1020;--panel:#121a2d;--panel2:#18233a;--line:#2a3857;--text:#edf3ff;--muted:#93a4c4;--accent:#76a9ff;--mint:#5ee6b0;--amber:#ffd166;--rose:#ff7d9d;--violet:#b696ff;--shadow:0 18px 50px #0005;--radius:18px}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;color:var(--text);font:15px/1.5 Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:radial-gradient(circle at 82% -10%,#243d75 0,#0b1020 42%),var(--bg);min-height:100vh}
+button,input,select,textarea{font:inherit}button{cursor:pointer;border:0;color:inherit}.shell{max-width:1500px;margin:auto;padding:28px clamp(16px,3vw,44px) 46px}
+.topbar{display:flex;gap:18px;align-items:flex-start;justify-content:space-between;margin-bottom:24px}.eyebrow{color:var(--accent);font-weight:800;letter-spacing:.11em;text-transform:uppercase;font-size:11px}.brand h1{font-size:clamp(26px,4vw,42px);line-height:1.08;margin:8px 0}.brand p{color:var(--muted);margin:0;max-width:680px}.actions{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}.btn{background:#253556;border:1px solid #3b527c;padding:10px 14px;border-radius:11px;font-weight:700;transition:.2s}.btn:hover,.btn:focus-visible{background:#314a78;transform:translateY(-1px);outline:2px solid #fff3;outline-offset:2px}.btn.primary{background:var(--accent);color:#081226;border-color:transparent}.btn.ghost{background:transparent;border-color:var(--line);color:var(--muted)}
+.notice{display:flex;align-items:center;gap:12px;background:#171f35;border:1px solid #354a76;padding:13px 16px;border-radius:14px;margin-bottom:18px;color:#c8d7f5}.notice b{color:#fff}.notice .dot{width:9px;height:9px;border-radius:50%;background:var(--mint);box-shadow:0 0 14px var(--mint);flex:none}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}.search{flex:1 1 260px;position:relative}.search input,.toolbar select{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:11px;padding:11px 13px;outline:none}.search input:focus,.toolbar select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #76a9ff22}.toolbar select{width:auto;min-width:142px}.stats{display:flex;gap:8px;flex-wrap:wrap}.stat{display:flex;gap:7px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px 11px;color:var(--muted);font-size:13px}.stat strong{color:var(--text)}
+.board{display:grid;grid-template-columns:repeat(4,minmax(235px,1fr));gap:14px;align-items:start}.column{background:#0e1629aa;border:1px solid var(--line);border-radius:var(--radius);min-height:440px;display:flex;flex-direction:column;box-shadow:var(--shadow)}.column.dragover{border-color:var(--accent);background:#18294aaa}.column-head{padding:16px 16px 12px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}.column-title{display:flex;align-items:center;gap:9px;font-weight:850}.column-title .mark{width:10px;height:10px;border-radius:50%;background:var(--muted)}[data-status="in-progress"] .mark{background:var(--accent)}[data-status="review"] .mark{background:var(--amber)}[data-status="done"] .mark{background:var(--mint)}.count{color:var(--muted);font-size:12px;background:#ffffff0d;padding:3px 8px;border-radius:99px}.dropzone{padding:12px;display:flex;flex-direction:column;gap:11px;min-height:360px;flex:1}.empty{color:#6f7f9f;text-align:center;border:1px dashed #344463;border-radius:13px;padding:28px 12px;margin:auto 0;font-size:13px}.card{background:var(--panel);border:1px solid #293a5e;border-radius:15px;padding:14px;box-shadow:0 8px 20px #0002;transition:.2s;cursor:grab}.card:hover{border-color:#5276b0;transform:translateY(-2px)}.card.dragging{opacity:.4}.card.blocked{border-left:4px solid var(--rose)}.card-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.card h3{font-size:15px;margin:0 0 7px;line-height:1.3}.card p{color:var(--muted);font-size:13px;margin:0 0 13px}.priority{font-size:10px;font-weight:900;border-radius:6px;padding:3px 6px;white-space:nowrap}.priority.high{background:#ff7d9d22;color:var(--rose)}.priority.medium{background:#ffd16622;color:var(--amber)}.priority.low{background:#5ee6b022;color:var(--mint)}.chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:12px}.chip{font-size:11px;color:#b7c8e8;background:#ffffff0b;border:1px solid #ffffff12;border-radius:99px;padding:3px 7px}.chip.block{color:var(--rose);border-color:#ff7d9d55}.card-foot{display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:11px}.avatar{width:25px;height:25px;border-radius:50%;display:inline-grid;place-items:center;background:linear-gradient(135deg,#526ea8,#8d67d7);color:#fff;font-size:11px;font-weight:800}.assignee{display:flex;align-items:center;gap:7px}.card-menu{display:flex;gap:5px}.icon-btn{background:transparent;color:var(--muted);padding:3px 5px;border-radius:6px}.icon-btn:hover,.icon-btn:focus-visible{color:#fff;background:#ffffff12;outline:none}.move-row{display:flex;gap:6px;margin-top:11px;border-top:1px solid #ffffff0b;padding-top:10px}.move-row button{flex:1;background:#ffffff08;color:var(--muted);font-size:11px;padding:6px 4px;border-radius:7px}.move-row button:hover{background:#ffffff14;color:#fff}
+.footer-note{margin-top:22px;color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}.footer-note code{color:#c7d8ff;background:#ffffff0a;padding:2px 5px;border-radius:5px}
+dialog{border:1px solid #40567f;background:var(--panel);color:var(--text);border-radius:18px;width:min(560px,calc(100% - 28px));padding:0;box-shadow:0 30px 100px #0009}dialog::backdrop{background:#050916b8;backdrop-filter:blur(5px)}.modal-head{padding:19px 21px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.modal-head h2{font-size:19px;margin:0}.modal-body{padding:20px 21px}.field{display:grid;gap:6px;margin-bottom:14px}.field label{font-size:12px;color:var(--muted);font-weight:800}.field input,.field textarea,.field select{background:#0b1325;border:1px solid var(--line);color:var(--text);border-radius:9px;padding:10px 11px;width:100%;outline:0}.field textarea{min-height:84px;resize:vertical}.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px #76a9ff22}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.modal-foot{padding:14px 21px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.command-panel{margin-top:22px;background:linear-gradient(135deg,#121a2d,#0d1527);border:1px solid var(--line);border-radius:var(--radius);padding:19px}.command-panel h2{font-size:16px;margin:0 0 5px}.command-panel p{margin:0 0 13px;color:var(--muted);font-size:13px}.command-list{display:flex;gap:8px;flex-wrap:wrap}.command{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;color:#c9d8fa;background:#070d19;border:1px solid #273858;padding:8px 10px;border-radius:8px}
+.toast{position:fixed;right:22px;bottom:22px;background:#1d2e50;border:1px solid #5276b0;color:#fff;padding:12px 15px;border-radius:11px;box-shadow:var(--shadow);transform:translateY(20px);opacity:0;pointer-events:none;transition:.25s;z-index:5}.toast.show{transform:none;opacity:1}
+@media(max-width:1050px){.board{grid-template-columns:repeat(2,minmax(240px,1fr))}}@media(max-width:620px){.topbar{display:block}.actions{justify-content:flex-start;margin-top:16px}.board{grid-template-columns:1fr}.column{min-height:300px}.dropzone{min-height:180px}.grid2{grid-template-columns:1fr}.toolbar select{flex:1}.notice{align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main class="shell">
+  <header class="topbar">
+    <div class="brand">
+      <div class="eyebrow">Hermes Agent · Kanban work queue</div>
+      <h1>작업이 흐르는 칸반 보드</h1>
+      <p>여러 에이전트와 프로필이 작업을 만들고, 맡고, 막힘을 기록하고, 완료하는 흐름을 한눈에 살펴보는 예제입니다.</p>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="resetBtn">데모 초기화</button>
+      <button class="btn primary" id="addBtn">＋ 작업 만들기</button>
+    </div>
+  </header>
+
+  <div class="notice"><span class="dot"></span><span><b>브라우저 단독 시뮬레이션</b> · 실제 Hermes 보드나 SQLite에 연결하지 않고, 카드 상태를 이 브라우저의 localStorage에 저장합니다.</span></div>
+
+  <section class="toolbar" aria-label="보드 필터">
+    <div class="search"><input id="search" type="search" placeholder="작업, 설명, 태그 검색…" aria-label="작업 검색"></div>
+    <select id="assigneeFilter" aria-label="담당자 필터"><option value="all">모든 담당자</option></select>
+    <select id="priorityFilter" aria-label="우선순위 필터"><option value="all">모든 우선순위</option><option value="high">높음</option><option value="medium">보통</option><option value="low">낮음</option></select>
+    <div class="stats" aria-live="polite"><div class="stat">전체 <strong id="totalStat">0</strong></div><div class="stat">진행 중 <strong id="activeStat">0</strong></div><div class="stat">완료 <strong id="doneStat">0</strong></div></div>
+  </section>
+
+  <section class="board" id="board" aria-label="Hermes 칸반 보드">
+    <section class="column" data-status="backlog"><div class="column-head"><div class="column-title"><span class="mark"></span>Backlog</div><span class="count" id="count-backlog">0</span></div><div class="dropzone" data-drop-status="backlog"></div></section>
+    <section class="column" data-status="in-progress"><div class="column-head"><div class="column-title"><span class="mark"></span>In Progress</div><span class="count" id="count-in-progress">0</span></div><div class="dropzone" data-drop-status="in-progress"></div></section>
+    <section class="column" data-status="review"><div class="column-head"><div class="column-title"><span class="mark"></span>Review</div><span class="count" id="count-review">0</span></div><div class="dropzone" data-drop-status="review"></div></section>
+    <section class="column" data-status="done"><div class="column-head"><div class="column-title"><span class="mark"></span>Done</div><span class="count" id="count-done">0</span></div><div class="dropzone" data-drop-status="done"></div></section>
+  </section>
+
+  <section class="command-panel">
+    <h2>실제 Hermes Kanban과 연결되는 개념</h2>
+    <p>공식 CLI의 작업 흐름을 화면 요소로 번역한 안내입니다. 아래 명령은 이 예제에서 실행되지 않습니다.</p>
+    <div class="command-list"><span class="command">hermes kanban init</span><span class="command">hermes kanban create</span><span class="command">hermes kanban assign</span><span class="command">hermes kanban block</span><span class="command">hermes kanban comment</span><span class="command">hermes kanban complete</span><span class="command">hermes kanban dispatch</span></div>
+  </section>
+  <div class="footer-note"><span>Tip: 카드를 드래그하거나 카드 아래의 상태 버튼을 눌러 이동해 보세요.</span><span>데이터 저장 위치: <code>localStorage</code></span></div>
+</main>
+
+<dialog id="taskDialog">
+  <form id="taskForm" method="dialog">
+    <div class="modal-head"><h2 id="dialogTitle">새 작업 만들기</h2><button type="button" class="icon-btn" id="closeDialog" aria-label="닫기">✕</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="taskId">
+      <div class="field"><label for="taskTitle">작업 제목</label><input id="taskTitle" required maxlength="90" placeholder="예: Telegram 알림 테스트"></div>
+      <div class="field"><label for="taskDescription">설명</label><textarea id="taskDescription" maxlength="240" placeholder="작업의 목표나 완료 조건을 적어 주세요."></textarea></div>
+      <div class="grid2"><div class="field"><label for="taskStatus">상태</label><select id="taskStatus"><option value="backlog">Backlog</option><option value="in-progress">In Progress</option><option value="review">Review</option><option value="done">Done</option></select></div><div class="field"><label for="taskPriority">우선순위</label><select id="taskPriority"><option value="high">높음</option><option value="medium" selected>보통</option><option value="low">낮음</option></select></div></div>
+      <div class="grid2"><div class="field"><label for="taskAssignee">담당자 / 프로필</label><input id="taskAssignee" maxlength="30" placeholder="예: Leon"></div><div class="field"><label for="taskTags">태그 (쉼표로 구분)</label><input id="taskTags" maxlength="100" placeholder="예: docs, web"></div></div>
+      <label class="field" style="display:flex;align-items:center;gap:8px;flex-direction:row"><input id="taskBlocked" type="checkbox" style="width:auto"> 다른 작업이나 조건 때문에 막힘</label>
+    </div>
+    <div class="modal-foot"><button type="button" class="btn ghost" id="cancelDialog">취소</button><button class="btn primary" type="submit">저장</button></div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(() => {
+  const KEY = 'hermes-kanban-demo-v1';
+  const seed = [
+    {id:'k1',title:'칸반 보드 구조 확인',description:'작업 큐와 네 개 상태 열의 역할을 정리합니다.',status:'done',priority:'high',assignee:'Leon',tags:['docs','hermes'],blocked:false},
+    {id:'k2',title:'Telegram 알림 흐름 테스트',description:'작업 완료 시 알림이 필요한지 확인합니다.',status:'in-progress',priority:'high',assignee:'Leon',tags:['gateway','test'],blocked:false},
+    {id:'k3',title:'사용자 안내 문서 작성',description:'카드 생성부터 완료까지의 사용법을 쉽게 설명합니다.',status:'review',priority:'medium',assignee:'Runea',tags:['docs'],blocked:false},
+    {id:'k4',title:'실제 작업자에게 할당',description:'담당 프로필을 지정하고 시작 조건을 확인합니다.',status:'backlog',priority:'medium',assignee:'',tags:['dispatch'],blocked:true},
+    {id:'k5',title:'완료 조건 정의하기',description:'무엇을 완료로 볼지 체크리스트로 남깁니다.',status:'backlog',priority:'low',assignee:'Runea',tags:['planning'],blocked:false}
+  ];
+  let tasks = load(); let draggedId = null;
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s ?? '').replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const initials = n => n ? n.trim().split(/\s+/).map(x=>x[0]).join('').slice(0,2).toUpperCase() : '—';
+  const labels = {high:'높음',medium:'보통',low:'낮음'};
+  const statuses = ['backlog','in-progress','review','done'];
+  function load(){try{const x=JSON.parse(localStorage.getItem(KEY));return Array.isArray(x)?x:seed.map(x=>({...x,tags:[...x.tags]}));}catch{return seed.map(x=>({...x,tags:[...x.tags]}));}}
+  function save(){localStorage.setItem(KEY,JSON.stringify(tasks));}
+  function filtered(){const q=$('#search').value.trim().toLowerCase(), a=$('#assigneeFilter').value, p=$('#priorityFilter').value;return tasks.filter(t=>(!q||[t.title,t.description,t.assignee,...t.tags].join(' ').toLowerCase().includes(q))&&(a==='all'||t.assignee===a)&&(p==='all'||t.priority===p));}
+  function render(){
+    statuses.forEach(s=>{$(`[data-drop-status="${s}"]`).innerHTML='';});
+    const visible=filtered();
+    statuses.forEach(s=>{const zone=$(`[data-drop-status="${s}"]`), list=visible.filter(t=>t.status===s);$('#count-'+s).textContent=tasks.filter(t=>t.status===s).length;if(!list.length){zone.innerHTML='<div class="empty">이 열에 보이는 작업이 없습니다.<br>카드를 끌어다 놓아 보세요.</div>';}else list.forEach(t=>zone.appendChild(card(t)));});
+    $('#totalStat').textContent=tasks.length;$('#activeStat').textContent=tasks.filter(t=>t.status==='in-progress').length;$('#doneStat').textContent=tasks.filter(t=>t.status==='done').length;updateAssignees();
+  }
+  function card(t){const el=document.createElement('article');el.className='card'+(t.blocked?' blocked':'');el.draggable=true;el.dataset.id=t.id;el.tabIndex=0;el.setAttribute('aria-label',t.title+' 작업 카드');el.innerHTML=`<div class="card-top"><div><h3>${esc(t.title)}</h3><p>${esc(t.description||'설명 없음')}</p></div><span class="priority ${t.priority}">${labels[t.priority]}</span></div><div class="chips">${t.tags.map(x=>`<span class="chip">#${esc(x)}</span>`).join('')}${t.blocked?'<span class="chip block">⚠ 막힘</span>':''}</div><div class="card-foot"><span class="assignee"><span class="avatar">${esc(initials(t.assignee))}</span>${esc(t.assignee||'미할당')}</span><span class="card-menu"><button class="icon-btn edit" aria-label="${esc(t.title)} 편집">✎</button><button class="icon-btn delete" aria-label="${esc(t.title)} 삭제">♲</button></span></div><div class="move-row">${statuses.map(s=>`<button data-move="${s}" ${s===t.status?'disabled':''}>${s===t.status?'현재':s==='backlog'?'대기':s==='in-progress'?'진행':s==='review'?'검토':'완료'}</button>`).join('')}</div>`;
+    el.addEventListener('dragstart',e=>{draggedId=t.id;el.classList.add('dragging');e.dataTransfer.effectAllowed='move';e.dataTransfer.setData('text/plain',t.id);});el.addEventListener('dragend',()=>{draggedId=null;el.classList.remove('dragging');document.querySelectorAll('.column').forEach(x=>x.classList.remove('dragover'));});
+    el.addEventListener('keydown',e=>{if(e.key==='Enter')openEdit(t.id);});el.querySelector('.edit').onclick=()=>openEdit(t.id);el.querySelector('.delete').onclick=()=>removeTask(t.id);el.querySelectorAll('[data-move]').forEach(b=>b.onclick=()=>move(t.id,b.dataset.move));return el;}
+  function updateAssignees(){const select=$('#assigneeFilter'), current=select.value, names=[...new Set(tasks.map(t=>t.assignee).filter(Boolean))].sort();select.innerHTML='<option value="all">모든 담당자</option>'+names.map(n=>`<option value="${esc(n)}">${esc(n)}</option>`).join('');select.value=names.includes(current)?current:'all';}
+  function move(id,status){const t=tasks.find(x=>x.id===id);if(!t)return;t.status=status;save();render();toast(`“${t.title}”을(를) ${statusName(status)}(으)로 이동했습니다.`);}
+  function statusName(s){return {backlog:'Backlog', 'in-progress':'In Progress',review:'Review',done:'Done'}[s];}
+  function removeTask(id){const t=tasks.find(x=>x.id===id);if(!t||!confirm(`“${t.title}” 작업을 삭제할까요?`))return;tasks=tasks.filter(x=>x.id!==id);save();render();toast('작업을 삭제했습니다.');}
+  function openEdit(id){const t=tasks.find(x=>x.id===id);if(!t)return;$('#dialogTitle').textContent='작업 편집';$('#taskId').value=t.id;$('#taskTitle').value=t.title;$('#taskDescription').value=t.description;$('#taskStatus').value=t.status;$('#taskPriority').value=t.priority;$('#taskAssignee').value=t.assignee;$('#taskTags').value=t.tags.join(', ');$('#taskBlocked').checked=t.blocked;$('#taskDialog').showModal();}
+  function openNew(){$('#dialogTitle').textContent='새 작업 만들기';$('#taskForm').reset();$('#taskId').value='';$('#taskStatus').value='backlog';$('#taskPriority').value='medium';$('#taskDialog').showModal();setTimeout(()=>$('#taskTitle').focus(),50);}
+  function toast(msg){const x=$('#toast');x.textContent=msg;x.classList.add('show');clearTimeout(window.__toast);window.__toast=setTimeout(()=>x.classList.remove('show'),2200);}
+  $('#taskForm').addEventListener('submit',e=>{e.preventDefault();const id=$('#taskId').value||'k'+Date.now();const data={id,title:$('#taskTitle').value.trim(),description:$('#taskDescription').value.trim(),status:$('#taskStatus').value,priority:$('#taskPriority').value,assignee:$('#taskAssignee').value.trim(),tags:$('#taskTags').value.split(',').map(x=>x.trim()).filter(Boolean),blocked:$('#taskBlocked').checked};if(!data.title)return;if($('#taskId').value){tasks=tasks.map(t=>t.id===id?data:t);toast('작업을 수정했습니다.');}else{tasks.push(data);toast('새 작업을 만들었습니다.');}save();render();$('#taskDialog').close();});
+  $('#addBtn').onclick=openNew;$('#closeDialog').onclick=()=>$('#taskDialog').close();$('#cancelDialog').onclick=()=>$('#taskDialog').close();$('#resetBtn').onclick=()=>{if(confirm('데모 카드를 처음 상태로 되돌릴까요?')){tasks=seed.map(x=>({...x,tags:[...x.tags]}));save();render();toast('데모 보드를 초기화했습니다.');}};['search','assigneeFilter','priorityFilter'].forEach(id=>$('#'+id).addEventListener('input',render));
+  document.querySelectorAll('.dropzone').forEach(zone=>{zone.addEventListener('dragover',e=>{e.preventDefault();zone.closest('.column').classList.add('dragover');});zone.addEventListener('dragleave',()=>zone.closest('.column').classList.remove('dragover'));zone.addEventListener('drop',e=>{e.preventDefault();zone.closest('.column').classList.remove('dragover');const id=e.dataTransfer.getData('text/plain')||draggedId;move(id,zone.dataset.dropStatus);});});
+  render();
+})();
+</script>
+</body>
+</html>
