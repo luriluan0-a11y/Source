@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>절약 블로그 키워드 분석기</title>
+  <style>
+    :root {
+      --bg: #f7f4ee;
+      --card: #ffffff;
+      --text: #222222;
+      --muted: #6b6258;
+      --line: #e5ded3;
+      --main: #2f6f4e;
+      --main-dark: #23563c;
+      --sub: #fff7e6;
+      --danger: #9d3b2f;
+      --shadow: 0 12px 30px rgba(50, 40, 25, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      background: radial-gradient(circle at top left, #fff4d8 0, transparent 32%), var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 36px 0 60px;
+    }
+
+    header {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .badge {
+      display: inline-flex;
+      width: fit-content;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: #e9f5ed;
+      color: var(--main-dark);
+      font-weight: 700;
+      font-size: 14px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(30px, 5vw, 54px);
+      letter-spacing: -0.05em;
+      line-height: 1.08;
+    }
+
+    .lead {
+      margin: 0;
+      color: var(--muted);
+      font-size: 18px;
+      max-width: 760px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel {
+      padding: 22px;
+      position: sticky;
+      top: 18px;
+    }
+
+    label {
+      display: block;
+      font-weight: 800;
+      margin: 0 0 8px;
+    }
+
+    input, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 13px 14px;
+      font: inherit;
+      background: white;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--main);
+      box-shadow: 0 0 0 4px rgba(47,111,78,0.12);
+    }
+
+    .field { margin-bottom: 16px; }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 6px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 16px;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+    }
+
+    .primary {
+      width: 100%;
+      background: var(--main);
+      color: white;
+    }
+
+    .primary:hover { background: var(--main-dark); }
+
+    .secondary {
+      background: #efe8dc;
+      color: #3d3328;
+    }
+
+    .row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 22px;
+    }
+
+    .metric {
+      padding: 18px;
+    }
+
+    .metric b {
+      display: block;
+      font-size: 26px;
+      letter-spacing: -0.04em;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .section {
+      padding: 22px;
+      margin-bottom: 22px;
+    }
+
+    h2, h3 {
+      margin: 0 0 14px;
+      letter-spacing: -0.035em;
+      line-height: 1.25;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      overflow: hidden;
+      border-radius: 14px;
+      font-size: 14px;
+    }
+
+    th, td {
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #f0eadf;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    tr:hover td { background: #fffaf0; }
+
+    .score {
+      font-weight: 900;
+      color: var(--main-dark);
+    }
+
+    .pill {
+      display: inline-flex;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #edf6f0;
+      color: var(--main-dark);
+      font-size: 12px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .ideas {
+      display: grid;
+      gap: 14px;
+    }
+
+    .idea {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 18px;
+      background: #fffefd;
+    }
+
+    .idea-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: start;
+      margin-bottom: 10px;
+    }
+
+    .idea h3 { margin-bottom: 4px; }
+
+    ul { margin: 8px 0 0; padding-left: 20px; }
+
+    .muted { color: var(--muted); }
+
+    .draft {
+      white-space: pre-wrap;
+      background: #2a241d;
+      color: #fff8ea;
+      border-radius: 16px;
+      padding: 18px;
+      overflow: auto;
+    }
+
+    .notice {
+      background: var(--sub);
+      border: 1px solid #efd69b;
+      color: #5a4317;
+      border-radius: 16px;
+      padding: 14px 16px;
+      margin-top: 14px;
+      font-size: 14px;
+    }
+
+    @media (max-width: 900px) {
+      .grid { grid-template-columns: 1fr; }
+      .panel { position: static; }
+      .summary { grid-template-columns: repeat(2, 1fr); }
+      table { font-size: 13px; }
+    }
+
+    @media (max-width: 560px) {
+      .summary { grid-template-columns: 1fr; }
+      th:nth-child(5), td:nth-child(5),
+      th:nth-child(6), td:nth-child(6),
+      th:nth-child(7), td:nth-child(7) { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <span class="badge">절약 글쓰기 도구</span>
+      <h1>블로그 키워드 분석기</h1>
+      <p class="lead">절약을 위한 마음가짐과 실천 과제를 주제로, 글감·제목·구성·초안 방향을 한 번에 뽑아줍니다.</p>
+    </header>
+
+    <div class="grid">
+      <aside class="card panel">
+        <div class="field">
+          <label for="theme">분석 주제</label>
+          <input id="theme" value="절약 마인드와 실천 과제" />
+          <div class="hint">예: 식비 절약, 고정비 줄이기, 무지출 챌린지</div>
+        </div>
+
+        <div class="field">
+          <label for="count">추천 개수</label>
+          <select id="count">
+            <option value="8">8개</option>
+            <option value="10">10개</option>
+            <option value="12" selected>12개</option>
+            <option value="15">15개</option>
+          </select>
+        </div>
+
+        <button class="primary" onclick="runAnalysis()">분석하기</button>
+
+        <div class="row">
+          <button class="secondary" onclick="copyMarkdown()">결과 복사</button>
+          <button class="secondary" onclick="downloadMarkdown()">문서 저장</button>
+        </div>
+
+        <div class="notice">
+          검색량을 직접 긁는 방식은 아직 아닙니다. 대신 글감 가치, 실행성, 난이도를 기준으로 첫 글감을 고르는 로컬 분석기입니다.
+        </div>
+      </aside>
+
+      <section>
+        <div class="summary">
+          <div class="card metric"><b id="mTotal">0</b><span>분석 키워드</span></div>
+          <div class="card metric"><b id="mTop">-</b><span>추천 1순위</span></div>
+          <div class="card metric"><b id="mIntent">-</b><span>주요 의도</span></div>
+          <div class="card metric"><b id="mScore">0</b><span>최고 점수</span></div>
+        </div>
+
+        <div class="card section">
+          <h2>추천 키워드 순위</h2>
+          <div id="tableArea"></div>
+        </div>
+
+        <div class="card section">
+          <h2>상위 키워드별 글감</h2>
+          <div id="ideaArea" class="ideas"></div>
+        </div>
+
+        <div class="card section">
+          <h2>첫 글 초안 방향</h2>
+          <div id="draftArea" class="draft"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const baseKeywords = {
+      "절약": [
+        "절약 습관", "생활비 절약", "식비 절약", "고정비 줄이기", "소비 습관 고치기",
+        "돈 모으는 방법", "가계부 쓰는 법", "충동구매 줄이기", "미니멀 소비", "월급 관리",
+        "무지출 챌린지", "짠테크", "현명한 소비", "저축 루틴", "절약 브이로그 글감"
+      ],
+      "마인드": [
+        "절약 마인드", "돈을 대하는 태도", "소비 기준 세우기", "비교 소비 끊기", "만족 지연",
+        "작은 돈의 힘", "소비 욕망 다루기", "돈 걱정 줄이는 습관", "가난한 습관 바꾸기", "경제적 안정감"
+      ],
+      "실천": [
+        "하루 천원 절약", "일주일 식비 계획", "냉장고 파먹기", "구독 서비스 정리", "외식비 줄이기",
+        "커피값 줄이기", "대중교통 절약", "전기요금 절약", "통신비 절약", "보험료 점검",
+        "소비 기록표", "절약 체크리스트", "30일 절약 챌린지", "월말 결산", "비상금 만들기"
+      ]
+    };
+
+    function hasFinalConsonant(text) {
+      if (!text) return false;
+      const code = text.charCodeAt(text.length - 1);
+      if (code < 0xac00 || code > 0xd7a3) return false;
+      return (code - 0xac00) % 28 !== 0;
+    }
+
+    function objectParticle(text) {
+      return hasFinalConsonant(text) ? "을" : "를";
+    }
+
+    function classifyIntent(keyword) {
+      const rules = [
+        ["방법", "정보 탐색", "무엇부터 해야 할지 모름"],
+        ["습관", "문제 해결", "꾸준히 실천하지 못함"],
+        ["줄이기", "즉시 실행", "지출을 바로 낮추고 싶음"],
+        ["챌린지", "참여형", "혼자 하면 지속하기 어려움"],
+        ["체크리스트", "실천 도구", "구체적인 점검표가 필요함"],
+        ["마인드", "태도 전환", "절약이 궁상맞게 느껴짐"],
+        ["가계부", "관리 도구", "돈 흐름을 파악하지 못함"],
+        ["고정비", "구조 개선", "매달 빠져나가는 돈이 큼"]
+      ];
+      for (const [token, intent, problem] of rules) {
+        if (keyword.includes(token)) return { intent, problem };
+      }
+      return { intent: "정보 탐색", problem: "절약을 시작하고 싶지만 방향이 흐림" };
+    }
+
+    function makeAngle(keyword, theme) {
+      if (["마인드", "태도", "욕망"].some(x => keyword.includes(x))) {
+        return "절약을 참는 일이 아니라 선택 기준을 세우는 일로 설명";
+      }
+      if (["식비", "냉장고", "외식"].some(x => keyword.includes(x))) {
+        return "이번 주 바로 따라 할 수 있는 식비 절약 루틴 제안";
+      }
+      if (["고정비", "구독", "통신비", "보험료"].some(x => keyword.includes(x))) {
+        return "한 번 정리하면 매달 효과가 나는 구조적 절약법 제안";
+      }
+      if (["챌린지", "체크리스트"].some(x => keyword.includes(x))) {
+        return "독자가 저장하고 따라 할 수 있는 실천표 중심 글";
+      }
+      return `${theme}을 일상 언어로 풀어 초보자도 바로 실행하게 구성`;
+    }
+
+    function estimate(keyword) {
+      let difficulty = 5;
+      let value = 6;
+      let actionability = 6;
+
+      if (["체크리스트", "줄이기", "계획", "정리", "챌린지"].some(x => keyword.includes(x))) {
+        actionability += 2;
+        value += 1;
+      }
+      if (["고정비", "보험료", "통신비", "구독"].some(x => keyword.includes(x))) {
+        value += 2;
+        difficulty += 1;
+      }
+      if (["마인드", "태도", "욕망", "비교"].some(x => keyword.includes(x))) {
+        difficulty += 1;
+        value += 1;
+      }
+      if (["하루", "일주일", "30일"].some(x => keyword.includes(x))) {
+        actionability += 1;
+        difficulty -= 1;
+      }
+
+      return {
+        difficulty: clamp(difficulty, 1, 10),
+        value: clamp(value, 1, 10),
+        actionability: clamp(actionability, 1, 10)
+      };
+    }
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function generateKeywords(theme) {
+      let raw = [];
+      Object.values(baseKeywords).forEach(list => raw.push(...list));
+      theme = (theme || "절약").trim();
+
+      if (!raw.includes(theme)) {
+        raw.unshift(theme);
+        raw.push(`${theme} 방법`, `${theme} 습관`, `${theme} 체크리스트`, `${theme} 실천 과제`, `${theme} 마인드`);
+      }
+
+      const seen = new Set();
+      const ideas = [];
+      for (const keyword of raw) {
+        if (seen.has(keyword)) continue;
+        seen.add(keyword);
+        const { intent, problem } = classifyIntent(keyword);
+        const e = estimate(keyword);
+        const score = e.value * 3 + e.actionability * 2 - e.difficulty;
+        ideas.push({
+          keyword,
+          intent,
+          problem,
+          angle: makeAngle(keyword, theme),
+          difficulty: e.difficulty,
+          value: e.value,
+          actionability: e.actionability,
+          score
+        });
+      }
+      return ideas.sort((a, b) => b.score - a.score);
+    }
+
+    function makeTitles(keyword) {
+      const obj = objectParticle(keyword);
+      return [
+        `${keyword}, 오늘부터 바로 시작하는 현실적인 방법`,
+        `돈이 새는 사람을 위한 ${keyword} 체크리스트`,
+        `절약이 힘든 이유와 ${keyword}${obj} 오래 지속하는 법`,
+        `한 달 뒤 차이가 나는 ${keyword} 실천 과제 7가지`
+      ];
+    }
+
+    function makeOutline(keyword) {
+      const obj = objectParticle(keyword);
+      return [
+        "왜 절약이 필요한가: 불안 줄이기와 선택권 늘리기",
+        "절약을 방해하는 마음: 비교, 보상 심리, 작은 돈 무시하기",
+        `핵심 주제: ${keyword}${obj} 일상에서 적용하는 법`,
+        "오늘 할 수 있는 실천 과제 3가지",
+        "일주일 동안 점검할 기록표",
+        "포기하지 않기 위한 기준: 완벽보다 반복"
+      ];
+    }
+
+    function runAnalysis() {
+      const theme = document.getElementById("theme").value.trim() || "절약";
+      const count = Number(document.getElementById("count").value);
+      const ideas = generateKeywords(theme).slice(0, count);
+      window.currentIdeas = ideas;
+      window.currentTheme = theme;
+
+      document.getElementById("mTotal").textContent = ideas.length;
+      document.getElementById("mTop").textContent = ideas[0]?.keyword || "-";
+      document.getElementById("mIntent").textContent = ideas[0]?.intent || "-";
+      document.getElementById("mScore").textContent = ideas[0]?.score || 0;
+
+      renderTable(ideas);
+      renderIdeas(ideas);
+      renderDraft(ideas[0], theme);
+    }
+
+    function renderTable(ideas) {
+      const rows = ideas.map((item, i) => `
+        <tr>
+          <td>${i + 1}</td>
+          <td><strong>${escapeHtml(item.keyword)}</strong></td>
+          <td><span class="pill">${escapeHtml(item.intent)}</span></td>
+          <td class="score">${item.score}</td>
+          <td>${item.difficulty}</td>
+          <td>${item.value}</td>
+          <td>${item.actionability}</td>
+          <td>${escapeHtml(item.problem)}</td>
+        </tr>
+      `).join("");
+
+      document.getElementById("tableArea").innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>순위</th><th>키워드</th><th>의도</th><th>점수</th><th>난이도</th><th>가치</th><th>실행성</th><th>독자 문제</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+      `;
+    }
+
+    function renderIdeas(ideas) {
+      document.getElementById("ideaArea").innerHTML = ideas.map((item, i) => {
+        const titles = makeTitles(item.keyword).map(t => `<li>${escapeHtml(t)}</li>`).join("");
+        const outline = makeOutline(item.keyword).map(t => `<li>${escapeHtml(t)}</li>`).join("");
+        return `
+          <article class="idea">
+            <div class="idea-top">
+              <div>
+                <h3>${i + 1}. ${escapeHtml(item.keyword)}</h3>
+                <div class="muted">${escapeHtml(item.angle)}</div>
+              </div>
+              <span class="pill">점수 ${item.score}</span>
+            </div>
+            <strong>제목 후보</strong>
+            <ul>${titles}</ul>
+            <br />
+            <strong>글 구성</strong>
+            <ul>${outline}</ul>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderDraft(first, theme) {
+      if (!first) return;
+      const title = makeTitles(first.keyword)[0];
+      const draft = `${title}\n\n1. 절약은 궁핍함이 아니라 선택권을 늘리는 일입니다.\n2. 많은 사람이 절약에 실패하는 이유는 의지가 약해서가 아니라 기준이 없기 때문입니다.\n3. 오늘의 주제는 '${first.keyword}'입니다.\n4. 먼저 이번 달에 새고 있는 돈을 하나만 찾아봅니다.\n5. 다음으로 오늘 바로 줄일 수 있는 지출을 하나 정합니다.\n6. 마지막으로 일주일 뒤 결과를 기록합니다.\n7. 절약은 한 번에 크게 바꾸는 것이 아니라, 작은 선택을 반복하는 기술입니다.`;
+      document.getElementById("draftArea").textContent = draft;
+    }
+
+    function buildMarkdown() {
+      const ideas = window.currentIdeas || [];
+      const theme = window.currentTheme || "절약";
+      const lines = [];
+      lines.push(`# 블로그 키워드 분석 결과: ${theme}`);
+      lines.push("");
+      lines.push(`- 관심사: 절약`);
+      lines.push(`- 글 방향: 절약을 위한 마음가짐과 실천 과제`);
+      lines.push("");
+      lines.push("## 추천 키워드 순위");
+      lines.push("");
+      lines.push("| 순위 | 키워드 | 의도 | 점수 | 난이도 | 가치 | 실행성 | 독자 문제 |");
+      lines.push("|---:|---|---|---:|---:|---:|---:|---|");
+      ideas.forEach((item, i) => {
+        lines.push(`| ${i + 1} | ${item.keyword} | ${item.intent} | ${item.score} | ${item.difficulty} | ${item.value} | ${item.actionability} | ${item.problem} |`);
+      });
+      lines.push("");
+      lines.push("## 상위 키워드별 글감");
+      ideas.forEach(item => {
+        lines.push("");
+        lines.push(`### ${item.keyword}`);
+        lines.push(`- 검색 의도: ${item.intent}`);
+        lines.push(`- 독자 문제: ${item.problem}`);
+        lines.push(`- 글쓰기 각도: ${item.angle}`);
+        lines.push("");
+        lines.push("#### 제목 후보");
+        makeTitles(item.keyword).forEach(t => lines.push(`- ${t}`));
+        lines.push("");
+        lines.push("#### 글 구성");
+        makeOutline(item.keyword).forEach(t => lines.push(`- ${t}`));
+      });
+      return lines.join("\n");
+    }
+
+    async function copyMarkdown() {
+      const text = buildMarkdown();
+      await navigator.clipboard.writeText(text);
+      alert("결과를 복사했습니다.");
+    }
+
+    function downloadMarkdown() {
+      const text = buildMarkdown();
+      const blob = new Blob([text], { type: "text/markdown;charset=utf-8" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "절약_블로그_키워드_분석.md";
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    runAnalysis();
+  </script>
+</body>
+</html>
