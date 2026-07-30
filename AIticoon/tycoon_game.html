@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>달콤 포근 디저트 카페 7일 경영 — AI 타이쿤</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f131d;
+      --bg-card: rgba(28, 35, 51, 0.85);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --accent-gold: #f59e0b;
+      --accent-amber: #d97706;
+      --accent-pink: #ec4899;
+      --accent-cyan: #06b6d4;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #0f131d;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(245, 158, 11, 0.25) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(236, 72, 153, 0.2) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(15, 19, 29, 0.9) 0px, transparent 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Header & HUD */
+    header {
+      padding: 1rem 2rem;
+      background: rgba(15, 19, 29, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-card);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .hud-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .shop-title-box {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .shop-badge {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
+      padding: 0.35rem 0.8rem;
+      border-radius: 10px;
+      font-weight: 900;
+      font-size: 1.1rem;
+      color: #fff;
+    }
+
+    .shop-name {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .hud-stats {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .stat-chip {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-card);
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .stat-gold { color: var(--accent-gold); border-color: rgba(245, 158, 11, 0.4); }
+    .stat-day { color: var(--accent-cyan); }
+    .stat-rating { color: #fde047; }
+
+    .btn-hud {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: #fff;
+      padding: 0.45rem 0.9rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-hud:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: var(--accent-gold);
+    }
+
+    /* Main Container */
+    .container {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Stages */
+    .view-stage {
+      display: none;
+      flex-direction: column;
+      gap: 1.5rem;
+      animation: fadeIn 0.3s ease forwards;
+    }
+
+    .view-stage.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Card Panels */
+    .card-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 28px;
+      padding: 2rem;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .panel-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent-gold);
+    }
+
+    /* Stage 1: Prep Grid */
+    .prep-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .prep-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-card);
+      border-radius: 18px;
+      padding: 1.25rem;
+      text-align: center;
+    }
+
+    .prep-card img {
+      width: 100%;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 0.75rem;
+    }
+
+    .prep-card-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .prep-card-info {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .btn-buy-stock {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      padding: 0.4rem 0.8rem;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s ease;
+    }
+
+    .btn-buy-stock:hover {
+      background: var(--accent-gold);
+      color: #000;
+    }
+
+    /* Stage 2: Serving Counter */
+    .counter-area {
+      background: radial-gradient(circle at center, rgba(30, 41, 59, 0.9) 0%, rgba(15, 23, 42, 0.95) 100%);
+      border: 2px solid var(--border-card);
+      border-radius: 28px;
+      padding: 2rem;
+      min-height: 420px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .customer-lane {
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      margin-top: 1rem;
+      min-height: 180px;
+    }
+
+    .customer-box {
+      background: rgba(15, 23, 42, 0.85);
+      border: 2px solid var(--accent-gold);
+      border-radius: 20px;
+      padding: 1rem 1.5rem;
+      text-align: center;
+      width: 190px;
+      box-shadow: 0 10px 30px rgba(245, 158, 11, 0.3);
+      animation: popCustomer 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+
+    @keyframes popCustomer {
+      from { transform: scale(0.7) translateY(20px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .customer-avatar {
+      font-size: 2.5rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .speech-bubble {
+      background: var(--accent-gold);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 50px;
+      margin-bottom: 0.5rem;
+      display: inline-block;
+    }
+
+    /* Serving Tray / Menu Buttons */
+    .serving-tray {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .btn-serve-menu {
+      background: var(--bg-card);
+      border: 2px solid var(--border-card);
+      border-radius: 18px;
+      padding: 1rem 0.75rem;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .btn-serve-menu:hover {
+      border-color: var(--accent-gold);
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-serve-menu:active {
+      transform: scale(0.96);
+    }
+
+    .combo-badge {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-gold));
+      color: #fff;
+      padding: 0.4rem 1rem;
+      border-radius: 50px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 1.2rem;
+      box-shadow: 0 0 20px rgba(236, 72, 153, 0.6);
+      animation: pulseCombo 1s infinite alternate;
+      display: none;
+    }
+
+    @keyframes pulseCombo {
+      from { transform: scale(1); }
+      to { transform: scale(1.1); }
+    }
+
+    /* Stage 3: Daily Summary */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .summary-box {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-card);
+      border-radius: 18px;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .summary-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2rem;
+      font-weight: 900;
+      margin-top: 0.5rem;
+    }
+
+    .btn-start-next {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 800;
+      padding: 1rem 2.5rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 30px rgba(245, 158, 11, 0.4);
+      transition: all 0.25s ease;
+      display: inline-block;
+    }
+
+    .btn-start-next:hover {
+      transform: scale(1.04);
+      box-shadow: 0 12px 40px rgba(236, 72, 153, 0.6);
+    }
+
+    /* Floating Gold Popup */
+    .gold-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 900;
+      font-size: 2.2rem;
+      color: var(--accent-gold);
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+      pointer-events: none;
+      z-index: 200;
+      animation: floatUp 1.2s forwards ease-out;
+    }
+
+    @keyframes floatUp {
+      0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+      30% { opacity: 1; transform: translate(-50%, -40px) scale(1.2); }
+      100% { opacity: 0; transform: translate(-50%, -100px) scale(1); }
+    }
+
+    /* Confetti Canvas */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 150;
+    }
+  </style>
+</head>
+<body>
+
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- HUD -->
+  <header>
+    <div class="hud-top">
+      <div class="shop-title-box">
+        <span class="shop-badge">STORE</span>
+        <span id="shopNameDisplay" class="shop-name">달콤 포근 디저트 카페</span>
+      </div>
+
+      <div class="hud-stats">
+        <div class="stat-chip stat-day">🗓️ DAY <span id="hudDay">1</span>/7</div>
+        <div class="stat-chip stat-gold">💰 <span id="hudGold">50,000</span> Gold</div>
+        <div class="stat-chip stat-rating">★ <span id="hudRating">4.8</span></div>
+      </div>
+
+      <div>
+        <button class="btn-hud" id="btnAudio" onclick="toggleAudio()">🔊 효과음 ON</button>
+        <button class="btn-hud" onclick="restartGame()">🔄 영업 리셋</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="container">
+
+    <!-- STAGE 1: MORNING PREP (재료 발주 및 가격 설정) -->
+    <div id="stagePrep" class="view-stage active">
+      <div class="card-panel">
+        <div class="panel-title">☀️ 1단계: 아침 재료 발주 & 메뉴 설정 (DAY <span class="lblDay">1</span>)</div>
+        <p style="color: var(--text-muted); margin-bottom: 1.5rem;">오늘 판매할 메뉴의 재료 재고를 발주하고 판매 가격을 확인하세요!</p>
+
+        <div id="prepGrid" class="prep-grid">
+          <!-- Dynamically populated -->
+        </div>
+
+        <div style="text-align: center; margin-top: 1.5rem;">
+          <button class="btn-start-next" onclick="startDayOpen()">🚀 오늘 영업 시작하기 (OPEN)</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 2: DAYTIME OPEN (실시간 손님 서빙) -->
+    <div id="stageOpen" class="view-stage">
+      <div class="counter-area">
+        <div id="comboBadge" class="combo-badge">COMBO x2!</div>
+        <div style="text-align: center;">
+          <div style="font-size: 1.2rem; font-weight: 800; color: var(--accent-gold);">🔔 실시간 손님 서빙 카운터</div>
+          <div style="font-size: 0.9rem; color: var(--text-muted);">손님이 주문한 메뉴 버튼을 빠르게 누르세요!</div>
+        </div>
+
+        <!-- Customer Line -->
+        <div id="customerLane" class="customer-lane">
+          <!-- Customers rendered here -->
+        </div>
+
+        <!-- Serving Buttons -->
+        <div id="servingTray" class="serving-tray">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 3: EVENING SUMMARY (1일 정산 리포트) -->
+    <div id="stageSummary" class="view-stage">
+      <div class="card-panel">
+        <div class="panel-title">🌙 3단계: DAY <span class="lblDay">1</span> 영업 정산 리포트</div>
+        
+        <div class="summary-grid">
+          <div class="summary-box">
+            <div style="color: var(--text-muted); font-size: 0.9rem;">오늘 총 매출</div>
+            <div id="sumGrossSales" class="summary-val" style="color: var(--accent-green);">+0 Gold</div>
+          </div>
+          <div class="summary-box">
+            <div style="color: var(--text-muted); font-size: 0.9rem;">재료비 지출</div>
+            <div id="sumMaterialCost" class="summary-val" style="color: var(--accent-red);">-0 Gold</div>
+          </div>
+          <div class="summary-box">
+            <div style="color: var(--text-muted); font-size: 0.9rem;">오늘 순이익</div>
+            <div id="sumNetProfit" class="summary-val" style="color: var(--accent-gold);">0 Gold</div>
+          </div>
+        </div>
+
+        <div style="background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-card); border-radius: 18px; padding: 1.5rem; margin-bottom: 2rem;">
+          <div style="font-weight: 800; margin-bottom: 0.5rem; color: var(--accent-cyan);">📝 사장님의 일일 일기 메모</div>
+          <div id="sumDiary" style="color: var(--text-muted); font-size: 0.95rem;">오늘 하루도 손님들이 맛있게 디저트를 즐겨주었습니다!</div>
+        </div>
+
+        <div style="text-align: center;">
+          <button id="btnNextDay" class="btn-start-next" onclick="nextDayPrep()">➡️ 다음 날 영업 준비하기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- STAGE 4: FINAL ENDING (7일차 성과 결산) -->
+    <div id="stageEnding" class="view-stage">
+      <div class="card-panel" style="text-align: center; padding: 4rem 2rem;">
+        <div style="font-size: 4.5rem; margin-bottom: 1rem;">🏆</div>
+        <h1 id="endTitle" style="font-size: 2.5rem; font-weight: 900; color: var(--accent-gold); margin-bottom: 1rem;">7일간의 타이쿤 대경영 완수!</h1>
+        <p id="endDesc" style="color: var(--text-muted); font-size: 1.15rem; max-width: 600px; margin: 0 auto 2rem;">목표 매출 30만 Gold를 달성하여 지역 최고의 디저트 카페 명소로 등극하였습니다!</p>
+
+        <button class="btn-start-next" onclick="restartGame()">🔄 새 상점 경영 시작하기</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    // ----------------------------------------------------
+    // INITIAL MENU DATA
+    // ----------------------------------------------------
+    const MENUS = [
+      { id: 1, name: "딸기 타르트", cost: 3000, price: 7500, stock: 20, img: "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop" },
+      { id: 2, name: "마카롱 세트", cost: 4000, price: 9000, stock: 15, img: "https://images.unsplash.com/photo-1569864358642-9d1684040f43?w=600&auto=format&fit=crop" },
+      { id: 3, name: "아메리카노", cost: 1000, price: 4500, stock: 30, img: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=600&auto=format&fit=crop" },
+      { id: 4, name: "크로플", cost: 2500, price: 6500, stock: 25, img: "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=600&auto=format&fit=crop" }
+    ];
+
+    const CUSTOMER_AVATARS = ['🐱', '🐶', '🦊', '🐻', '🐰', '🐼', '🐯', '🦁'];
+
+    // ----------------------------------------------------
+    // GAME STATE
+    // ----------------------------------------------------
+    let currentDay = 1;
+    let totalDays = 7;
+    let currentGold = 50000;
+    let targetGold = 300000;
+    let rating = 4.8;
+
+    let dayGrossSales = 0;
+    let dayMaterialCost = 0;
+    let comboCount = 0;
+
+    let activeCustomers = [];
+    let openTimer = null;
+    let soundEnabled = true;
+
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'cash') {
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(987.77, now);
+        osc.frequency.setValueAtTime(1318.51, now + 0.08);
+        gain.gain.setValueAtTime(0.3, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.start(now);
+        osc.stop(now + 0.25);
+      } else if (type === 'victory') {
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.frequency.setValueAtTime(freq, now + idx * 0.12);
+          g.gain.setValueAtTime(0.2, now + idx * 0.12);
+          g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.25);
+          o.start(now + idx * 0.12);
+          o.stop(now + idx * 0.12 + 0.25);
+        });
+      }
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('btnAudio').textContent = soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+    }
+
+    // ----------------------------------------------------
+    // INIT & STAGE MANAGEMENT
+    // ----------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      restartGame();
+    });
+
+    function restartGame() {
+      currentDay = 1;
+      currentGold = 50000;
+      rating = 4.8;
+      MENUS.forEach(m => m.stock = 20);
+
+      updateHud();
+      showStage('stagePrep');
+      renderPrepGrid();
+    }
+
+    function updateHud() {
+      document.getElementById('hudDay').textContent = currentDay;
+      document.getElementById('hudGold').textContent = currentGold.toLocaleString();
+      document.getElementById('hudRating').textContent = rating.toFixed(1);
+      document.querySelectorAll('.lblDay').forEach(el => el.textContent = currentDay);
+    }
+
+    function showStage(stageId) {
+      document.querySelectorAll('.view-stage').forEach(s => s.classList.remove('active'));
+      document.getElementById(stageId).classList.add('active');
+    }
+
+    // ----------------------------------------------------
+    // STAGE 1: MORNING PREP
+    // ----------------------------------------------------
+    function renderPrepGrid() {
+      const grid = document.getElementById('prepGrid');
+      grid.innerHTML = '';
+
+      MENUS.forEach(m => {
+        const card = document.createElement('div');
+        card.className = 'prep-card';
+        card.innerHTML = `
+          <img src="${m.img}" alt="${m.name}">
+          <div class="prep-card-name">${m.name}</div>
+          <div class="prep-card-info">
+            현재 재고: <strong>${m.stock}개</strong><br>
+            원가: ${m.cost.toLocaleString()} G | 판매가: ${m.price.toLocaleString()} G
+          </div>
+          <button class="btn-buy-stock" onclick="buyStock(${m.id})">+ 10개 재료 발주 (${(m.cost * 10).toLocaleString()} G)</button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function buyStock(menuId) {
+      const menu = MENUS.find(m => m.id === menuId);
+      const costTotal = menu.cost * 10;
+
+      if (currentGold < costTotal) {
+        alert('보유 자금이 부족합니다!');
+        return;
+      }
+
+      currentGold -= costTotal;
+      dayMaterialCost += costTotal;
+      menu.stock += 10;
+
+      updateHud();
+      renderPrepGrid();
+    }
+
+    function startDayOpen() {
+      dayGrossSales = 0;
+      comboCount = 0;
+      activeCustomers = [];
+
+      showStage('stageOpen');
+      renderServingTray();
+      spawnCustomerLoop();
+    }
+
+    // ----------------------------------------------------
+    // STAGE 2: OPEN HOURS & SERVING
+    // ----------------------------------------------------
+    function renderServingTray() {
+      const tray = document.getElementById('servingTray');
+      tray.innerHTML = '';
+
+      MENUS.forEach(m => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-serve-menu';
+        btn.innerHTML = `
+          <div style="font-size: 1.1rem;">🍰 ${m.name}</div>
+          <div style="font-size: 0.8rem; color: var(--accent-gold);">${m.price.toLocaleString()} G (남은 재고: ${m.stock}개)</div>
+        `;
+        btn.onclick = () => serveMenu(m.id);
+        tray.appendChild(btn);
+      });
+    }
+
+    function spawnCustomerLoop() {
+      let spawnedCount = 0;
+      const maxSpawn = 8;
+
+      if (openTimer) clearInterval(openTimer);
+
+      openTimer = setInterval(() => {
+        if (spawnedCount < maxSpawn && activeCustomers.length < 3) {
+          const randomMenu = MENUS[Math.floor(Math.random() * MENUS.length)];
+          const randomAvatar = CUSTOMER_AVATARS[Math.floor(Math.random() * CUSTOMER_AVATARS.length)];
+          const customerId = Date.now() + Math.random();
+
+          activeCustomers.push({
+            id: customerId,
+            menu: randomMenu,
+            avatar: randomAvatar
+          });
+
+          spawnedCount++;
+          renderCustomers();
+        }
+
+        if (spawnedCount >= maxSpawn && activeCustomers.length === 0) {
+          clearInterval(openTimer);
+          endDayOpen();
+        }
+      }, 1500);
+    }
+
+    function renderCustomers() {
+      const lane = document.getElementById('customerLane');
+      lane.innerHTML = '';
+
+      activeCustomers.forEach(c => {
+        const box = document.createElement('div');
+        box.className = 'customer-box';
+        box.innerHTML = `
+          <div class="speech-bubble">" ${c.menu.name} 주세용! "</div>
+          <div class="customer-avatar">${c.avatar}</div>
+        `;
+        lane.appendChild(box);
+      });
+    }
+
+    function serveMenu(menuId) {
+      // Find matching customer
+      const targetIdx = activeCustomers.findIndex(c => c.menu.id === menuId);
+
+      if (targetIdx !== -1) {
+        const c = activeCustomers[targetIdx];
+        const menu = c.menu;
+
+        if (menu.stock <= 0) {
+          showGoldPopup('⚠️ 재고 품절!');
+          return;
+        }
+
+        // Success serve
+        menu.stock--;
+        comboCount++;
+        playSound('cash');
+
+        const earnGold = Math.round(menu.price * (1 + (comboCount * 0.1)));
+        currentGold += earnGold;
+        dayGrossSales += earnGold;
+
+        showGoldPopup(`+${earnGold.toLocaleString()} G (Combo x${comboCount})`);
+        
+        // Remove served customer
+        activeCustomers.splice(targetIdx, 1);
+        renderCustomers();
+        renderServingTray();
+        updateHud();
+
+        if (comboCount > 1) {
+          const cb = document.getElementById('comboBadge');
+          cb.textContent = `COMBO x${comboCount}!`;
+          cb.style.display = 'block';
+        }
+      } else {
+        // Miss serve
+        comboCount = 0;
+        document.getElementById('comboBadge').style.display = 'none';
+      }
+    }
+
+    function showGoldPopup(text) {
+      const pop = document.createElement('div');
+      pop.className = 'gold-popup';
+      pop.textContent = text;
+      document.body.appendChild(pop);
+
+      setTimeout(() => pop.remove(), 1200);
+    }
+
+    // ----------------------------------------------------
+    // STAGE 3: DAY SUMMARY
+    // ----------------------------------------------------
+    function endDayOpen() {
+      showStage('stageSummary');
+
+      const netProfit = dayGrossSales - dayMaterialCost;
+      document.getElementById('sumGrossSales').textContent = `+${dayGrossSales.toLocaleString()} Gold`;
+      document.getElementById('sumMaterialCost').textContent = `-${dayMaterialCost.toLocaleString()} Gold`;
+      
+      const elNet = document.getElementById('sumNetProfit');
+      elNet.textContent = `${netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()} Gold`;
+      elNet.style.color = netProfit >= 0 ? 'var(--accent-gold)' : 'var(--accent-red)';
+
+      if (netProfit > 30000) {
+        rating = Math.min(5.0, rating + 0.1);
+        document.getElementById('sumDiary').textContent = "대박 인기의 하루! 손님들의 서빙 칭찬이 자자했습니다. ★ 평점이 상승했습니다!";
+      } else {
+        document.getElementById('sumDiary').textContent = "무난한 하루를 보냈습니다. 내일은 재료 발주와 마케팅 전략을 더 점검해봅시다!";
+      }
+
+      updateHud();
+
+      const btnNext = document.getElementById('btnNextDay');
+      if (currentDay >= totalDays) {
+        btnNext.textContent = '🏆 7일차 최종 성과 결산 보기';
+        btnNext.onclick = showFinalEnding;
+      } else {
+        btnNext.textContent = '➡️ 다음 날 영업 준비하기';
+        btnNext.onclick = nextDayPrep;
+      }
+    }
+
+    function nextDayPrep() {
+      currentDay++;
+      dayMaterialCost = 0;
+      updateHud();
+      showStage('stagePrep');
+      renderPrepGrid();
+    }
+
+    // ----------------------------------------------------
+    // STAGE 4: FINAL ENDING
+    // ----------------------------------------------------
+    function showFinalEnding() {
+      showStage('stageEnding');
+
+      const endTitle = document.getElementById('endTitle');
+      const endDesc = document.getElementById('endDesc');
+
+      if (currentGold >= targetGold) {
+        playSound('victory');
+        endTitle.textContent = "🏆 목표 달성 성공! 전설의 대박 카페!";
+        endTitle.style.color = "var(--accent-gold)";
+        endDesc.textContent = `축하합니다! 총 7일 동안 목표 금액 ${targetGold.toLocaleString()} Gold를 달성하였습니다! 최종 자금: ${currentGold.toLocaleString()} Gold`;
+        startConfetti();
+      } else {
+        endTitle.textContent = "😭 목표 달성 아쉬운 실패...";
+        endTitle.style.color = "var(--accent-pink)";
+        endDesc.textContent = `목표 자금 ${targetGold.toLocaleString()} Gold에 달성하지 못했습니다. (최종 자금: ${currentGold.toLocaleString()} Gold) 더 멋진 재고 전략으로 재도전해보세요!`;
+      }
+    }
+
+    // ----------------------------------------------------
+    // CONFETTI CANVAS ANIMATION
+    // ----------------------------------------------------
+    let confettiActive = false;
+    function startConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#f59e0b', '#ec4899', '#06b6d4', '#10b981', '#8b5cf6'];
+
+      for (let i = 0; i < 150; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speedY: Math.random() * 4 + 2,
+          speedX: Math.random() * 2 - 1,
+          rot: Math.random() * 360,
+          rotSpeed: Math.random() * 5 - 2.5
+        });
+      }
+
+      confettiActive = true;
+      let frameCount = 0;
+
+      function render() {
+        if (!confettiActive) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach(p => {
+          p.y += p.speedY;
+          p.x += p.speedX;
+          p.rot += p.rotSpeed;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+
+          if (p.y > canvas.height) {
+            p.y = -10;
+            p.x = Math.random() * canvas.width;
+          }
+        });
+
+        frameCount++;
+        if (frameCount < 250) {
+          requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          confettiActive = false;
+        }
+      }
+
+      render();
+    }
+  </script>
+</body>
+</html>

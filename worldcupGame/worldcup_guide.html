@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 이상형 월드컵 토너먼트 만들기 — 특강 가이드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f172a;
+      --bg-card: rgba(30, 41, 59, 0.7);
+      --border-card: rgba(255, 255, 255, 0.1);
+      --accent-violet: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-gold: #f59e0b;
+      --accent-pink: #ec4899;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', 'Outfit', sans-serif;
+      background: radial-gradient(circle at 50% -20%, #1e1b4b 0%, #0f172a 60%, #020617 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* Navbar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: rgba(15, 23, 42, 0.8);
+      border-bottom: 1px solid var(--border-card);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, #a855f7, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 900;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    }
+
+    nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s ease;
+    }
+
+    nav a:hover {
+      color: var(--text-main);
+    }
+
+    .btn-cta {
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      color: #fff;
+      padding: 0.6rem 1.2rem;
+      border-radius: 50px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 6rem;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem 3rem;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.4rem 1rem;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c084fc;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, #ec4899, #8b5cf6, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 700px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      padding: 0.75rem 1.5rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Sections */
+    section {
+      margin-top: 5rem;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    /* Grid cards */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 1.75rem;
+      position: relative;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .step-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .step-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Preset Topics Grid */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .topic-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 1.5rem;
+      display: flex;
+      gap: 1.25rem;
+      align-items: center;
+      transition: border-color 0.3s ease;
+    }
+
+    .topic-card:hover {
+      border-color: var(--accent-cyan);
+    }
+
+    .topic-icon {
+      font-size: 2.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .topic-info h3 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.3rem;
+    }
+
+    .topic-info p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+
+    /* Rules Banner */
+    .rules-banner {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(6, 182, 212, 0.15));
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .rules-list {
+      list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .rules-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      font-size: 0.95rem;
+    }
+
+    .rules-list li span {
+      background: var(--accent-violet);
+      color: #fff;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    /* Footer CTA */
+    .cta-box {
+      text-align: center;
+      background: radial-gradient(circle at center, rgba(139, 92, 246, 0.2) 0%, rgba(15, 23, 42, 0.8) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      padding: 3.5rem 1.5rem;
+      margin-top: 5rem;
+    }
+
+    .cta-box h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .cta-box p {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 1.05rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      border-top: 1px solid var(--border-card);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">VS</div>
+      <span>AI 월드컵 특강</span>
+    </div>
+    <nav>
+      <a href="#goal">목표</a>
+      <a href="#steps">제작 순서</a>
+      <a href="#topics">추천 주제</a>
+      <a href="worldcup_game.html" target="_blank">샘플 게임 플레이 🎮</a>
+      <a href="worldcup_paper.html" class="btn-cta">기획서 작성하기 🚀</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="badge">경기공유학교 2026 · 가족과 함께하는 AI 바이브코딩</div>
+      <h1>AI와 함께 만드는<br><span>이상형 월드컵 토너먼트 게임</span></h1>
+      <p>내가 원하는 캐릭터, 야식, 여행지로 16강 대진표를 짜고 AI가 만들어주는 생생한 월드컵 토너먼트 게임을 경험해보세요!</p>
+      <div class="hero-actions">
+        <a href="worldcup_paper.html" class="btn-cta" style="padding: 0.85rem 2rem; font-size: 1.05rem;">
+          🎯 나만의 월드컵 기획 시작하기
+        </a>
+        <a href="worldcup_game.html" target="_blank" class="btn-secondary" style="padding: 0.85rem 1.5rem;">
+          🏆 예시 게임 바로 실행하기
+        </a>
+      </div>
+    </div>
+
+    <!-- Section 1: Goals -->
+    <section id="goal">
+      <div class="section-title">✨ 오늘의 학습 목표</div>
+      <div class="section-desc">코딩 없이 AI 아이디어를 게임으로 현실화하는 3가지 경험</div>
+      <div class="grid-4">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-title">나만의 테마 기획</div>
+          <div class="step-desc">가족과 대화하며 나만의 흥미진진한 토너먼트 주제와 16강 후보를 선정합니다.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-title">스마트 기획서 생성</div>
+          <div class="step-desc">기획서 작성기 웹앱에서 항목만 입력하여 마크다운(.md) 기획서를 자동 제작합니다.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-title">AI 바이브코딩</div>
+          <div class="step-desc">Antigravity AI에 기획서를 전달해 타격감 높은 HTML 단일 웹 게임을 생성합니다.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">04</div>
+          <div class="step-title">가족 토너먼트 플레이</div>
+          <div class="step-desc">완성된 게임으로 가족들과 이상형 월드컵을 즐기고 최종 우승자를 가립니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Steps Flow -->
+    <section id="steps">
+      <div class="section-title">🗺️ 게임 제작 4단계 프로세스</div>
+      <div class="section-desc">쉽고 빠른 바이브코딩 워크플로우를 따라해보세요</div>
+      <div class="rules-banner">
+        <ul class="rules-list">
+          <li>
+            <span>1</span>
+            <div><strong>주제 및 후보 정하기:</strong> 가장 좋아하는 음식, 애니, 여행지, 스포츠 등을 결정합니다.</div>
+          </li>
+          <li>
+            <span>2</span>
+            <div><strong>기획서 작성기 이용:</strong> <code>worldcup_paper.html</code>에서 원클릭 예시를 참고하여 후보를 채우고 .md 파일을 다운로드합니다.</div>
+          </li>
+          <li>
+            <span>3</span>
+            <div><strong>AI IDE 요청:</strong> Antigravity IDE에 <i>"기획서.md를 읽고 단일 페이지 html 월드컵 게임을 만들어줘"</i> 라고 지시합니다.</div>
+          </li>
+          <li>
+            <span>4</span>
+            <div><strong>게임 즐기기:</strong> 만들어진 <code>.html</code> 파일로 1:1 VS 대결과 대진표 브래킷 시각화를 플레이합니다.</div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Section 3: Recommended Topics -->
+    <section id="topics">
+      <div class="section-title">💡 인기 토너먼트 주제 아이디어</div>
+      <div class="section-desc">무엇을 만들지 고민되시나요? 가족들이 선호하는 인기 키워드입니다</div>
+      <div class="grid-2">
+        <div class="topic-card">
+          <div class="topic-icon">🍗</div>
+          <div class="topic-info">
+            <h3>K-푸드 대표 야식 16강</h3>
+            <p>치킨 vs 피자, 떡볶이 vs 족발! 가슴 떨리는 야식 최강자전</p>
+          </div>
+        </div>
+        <div class="topic-card">
+          <div class="topic-icon">🎬</div>
+          <div class="topic-info">
+            <h3>추억의 애니 캐릭터 월드컵</h3>
+            <p>짱구, 도라에몽, 코난, 원피스 등 최애 캐릭터들의 라이벌전</p>
+          </div>
+        </div>
+        <div class="topic-card">
+          <div class="topic-icon">✈️</div>
+          <div class="topic-icon-desc"></div>
+          <div class="topic-info">
+            <h3>버킷리스트 세계 여행지</h3>
+            <p>파리, 하와이, 도쿄, 발리 등 가족과 함께 떠나고 싶은 꿈의 도시</p>
+          </div>
+        </div>
+        <div class="topic-card">
+          <div class="topic-icon">🍰</div>
+          <div class="topic-info">
+            <h3>달콤한 최애 디저트 16강</h3>
+            <p>마카롱, 크로플, 빙수, 소금빵! 당충전 디저트 왕좌의 게임</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <div class="cta-box">
+      <h2>준비되셨나요? 나만의 월드컵을 제작해보세요!</h2>
+      <p>기획서 작성기 웹앱에서 원클릭으로 예시를 체험하고 마크다운 다운로드를 해보세요.</p>
+      <a href="worldcup_paper.html" class="btn-cta" style="padding: 1rem 2.5rem; font-size: 1.15rem;">
+        🚀 이상형 월드컵 기획서 작성하기
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    경기공유학교 2026 · 가족과 함께하는 AI 바이브코딩 (유한대학교) | World Cup Tournament Game
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>이상형 월드컵 게임 기획서 작성기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(22, 30, 46, 0.75);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --accent-violet: #8b5cf6;
+      --accent-cyan: #06b6d4;
+      --accent-pink: #ec4899;
+      --accent-emerald: #10b981;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: radial-gradient(circle at 50% -10%, #1e1b4b 0%, #090d16 70%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 5rem;
+    }
+
+    /* Header */
+    header {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-card);
+      padding: 1.25rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-preset {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.3);
+      color: #c084fc;
+    }
+
+    .btn-preset:hover {
+      background: rgba(139, 92, 246, 0.3);
+      color: #fff;
+    }
+
+    .btn-reset {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .btn-reset:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: #fff;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, var(--accent-violet), var(--accent-cyan));
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(6, 182, 212, 0.5);
+    }
+
+    /* Main Container */
+    .container {
+      max-width: 960px;
+      margin: 2.5rem auto 0;
+      padding: 0 1.5rem;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-sub {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    /* Form Card */
+    .form-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .form-section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent-cyan);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #e2e8f0;
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-violet);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.25);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* Candidate Cards Grid */
+    .candidates-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .candidates-count {
+      font-size: 0.9rem;
+      padding: 0.25rem 0.75rem;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 50px;
+      color: var(--accent-cyan);
+      font-weight: 700;
+    }
+
+    .candidate-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      display: grid;
+      grid-template-columns: 100px 1fr 40px;
+      gap: 1.25rem;
+      align-items: center;
+      transition: border-color 0.2s ease;
+    }
+
+    .candidate-card:hover {
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    .candidate-img-box {
+      width: 100px;
+      height: 100px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #1e293b;
+      position: relative;
+      border: 1px solid var(--border-card);
+    }
+
+    .candidate-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .candidate-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .btn-remove {
+      background: rgba(239, 68, 68, 0.15);
+      border: none;
+      color: #ef4444;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      transition: background 0.2s ease;
+    }
+
+    .btn-remove:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: #fff;
+    }
+
+    .btn-add-candidate {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px dashed var(--border-card);
+      border-radius: 16px;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-add-candidate:hover {
+      background: rgba(139, 92, 246, 0.1);
+      border-color: var(--accent-violet);
+      color: var(--text-main);
+    }
+
+    /* Preset modal / selector */
+    .preset-bar {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .chip-preset {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-card);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip-preset:hover {
+      background: var(--accent-violet);
+      color: #fff;
+      border-color: var(--accent-violet);
+    }
+
+    @media (max-width: 640px) {
+      .candidate-card {
+        grid-template-columns: 1fr;
+        position: relative;
+      }
+      .candidate-img-box {
+        width: 100%;
+        height: 140px;
+      }
+      .btn-remove {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="logo">
+      <span>🏆</span> 이상형 월드컵 기획서 작성기
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-reset" onclick="resetForm()">🔄 초기화</button>
+      <button class="btn btn-download" onclick="downloadMarkdown()">📥 마크다운 다운로드</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1 class="page-title">이상형 월드컵 기획서 만들기</h1>
+    <p class="page-sub">원하는 주제와 16강 후보 항목을 채워 나만의 기획서(.md)를 다운로드해보세요.</p>
+
+    <!-- Presets bar -->
+    <div class="form-section">
+      <div class="form-section-title">⚡ 빠른 예시로 채우기</div>
+      <div class="preset-bar">
+        <div class="chip-preset" onclick="loadPreset('food')">🍗 K-푸드 대표 야식 16강</div>
+        <div class="chip-preset" onclick="loadPreset('anime')">🎬 추억의 애니 캐릭터 16강</div>
+        <div class="chip-preset" onclick="loadPreset('travel')">✈️ 버킷리스트 세계 여행지 16강</div>
+      </div>
+    </div>
+
+    <!-- Basic Info -->
+    <div class="form-section">
+      <div class="form-section-title">📌 1. 기본 정보 설정</div>
+      
+      <div class="form-group">
+        <label class="form-label">월드컵 게임 제목</label>
+        <input type="text" id="gameTitle" class="form-control" placeholder="예: K-푸드 대표 야식 월드컵 16강">
+      </div>
+
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">토너먼트 라운드</label>
+          <select id="roundCount" class="form-control" onchange="updateRoundNotice()">
+            <option value="16">16강 토너먼트 (추천)</option>
+            <option value="8">8강 토너먼트</option>
+            <option value="4">4강 토너먼트</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">기획자 (가족 / 닉네임)</label>
+          <input type="text" id="author" class="form-control" placeholder="예: 루크네 가족">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">게임 설명 및 컨셉</label>
+        <textarea id="gameDesc" class="form-control" placeholder="가슴 뛰는 한국인의 최애 야식 1등을 가리는 흥미진진한 토너먼트!"></textarea>
+      </div>
+    </div>
+
+    <!-- Candidates Section -->
+    <div class="form-section">
+      <div class="candidates-header">
+        <div class="form-section-title" style="margin-bottom: 0;">🥊 2. 토너먼트 후보 등록</div>
+        <div class="candidates-count">등록된 후보: <span id="candidateCount">0</span>명</div>
+      </div>
+
+      <div id="candidateList">
+        <!-- Dynamic candidate cards inserted here -->
+      </div>
+
+      <button class="btn-add-candidate" onclick="addCandidate()">+ 새 후보 추가하기</button>
+    </div>
+
+    <!-- Download Section -->
+    <div style="text-align: center; margin-top: 3rem;">
+      <button class="btn btn-download" style="padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 50px;" onclick="downloadMarkdown()">
+        📥 마크다운 기획서 파일(.md) 다운로드
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // Candidate Presets Data
+    const PRESETS = {
+      food: {
+        title: "K-푸드 대표 야식 월드컵 16강",
+        author: "바이브코딩 패밀리",
+        round: "16",
+        desc: "출출한 밤을 책임지는 대한민국 최고의 야식 1등을 가려라!",
+        candidates: [
+          { name: "양념치킨", img: "https://images.unsplash.com/photo-1626645738196-c2a7c87a8f58?w=600&auto=format&fit=crop", desc: "달콤 매콤 바삭한 야식의 영원한 왕좌" },
+          { name: "페퍼로니 피자", img: "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&auto=format&fit=crop", desc: "고소한 치즈 풍미와 짭조름한 햄의 조화" },
+          { name: "매콤 떡볶이", img: "https://images.unsplash.com/photo-1627308595229-7830a5c91f9f?w=600&auto=format&fit=crop", desc: "쫄깃한 떡과 입맛 돋우는 소스의 국민 간식" },
+          { name: "한방 족발", img: "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop", desc: "야들야들 쫄깃한 식감과 쌈의 미학" },
+          { name: "숯불 삼겹살", img: "https://images.unsplash.com/photo-1594041680534-e8c8cdebd659?w=600&auto=format&fit=crop", desc: "노릇노릇 불향이 솔솔 풍기는 진리의 육류" },
+          { name: "수제 햄버거", img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop", desc: "두툼한 패티와 육즙 폭발 패스트푸드" },
+          { name: "심야 라면", img: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600&auto=format&fit=crop", desc: "밤 11시에 먹는 계란 퐁당 얼큰한국물" },
+          { name: "야채 곱창볶음", img: "https://images.unsplash.com/photo-1555939594-58d7cb561ad1?w=600&auto=format&fit=crop", desc: "쫄깃한 곱창과 당면의 환상 콜라보" },
+          { name: "모둠 초밥", img: "https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=600&auto=format&fit=crop", desc: "신선함이 살아있는 고급 야식의 대표" },
+          { name: "바삭 돈까스", img: "https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=600&auto=format&fit=crop", desc: "겉바속촉 등심 튀김의 든든한 한끼" },
+          { name: "훈제 보쌈", img: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&auto=format&fit=crop", desc: "담백한 수육과 매콤 무말랭이 김치" },
+          { name: "크림 파스타", img: "https://images.unsplash.com/photo-1621996346565-e3d5d6281288?w=600&auto=format&fit=crop", desc: "꾸덕꾸덕한 고소함이 가득한 파스타" },
+          { name: "바삭 탕수육", img: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?w=600&auto=format&fit=crop", desc: "부먹 vs 찍먹을 뛰어넘는 고기 튀김" },
+          { name: "알얼큰 마라탕", img: "https://images.unsplash.com/photo-1547592180-85f173990554?w=600&auto=format&fit=crop", desc: "중독성 강한 얼얼한 중식 명물" },
+          { name: "불닭발", img: "https://images.unsplash.com/photo-1562967914-608f82629710?w=600&auto=format&fit=crop", desc: "화끈한 매운맛으로 스트레스 싹 날리기" },
+          { name: "고소 곱창구이", img: "https://images.unsplash.com/photo-1544025162-d76694265947?w=600&auto=format&fit=crop", desc: "기름진 곱과 부추무침의 극상 케미" }
+        ]
+      },
+      anime: {
+        title: "추억의 애니 캐릭터 월드컵 16강",
+        author: "키덜트 마스터",
+        round: "16",
+        desc: "세대를 뛰어넘어 모두의 사랑을 받은 애니메이션 명작 캐릭터 최강전!",
+        candidates: [
+          { name: "짱구", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop", desc: "못말리는 엉뚱함과 따뜻한 가족 사랑" },
+          { name: "도라에몽", img: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=600&auto=format&fit=crop", desc: "4차원 주머니에서 나오는 만능 비밀도구" },
+          { name: "명탐정 코난", img: "https://images.unsplash.com/photo-1563089145-599997674d42?w=600&auto=format&fit=crop", desc: "진실은 언제나 하나! 천재 고등학생 탐정" },
+          { name: "피카츄", img: "https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?w=600&auto=format&fit=crop", desc: "백만볼트 전기 공격의 포켓몬 귀요미" },
+          { name: "손오공", img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop", desc: "초사이언으로 변신하는 전설의 사이언인" },
+          { name: "루피", img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop", desc: "해적왕이 될 사나이 고무고무 능력자" },
+          { name: "스폰지밥", img: "https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?w=600&auto=format&fit=crop", desc: "집게리아 최고의 요리사이자 유쾌한 스폰지" },
+          { name: "마리오", img: "https://images.unsplash.com/photo-1612404730960-5c71577fca11?w=600&auto=format&fit=crop", desc: "버섯왕국을 구하는 배관공 영웅" },
+          { name: "토토로", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop", desc: "숲속을 지키는 푹신푹신 정령 신령님" },
+          { name: "가오나시", img: "https://images.unsplash.com/photo-1578632767115-351597cf2477?w=600&auto=format&fit=crop", desc: "아아... 센과 치히로의 신비로운 요괴" },
+          { name: "세일러문", img: "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=600&auto=format&fit=crop", desc: "정의의 이름으로 너를 용서하지 않겠다!" },
+          { name: "아기공룡 둘리", img: "https://images.unsplash.com/photo-1563089145-599997674d42?w=600&auto=format&fit=crop", desc: "호이호이! 빙하 타고 내려온 아기공룡" },
+          { name: "라이언", img: "https://images.unsplash.com/photo-1618336753974-aae8e04506aa?w=600&auto=format&fit=crop", desc: "갈기 없는 듬직한 위로의 곰돌이" },
+          { name: "보노보노", img: "https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?w=600&auto=format&fit=crop", desc: "포로리야~ 때릴꺼야? 땀 흘리는 해달" },
+          { name: "하울", img: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=600&auto=format&fit=crop", desc: "움직이는 성의 잘생긴 마법사" },
+          { name: "심슨", img: "https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?w=600&auto=format&fit=crop", desc: "도넛을 사랑하는 스프링필드의 가정간부" }
+        ]
+      },
+      travel: {
+        title: "버킷리스트 세계 여행지 16강",
+        author: "세계 방랑자",
+        round: "16",
+        desc: "언젠가 꼭 한번 떠나고 싶은 꿈의 힐링 여행지 최강전!",
+        candidates: [
+          { name: "프랑스 파리", img: "https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&auto=format&fit=crop", desc: "에펠탑과 로맨틱한 센강이 만나는 예술의 도시" },
+          { name: "일본 도쿄", img: "https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=600&auto=format&fit=crop", desc: "화려한 야경과 맛집 천국 미식의 핫플" },
+          { name: "미국 뉴욕", img: "https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=600&auto=format&fit=crop", desc: "타임스퀘어와 센트럴파크의 브로드웨이 감성" },
+          { name: "미국 하와이", img: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600&auto=format&fit=crop", desc: "에메랄드빛 와이키키 해변과 환상의 휴양지" },
+          { name: "인도네시아 발리", img: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?w=600&auto=format&fit=crop", desc: "신들의 섬에서 즐기는 요가와 감성 리조트" },
+          { name: "영국 런던", img: "https://images.unsplash.com/photo-1513635269975-59663e0ac1ad?w=600&auto=format&fit=crop", desc: "빅벤과 붉은 이층버스의 고풍스러운 메트로폴리스" },
+          { name: "이탈리아 로마", img: "https://images.unsplash.com/photo-1552832230-c0197dd311b5?w=600&auto=format&fit=crop", desc: "콜로세움과 트레비 분수가 살아있는 역사의 도시" },
+          { name: "태국 방콕", img: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?w=600&auto=format&fit=crop", desc: "화려한 야시장과 미식 스트리트 푸드의 천국" },
+          { name: "호주 시드니", img: "https://images.unsplash.com/photo-1506973035872-a4ec16b8e8d9?w=600&auto=format&fit=crop", desc: "오페라 하우스와 하버 브릿지의 청정 휴양지" },
+          { name: "스위스 인터라켄", img: "https://images.unsplash.com/photo-1530122037265-a5f1f91d3b99?w=600&auto=format&fit=crop", desc: "융프라우 설산과 대자연 청정 힐링의 대명사" },
+          { name: "이탈리아 베네치아", img: "https://images.unsplash.com/photo-1514890547357-a9ee288728e0?w=600&auto=format&fit=crop", desc: "곤돌라 타고 누비는 아름다운 물의 도시" },
+          { name: "스페인 바르셀로나", img: "https://images.unsplash.com/photo-1583422409516-2895a771deda?w=600&auto=format&fit=crop", desc: "가우디의 성가족 성당과 플라멩코의 열정" },
+          { name: "미국 샌프란시스코", img: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=600&auto=format&fit=crop", desc: "금문교와 케이블카가 정겨운 붉은 안개의 도시" },
+          { name: "필리핀 세부", img: "https://images.unsplash.com/photo-1518509562904-e7ef99cdcc86?w=600&auto=format&fit=crop", desc: "호핑 투어와 고래상어 스노클링 해양 낙원" },
+          { name: "싱가포르", img: "https://images.unsplash.com/photo-1525625293386-3f8f99389edd?w=600&auto=format&fit=crop", desc: "마리나베이 샌즈와 슈퍼트리 야경의 미래 도시" },
+          { name: "체코 프라하", img: "https://images.unsplash.com/photo-1541849546-216549ae216d?w=600&auto=format&fit=crop", desc: "까를교 위에서 바라보는 주황빛 지붕의 동화 마을" }
+        ]
+      }
+    };
+
+    // Initialize page
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPreset('food');
+    });
+
+    function loadPreset(key) {
+      const data = PRESETS[key];
+      if (!data) return;
+
+      document.getElementById('gameTitle').value = data.title;
+      document.getElementById('author').value = data.author;
+      document.getElementById('roundCount').value = data.round;
+      document.getElementById('gameDesc').value = data.desc;
+
+      const container = document.getElementById('candidateList');
+      container.innerHTML = '';
+
+      data.candidates.forEach((c) => {
+        renderCandidateCard(c.name, c.img, c.desc);
+      });
+
+      updateCount();
+    }
+
+    function renderCandidateCard(name = '', img = '', desc = '') {
+      const container = document.getElementById('candidateList');
+      const card = document.createElement('div');
+      card.className = 'candidate-card';
+
+      const defaultPlaceholder = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop';
+      const imgSrc = img || defaultPlaceholder;
+
+      card.innerHTML = `
+        <div class="candidate-img-box">
+          <img src="${imgSrc}" onerror="this.src='${defaultPlaceholder}'" alt="후보 이미지">
+        </div>
+        <div class="candidate-inputs">
+          <input type="text" class="form-control c-name" placeholder="후보 이름 (예: 양념치킨)" value="${name}" oninput="updateCount()">
+          <input type="text" class="form-control c-img" placeholder="이미지 URL (Unsplash 등)" value="${img}" onchange="updateImgPreview(this)">
+          <input type="text" class="form-control c-desc" placeholder="한줄 설명 / 특징" value="${desc}">
+        </div>
+        <button class="btn-remove" onclick="removeCandidate(this)" title="후보 삭제">✕</button>
+      `;
+
+      container.appendChild(card);
+      updateCount();
+    }
+
+    function addCandidate() {
+      renderCandidateCard('', '', '');
+    }
+
+    function removeCandidate(btn) {
+      const card = btn.closest('.candidate-card');
+      if (card) {
+        card.remove();
+        updateCount();
+      }
+    }
+
+    function updateImgPreview(input) {
+      const card = input.closest('.candidate-card');
+      const imgTag = card.querySelector('.candidate-img-box img');
+      const url = input.value.trim();
+      imgTag.src = url || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop';
+    }
+
+    function updateCount() {
+      const cards = document.querySelectorAll('.candidate-card');
+      document.getElementById('candidateCount').textContent = cards.length;
+    }
+
+    function resetForm() {
+      if (confirm('모든 입력 데이터를 초기화하시겠습니까?')) {
+        document.getElementById('gameTitle').value = '';
+        document.getElementById('author').value = '';
+        document.getElementById('gameDesc').value = '';
+        document.getElementById('candidateList').innerHTML = '';
+        updateCount();
+      }
+    }
+
+    function downloadMarkdown() {
+      const title = document.getElementById('gameTitle').value.trim() || '나만의 이상형 월드컵';
+      const author = document.getElementById('author').value.trim() || 'AI 바이브코더';
+      const round = document.getElementById('roundCount').value;
+      const desc = document.getElementById('gameDesc').value.trim() || '설명 없음';
+
+      const cards = document.querySelectorAll('.candidate-card');
+      if (cards.length < 4) {
+        alert('최소 4개 이상의 후보를 추가해주세요!');
+        return;
+      }
+
+      let candidatesMd = '';
+      cards.forEach((card, idx) => {
+        const name = card.querySelector('.c-name').value.trim() || `후보 ${idx+1}`;
+        const img = card.querySelector('.c-img').value.trim() || 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop';
+        const cDesc = card.querySelector('.c-desc').value.trim() || '멋진 후보입니다';
+
+        candidatesMd += `| ${idx+1} | ${name} | ${img} | ${cDesc} |\n`;
+      });
+
+      const markdownContent = `// 게임 구현 규칙:
+// 1. 전달받은 후보 리스트로 무작위 대진표(${round}강/8강/4강)를 구성한다.
+// 2. 1대1 대결 화면(VS 카드)에서 후보 클릭 시 네온 이펙트와 함께 다음 라운드로 진행한다.
+// 3. 우승자 결정 시 Canvas 폭죽(Confetti) 이펙트와 우승 세레머니, 전체 순위표 및 토너먼트 대진표(Bracket View)를 시각화한다.
+
+# 이상형 월드컵 게임 기획서
+
+## 1. 기본 정보
+- **게임 제목**: ${title}
+- **기획자**: ${author}
+- **토너먼트 라운드**: ${round}강
+- **게임 설명**: ${desc}
+
+## 2. 후보자 목록 (${cards.length}명)
+
+| # | 후보 이름 | 이미지 URL | 한줄 설명 |
+|---|---|---|---|
+${candidatesMd}
+## 3. 엔딩 및 우승 연출
+- **우승 메시지**: "최종 우승을 축하합니다! 당신의 최애 선택은 바로 [우승자] 입니다!"
+- **세레머니 효과**: Gold Trophy 팝업 + Canvas Confetti 폭죽 이펙트
+- **재도전 기능**: 새 셔플로 재경여 플레이 가능
+`;
+
+      const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8;' });
+      const link = document.createElement('a');
+      const cleanTitle = title.replace(/[/\\?%*:|"<>]/g, '_');
+      link.href = URL.createObjectURL(blob);
+      link.download = `월드컵_기획서_${cleanTitle}.md`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 타이쿤 경영 게임 기획서 작성기</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f131d;
+      --bg-card: rgba(28, 35, 51, 0.75);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --accent-gold: #f59e0b;
+      --accent-amber: #d97706;
+      --accent-pink: #ec4899;
+      --accent-cyan: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: radial-gradient(circle at 50% -10%, #2e1065 0%, #0f131d 70%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding-bottom: 5rem;
+    }
+
+    header {
+      background: rgba(15, 19, 29, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-card);
+      padding: 1.25rem 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-reset {
+      background: rgba(239, 68, 68, 0.15);
+      border-color: rgba(239, 68, 68, 0.3);
+      color: #fca5a5;
+    }
+
+    .btn-reset:hover {
+      background: rgba(239, 68, 68, 0.3);
+      color: #fff;
+    }
+
+    .btn-download {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
+      color: #fff;
+      font-weight: 700;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-download:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 2.5rem auto 0;
+      padding: 0 1.5rem;
+    }
+
+    .page-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+    }
+
+    .page-sub {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .form-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .form-section-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--accent-gold);
+    }
+
+    .preset-bar {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .chip-preset {
+      padding: 0.5rem 1rem;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-card);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .chip-preset:hover {
+      background: var(--accent-gold);
+      color: #000;
+      font-weight: 700;
+      border-color: var(--accent-gold);
+    }
+
+    .form-group {
+      margin-bottom: 1.25rem;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #e2e8f0;
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: #fff;
+      font-size: 0.95rem;
+      font-family: inherit;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    .menu-card {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-card);
+      border-radius: 16px;
+      padding: 1.25rem;
+      margin-bottom: 1.25rem;
+      display: grid;
+      grid-template-columns: 90px 1fr 36px;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .menu-img-box {
+      width: 90px;
+      height: 90px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #1e293b;
+      border: 1px solid var(--border-card);
+    }
+
+    .menu-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .btn-remove {
+      background: rgba(239, 68, 68, 0.15);
+      border: none;
+      color: #ef4444;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .btn-add-menu {
+      width: 100%;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px dashed var(--border-card);
+      border-radius: 16px;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-add-menu:hover {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: var(--accent-gold);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="logo">
+      <span>🏪</span> AI 타이쿤 기획서 작성기
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-reset" onclick="resetForm()">🔄 초기화</button>
+      <button class="btn btn-download" onclick="downloadMarkdown()">📥 마크다운 다운로드</button>
+    </div>
+  </header>
+
+  <div class="container">
+    <h1 class="page-title">타이쿤 경영 기획서 만들기</h1>
+    <p class="page-sub">상점 정보, 대표 판매 메뉴, 돌발 이벤트를 설정하여 나만의 기획서(.md)를 다운로드하세요.</p>
+
+    <!-- Presets -->
+    <div class="form-section">
+      <div class="form-section-title">⚡ 빠른 예시 상점 채우기</div>
+      <div class="preset-bar">
+        <div class="chip-preset" onclick="loadPreset('cafe')">🍰 달콤 포근 디저트 카페 7일 경영</div>
+        <div class="chip-preset" onclick="loadPreset('space')">🚀 은하 1호 우주 푸드트럭 타이쿤</div>
+        <div class="chip-preset" onclick="loadPreset('cat')">🐱 냥냥이 고양이 베이커리</div>
+      </div>
+    </div>
+
+    <!-- Basic Info -->
+    <div class="form-section">
+      <div class="form-section-title">📌 1. 상점 기본 설정</div>
+      <div class="grid-2">
+        <div class="form-group">
+          <label class="form-label">가게 이름</label>
+          <input type="text" id="shopName" class="form-control" placeholder="예: 달콤 포근 디저트 카페">
+        </div>
+        <div class="form-group">
+          <label class="form-label">사장님 닉네임</label>
+          <input type="text" id="author" class="form-control" placeholder="예: 루크네 가족">
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="form-group">
+          <label class="form-label">시작 보유 자금 (Gold)</label>
+          <input type="number" id="startGold" class="form-control" value="50000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">최종 수입 목표 (Gold)</label>
+          <input type="number" id="targetGold" class="form-control" value="300000">
+        </div>
+        <div class="form-group">
+          <label class="form-label">총 영업일 수</label>
+          <input type="number" id="totalDays" class="form-control" value="7">
+        </div>
+      </div>
+    </div>
+
+    <!-- Menu Items -->
+    <div class="form-section">
+      <div class="form-section-title">🧁 2. 대표 판매 메뉴 4종 설정</div>
+      <div id="menuList">
+        <!-- Rendered dynamically -->
+      </div>
+      <button class="btn-add-menu" onclick="addMenuCard()">+ 새 메뉴 추가하기</button>
+    </div>
+
+    <!-- Random Events -->
+    <div class="form-section">
+      <div class="form-section-title">📢 3. 돌발 경영 이벤트 기획</div>
+      <div class="form-group">
+        <label class="form-label">이벤트 1: 파워 블로거 방문</label>
+        <input type="text" id="evt1" class="form-control" value="유명 맛집 유튜버가 촬영을 요청했습니다! (선택 A: 공짜 시식 제공 [비용 -10000, 평점 +0.5] / 선택 B: 일반 서빙 [변화없음])">
+      </div>
+      <div class="form-group">
+        <label class="form-label">이벤트 2: 갑작스러운 장마철 폭우</label>
+        <input type="text" id="evt2" class="form-control" value="폭우가 쏟아져 손님 유입이 급감합니다! (선택 A: 배달 할인 마케팅 [비용 -5000, 매출 유지] / 선택 B: 조기 마감 [매출 -30%])">
+      </div>
+    </div>
+
+    <!-- Download CTA -->
+    <div style="text-align: center; margin-top: 3rem;">
+      <button class="btn btn-download" style="padding: 1rem 2.5rem; font-size: 1.1rem; border-radius: 50px;" onclick="downloadMarkdown()">
+        📥 마크다운 기획서 파일(.md) 다운로드
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    const PRESETS = {
+      cafe: {
+        shopName: "달콤 포근 디저트 카페",
+        author: "바이브코딩 패밀리",
+        startGold: 50000,
+        targetGold: 300000,
+        totalDays: 7,
+        menus: [
+          { name: "딸기 생크림 타르트", cost: 3000, price: 7500, pop: 95, img: "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop" },
+          { name: "프리미엄 마카롱 세트", cost: 4000, price: 9000, pop: 90, img: "https://images.unsplash.com/photo-1569864358642-9d1684040f43?w=600&auto=format&fit=crop" },
+          { name: "아이스 아메리카노", cost: 1000, price: 4500, pop: 85, img: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=600&auto=format&fit=crop" },
+          { name: "수제 아이스크림 크로플", cost: 2500, price: 6500, pop: 88, img: "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=600&auto=format&fit=crop" }
+        ]
+      },
+      space: {
+        shopName: "은하 1호 우주 푸드트럭",
+        author: "스페이스 셰프",
+        startGold: 80000,
+        targetGold: 500000,
+        totalDays: 7,
+        menus: [
+          { name: "성운 라즈베리 파스타", cost: 5000, price: 12000, pop: 92, img: "https://images.unsplash.com/photo-1621996346565-e3d5d6281288?w=600&auto=format&fit=crop" },
+          { name: "외계 불꽃 타코", cost: 3500, price: 8500, pop: 88, img: "https://images.unsplash.com/photo-1565299585323-38d6b0865b47?w=600&auto=format&fit=crop" },
+          { name: "플라즈마 네온 에이드", cost: 1500, price: 5500, pop: 85, img: "https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=600&auto=format&fit=crop" },
+          { name: "수성 크런치 버거", cost: 4000, price: 9500, pop: 90, img: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop" }
+        ]
+      },
+      cat: {
+        shopName: "냥냥이 고양이 베이커리",
+        author: "집사 메이커",
+        startGold: 40000,
+        targetGold: 250000,
+        totalDays: 7,
+        menus: [
+          { name: "고양이 식빵", cost: 2000, price: 5500, pop: 96, img: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=600&auto=format&fit=crop" },
+          { name: "냥발 마들렌", cost: 1500, price: 4000, pop: 92, img: "https://images.unsplash.com/photo-1587314168485-3236d6710814?w=600&auto=format&fit=crop" },
+          { name: "냐옹 우유 크림빵", cost: 1800, price: 4800, pop: 89, img: "https://images.unsplash.com/photo-1555507036-ab1f4038808a?w=600&auto=format&fit=crop" },
+          { name: "캣닢 유기농 라떼", cost: 1200, price: 4500, pop: 87, img: "https://images.unsplash.com/photo-1534778101976-62847782c213?w=600&auto=format&fit=crop" }
+        ]
+      }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadPreset('cafe');
+    });
+
+    function loadPreset(key) {
+      const p = PRESETS[key];
+      if (!p) return;
+
+      document.getElementById('shopName').value = p.shopName;
+      document.getElementById('author').value = p.author;
+      document.getElementById('startGold').value = p.startGold;
+      document.getElementById('targetGold').value = p.targetGold;
+      document.getElementById('totalDays').value = p.totalDays;
+
+      const container = document.getElementById('menuList');
+      container.innerHTML = '';
+
+      p.menus.forEach(m => {
+        renderMenuCard(m);
+      });
+    }
+
+    function renderMenuCard(m = {}) {
+      const container = document.getElementById('menuList');
+      const card = document.createElement('div');
+      card.className = 'menu-card';
+
+      const name = m.name || '새 메뉴';
+      const cost = m.cost || 2000;
+      const price = m.price || 5000;
+      const pop = m.pop || 90;
+      const img = m.img || 'https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop';
+
+      card.innerHTML = `
+        <div class="menu-img-box">
+          <img src="${img}" alt="${name}">
+        </div>
+        <div>
+          <div class="grid-2" style="margin-bottom: 0.5rem;">
+            <input type="text" class="form-control m-name" placeholder="메뉴 이름" value="${name}">
+            <input type="text" class="form-control m-img" placeholder="이미지 URL" value="${img}" onchange="updateMenuImg(this)">
+          </div>
+          <div class="grid-3">
+            <div>
+              <label class="form-label" style="font-size: 0.75rem;">재료 원가 (Gold)</label>
+              <input type="number" class="form-control m-cost" value="${cost}">
+            </div>
+            <div>
+              <label class="form-label" style="font-size: 0.75rem;">판매 가격 (Gold)</label>
+              <input type="number" class="form-control m-price" value="${price}">
+            </div>
+            <div>
+              <label class="form-label" style="font-size: 0.75rem;">인기 지수 (%)</label>
+              <input type="number" class="form-control m-pop" value="${pop}">
+            </div>
+          </div>
+        </div>
+        <button class="btn-remove" onclick="removeMenu(this)">✕</button>
+      `;
+
+      container.appendChild(card);
+    }
+
+    function addMenuCard() {
+      renderMenuCard({});
+    }
+
+    function removeMenu(btn) {
+      btn.closest('.menu-card').remove();
+    }
+
+    function updateMenuImg(input) {
+      const card = input.closest('.menu-card');
+      const img = card.querySelector('.menu-img-box img');
+      img.src = input.value;
+    }
+
+    function resetForm() {
+      if (confirm('모든 입력 데이터를 초기화하시겠습니까?')) {
+        document.getElementById('shopName').value = '';
+        document.getElementById('menuList').innerHTML = '';
+      }
+    }
+
+    function downloadMarkdown() {
+      const shopName = document.getElementById('shopName').value.trim() || '나만의 타이쿤';
+      const author = document.getElementById('author').value.trim() || 'AI 사장님';
+      const startGold = document.getElementById('startGold').value;
+      const targetGold = document.getElementById('targetGold').value;
+      const totalDays = document.getElementById('totalDays').value;
+
+      const evt1 = document.getElementById('evt1').value;
+      const evt2 = document.getElementById('evt2').value;
+
+      const cards = document.querySelectorAll('.menu-card');
+      let menusMd = '';
+
+      cards.forEach((card, idx) => {
+        const name = card.querySelector('.m-name').value;
+        const cost = card.querySelector('.m-cost').value;
+        const price = card.querySelector('.m-price').value;
+        const pop = card.querySelector('.m-pop').value;
+        const img = card.querySelector('.m-img').value;
+
+        menusMd += `| ${idx+1} | ${name} | ${cost} Gold | ${price} Gold | ${pop}% | ${img} |\n`;
+      });
+
+      const mdContent = `// 게임 구현 규칙:
+// 1. [재료 구매/가격 설정] -> [영업 시간 손님 서빙] -> [1일 매출 정산 리포트]의 1일 경영 루프를 구축해줘.
+// 2. 손님 캐릭터의 주문 아이콘을 클릭하여 서빙하는 실시간 서빙 UI와 돌발 경영 이벤트 모달을 구현해줘.
+// 3. 7일차 영업 종료 후 최종 목표 금액 달성 여부에 따라 우승 세레머니(Canvas 폭죽) 및 사장님 랭킹을 시각화해줘.
+
+# AI 타이쿤 경영 시뮬레이션 게임 기획서
+
+## 1. 기본 정보
+- **가게 이름**: ${shopName}
+- **사장님**: ${author}
+- **시작 보유 자금**: ${startGold} Gold
+- **목표 자금**: ${targetGold} Gold
+- **총 영업일 수**: ${totalDays}일
+
+## 2. 대표 판매 메뉴 4종
+
+| # | 메뉴 이름 | 재료 원가 | 판매 가격 | 인기 지수 | 이미지 URL |
+|---|---|---|---|---|---|
+${menusMd}
+## 3. 돌발 경영 이벤트
+- **이벤트 1**: ${evt1}
+- **이벤트 2**: ${evt2}
+
+## 4. 엔딩 및 연출
+- **성공 엔딩**: "목표 매출 달성 축하! 전설의 사장님이 되어 대박 상점을 완성했습니다!"
+- **실패 엔딩**: "목표 달성 실패... 다음 기회에 더 멋진 전략으로 재도전해보세요!"
+`;
+
+      const blob = new Blob([mdContent], { type: 'text/markdown;charset=utf-8;' });
+      const link = document.createElement('a');
+      const cleanTitle = shopName.replace(/[/\\?%*:|"<>]/g, '_');
+      link.href = URL.createObjectURL(blob);
+      link.download = `타이쿤_기획서_${cleanTitle}.md`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+  </script>
+</body>
+</html>

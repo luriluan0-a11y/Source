@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 타이쿤 경영 시뮬레이션 만들기 — 특강 가이드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0f131d;
+      --bg-card: rgba(28, 35, 51, 0.75);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --accent-gold: #f59e0b;
+      --accent-amber: #d97706;
+      --accent-pink: #ec4899;
+      --accent-cyan: #06b6d4;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: radial-gradient(circle at 50% -10%, #2e1065 0%, #0f131d 70%, #030712 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: rgba(15, 19, 29, 0.85);
+      border-bottom: 1px solid var(--border-card);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 900;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4);
+    }
+
+    nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s ease;
+    }
+
+    nav a:hover {
+      color: var(--text-main);
+    }
+
+    .btn-cta {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
+      color: #fff;
+      padding: 0.6rem 1.3rem;
+      border-radius: 50px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 6rem;
+    }
+
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem 3rem;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.4rem 1.2rem;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--accent-gold);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      padding: 0.85rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    section {
+      margin-top: 5rem;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 1.75rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .step-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(245, 158, 11, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .step-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent-gold), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .theme-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 1.75rem;
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      transition: border-color 0.3s ease;
+    }
+
+    .theme-card:hover {
+      border-color: var(--accent-gold);
+    }
+
+    .theme-icon {
+      font-size: 2.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .theme-info h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+      color: #fff;
+    }
+
+    .theme-info p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .theme-tag {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      background: rgba(245, 158, 11, 0.2);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #fde047;
+      font-weight: 600;
+    }
+
+    .cta-box {
+      text-align: center;
+      background: radial-gradient(circle at center, rgba(245, 158, 11, 0.2) 0%, rgba(15, 23, 42, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 28px;
+      padding: 3.5rem 1.5rem;
+      margin-top: 5rem;
+    }
+
+    .cta-box h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .cta-box p {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 1.05rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      border-top: 1px solid var(--border-card);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Nav -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">🏪</div>
+      <span>AI 타이쿤 특강</span>
+    </div>
+    <nav>
+      <a href="#goal">목표</a>
+      <a href="#steps">경영 프로세스</a>
+      <a href="#themes">추천 테마</a>
+      <a href="tycoon_game.html" target="_blank">샘플 타이쿤 플레이 🎮</a>
+      <a href="tycoon_paper.html" class="btn-cta">기획서 작성하기 🚀</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="badge">경기공유학교 2026 · 가족과 함께하는 AI 바이브코딩</div>
+      <h1>AI와 함께 만드는<br><span>나만의 타이쿤 경영 시뮬레이션</span></h1>
+      <p>내가 직접 카페 사장님이 되어 메뉴 가격을 정하고, 손님을 서빙하며 7일간의 성공 신화를 써내려가는 웹 타이쿤 게임을 기획해보세요!</p>
+      <div class="hero-actions">
+        <a href="tycoon_paper.html" class="btn-cta" style="padding: 0.9rem 2.2rem; font-size: 1.05rem;">
+          🏪 나만의 가게 기획 시작하기
+        </a>
+        <a href="tycoon_game.html" target="_blank" class="btn-secondary">
+          🚀 예시 게임 바로 실행하기
+        </a>
+      </div>
+    </div>
+
+    <!-- Section 1: Goals -->
+    <section id="goal">
+      <div class="section-title">✨ 오늘의 학습 목표</div>
+      <div class="section-desc">경제 원리와 상점 경영의 재미를 동시에 경험하는 AI 타이쿤</div>
+      <div class="grid-4">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-title">상점 컨셉 & 메뉴 기획</div>
+          <div class="step-desc">디저트 카페, 우주 푸드트럭, 베이커리 등 나만의 매력적인 가게를 기획합니다.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-title">스마트 기획서 작성</div>
+          <div class="step-desc">기획서 작성기 웹앱에서 메뉴 단가, 재료비, 돌발 마케팅 이벤트를 작성합니다.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-title">AI 바이브코딩</div>
+          <div class="step-desc">Antigravity AI에 기획서를 전달해 서빙 애니메이션과 정산 시스템이 동작하는 앱을 생성합니다.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">04</div>
+          <div class="step-title">7일 경영 도전</div>
+          <div class="step-desc">가족과 함께 손님을 빠르게 서빙하고 백만장자 사장님 엔딩을 달성해봅니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Steps Flow -->
+    <section id="steps">
+      <div class="section-title">🗺️ 일일 경영 3단계 루프</div>
+      <div class="section-desc">체계적인 상점 경영 일과를 따라 플레이가 진행됩니다</div>
+      <div class="grid-4">
+        <div class="step-card" style="border-left: 4px solid var(--accent-gold);">
+          <div class="step-title">1단계: 아침 준비</div>
+          <div class="step-desc">오늘 판매할 메뉴의 재료 재고를 발주하고 판매가를 설정합니다.</div>
+        </div>
+        <div class="step-card" style="border-left: 4px solid var(--accent-pink);">
+          <div class="step-title">2단계: 낮 영업시간</div>
+          <div class="step-desc">카운터로 걸어오는 손님의 주문을 빠르게 서빙하여 콤보 매출을 달성합니다.</div>
+        </div>
+        <div class="step-card" style="border-left: 4px solid var(--accent-cyan);">
+          <div class="step-title">3단계: 돌발 이벤트</div>
+          <div class="step-desc">파워 블로거 방문, 재료 조기 소진 등 찰나의 판단으로 매출을 극대화합니다.</div>
+        </div>
+        <div class="step-card" style="border-left: 4px solid #10b981;">
+          <div class="step-title">4단계: 저녁 정산</div>
+          <div class="step-desc">오늘의 총 매출, 재료비 지출, 순이익을 계산하고 가게 평점을 확인합니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Recommended Themes -->
+    <section id="themes">
+      <div class="section-title">💡 인기 경영 상점 테마 아이디어</div>
+      <div class="section-desc">원하는 테마를 클릭해 기획서 생성을 바로 시작해보세요</div>
+      <div class="grid-2">
+        <div class="theme-card">
+          <div class="theme-icon">🍰</div>
+          <div class="theme-info">
+            <h3>달콤 포근 디저트 카페 7일 경영</h3>
+            <p>딸기 타르트, 마카롱, 크로플을 팔아 동네 대표 핫플 카페로 만드는 감성 타이쿤</p>
+            <span class="theme-tag">디저트 / 힐링 / 매출목표</span>
+          </div>
+        </div>
+        <div class="theme-card">
+          <div class="theme-icon">🚀</div>
+          <div class="theme-info">
+            <h3>은하 1호 우주 푸드트럭 타이쿤</h3>
+            <p>미지의 행성을 돌며 외계 손님들에게 성운 파스타와 플라즈마 에이드를 판매하기</p>
+            <span class="theme-tag">SF / 우주 / 경영</span>
+          </div>
+        </div>
+        <div class="theme-card">
+          <div class="theme-icon">🐱</div>
+          <div class="theme-info">
+            <h3>냥냥이 고양이 베이커리</h3>
+            <p>귀여운 고양이 제빵사들과 함께 고양이 식빵과 냥발 마들렌을 굽는 큐트 타이쿤</p>
+            <span class="theme-tag">귀여움 / 베이킹 / 힐링</span>
+          </div>
+        </div>
+        <div class="theme-card">
+          <div class="theme-icon">🍸</div>
+          <div class="theme-info">
+            <h3>네온 2099 사이버 맥주펍</h3>
+            <p>사이버펑크 미래 도시의 밤을 책임지는 무알콜 광선 칵테일 펍 타이쿤</p>
+            <span class="theme-tag">사이버펑크 / 펍 / 음악</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <div class="cta-box">
+      <h2>준비되셨나요? 나만의 상점을 직접 경영해보세요!</h2>
+      <p>기획서 작성기 웹앱에서 원클릭 예시를 로딩하고 마크다운 다운로드를 해보세요.</p>
+      <a href="tycoon_paper.html" class="btn-cta" style="padding: 1rem 2.5rem; font-size: 1.15rem;">
+        🚀 타이쿤 기획서 작성기 시작하기
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    경기공유학교 2026 · 가족과 함께하는 AI 바이브코딩 (유한대학교) | AI Tycoon Game
+  </footer>
+
+</body>
+</html>

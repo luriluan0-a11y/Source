@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>아스테리아호의 위기 — AI 롤플레이 시뮬레이션</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #070a12;
+      --bg-card: rgba(18, 26, 43, 0.85);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --accent-cyan: #06b6d4;
+      --accent-violet: #8b5cf6;
+      --accent-pink: #ec4899;
+      --accent-gold: #f59e0b;
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #070a12;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(6, 182, 212, 0.2) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.25) 0px, transparent 50%),
+        radial-gradient(at 50% 50%, rgba(15, 23, 42, 0.9) 0px, transparent 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Header & HUD */
+    header {
+      padding: 1rem 2rem;
+      background: rgba(7, 10, 18, 0.85);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border-card);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .hud-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 1200px;
+      margin: 0 auto;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .hero-profile {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .hero-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 1.2rem;
+      color: #fff;
+      box-shadow: 0 0 15px rgba(6, 182, 212, 0.4);
+    }
+
+    .hero-info-name {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .hero-info-role {
+      font-size: 0.8rem;
+      color: var(--accent-cyan);
+      font-weight: 600;
+    }
+
+    /* Gauges */
+    .hud-gauges {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .gauge-box {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .gauge-label {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      width: 45px;
+    }
+
+    .gauge-bar-bg {
+      width: 100px;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .gauge-fill {
+      height: 100%;
+      width: 100%;
+      transition: width 0.4s ease, background 0.3s ease;
+    }
+
+    .gauge-hp { background: linear-gradient(90deg, #ef4444, #f59e0b); }
+    .gauge-energy { background: linear-gradient(90deg, #06b6d4, #3b82f6); }
+    .gauge-trust { background: linear-gradient(90deg, #8b5cf6, #ec4899); }
+
+    .gauge-val {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 800;
+      min-width: 30px;
+    }
+
+    .hud-controls {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-hud {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid var(--border-card);
+      color: #fff;
+      padding: 0.45rem 0.9rem;
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-hud:hover {
+      background: rgba(255, 255, 255, 0.18);
+      border-color: var(--accent-cyan);
+    }
+
+    /* Inventory Bar */
+    .inventory-bar {
+      max-width: 1200px;
+      margin: 0.75rem auto 0;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.85rem;
+    }
+
+    .inv-title {
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .inv-item {
+      padding: 0.2rem 0.6rem;
+      background: rgba(139, 92, 246, 0.15);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: #c084fc;
+      border-radius: 6px;
+      font-size: 0.8rem;
+    }
+
+    /* Main Container & Stage */
+    .main-stage {
+      flex: 1;
+      max-width: 1100px;
+      width: 100%;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* Dialogue Card Screen */
+    .dialogue-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 28px;
+      overflow: hidden;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    .stage-bg {
+      height: 280px;
+      width: 100%;
+      object-fit: cover;
+      position: relative;
+      filter: brightness(0.7);
+    }
+
+    .stage-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 280px;
+      background: linear-gradient(to bottom, transparent 30%, var(--bg-dark) 100%);
+    }
+
+    .dialogue-body {
+      padding: 1.5rem 2rem 2.5rem;
+      margin-top: -60px;
+      position: relative;
+      z-index: 10;
+      display: flex;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+
+    .npc-avatar-box {
+      width: 90px;
+      height: 90px;
+      border-radius: 20px;
+      overflow: hidden;
+      border: 3px solid var(--accent-cyan);
+      box-shadow: 0 0 25px rgba(6, 182, 212, 0.5);
+      flex-shrink: 0;
+      background: #1e293b;
+    }
+
+    .npc-avatar-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .dialogue-content {
+      flex: 1;
+    }
+
+    .speaker-badge {
+      display: inline-block;
+      padding: 0.3rem 0.9rem;
+      background: rgba(6, 182, 212, 0.2);
+      border: 1px solid rgba(6, 182, 212, 0.4);
+      color: var(--accent-cyan);
+      border-radius: 50px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin-bottom: 0.75rem;
+    }
+
+    .dialogue-text {
+      font-size: 1.15rem;
+      line-height: 1.7;
+      color: #f1f5f9;
+      min-height: 70px;
+    }
+
+    /* Choices Area */
+    .choices-area {
+      padding: 0 2rem 2.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .choice-btn {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1.5px solid var(--border-card);
+      border-radius: 16px;
+      padding: 1.1rem 1.5rem;
+      color: #fff;
+      font-size: 1.05rem;
+      font-weight: 600;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .choice-btn:hover {
+      background: rgba(139, 92, 246, 0.2);
+      border-color: var(--accent-violet);
+      transform: translateX(6px);
+      box-shadow: 0 5px 20px rgba(139, 92, 246, 0.3);
+    }
+
+    .choice-btn .tag-effect {
+      font-size: 0.8rem;
+      color: var(--accent-gold);
+      font-weight: 700;
+      background: rgba(245, 158, 11, 0.15);
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+    }
+
+    /* Ending Overlay View */
+    .ending-card {
+      background: var(--bg-card);
+      border: 2px solid var(--border-card);
+      border-radius: 32px;
+      padding: 4rem 2rem;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ending-card.active {
+      display: flex;
+    }
+
+    .ending-icon {
+      font-size: 4.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .ending-title {
+      font-size: 2.5rem;
+      font-weight: 900;
+      margin-bottom: 1rem;
+    }
+
+    .ending-desc {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 600px;
+      margin-bottom: 2rem;
+    }
+
+    /* Floating stat notification */
+    .stat-popup {
+      position: fixed;
+      top: 90px;
+      right: 30px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid var(--accent-gold);
+      color: var(--accent-gold);
+      padding: 0.6rem 1.2rem;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 0.95rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      z-index: 200;
+      animation: popFade 2s forwards;
+      pointer-events: none;
+    }
+
+    @keyframes popFade {
+      0% { opacity: 0; transform: translateY(-10px); }
+      20% { opacity: 1; transform: translateY(0); }
+      80% { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-20px); }
+    }
+
+    /* Canvas for Victory Confetti */
+    #confettiCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 150;
+    }
+
+    @media (max-width: 768px) {
+      .hud-top {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .dialogue-body {
+        flex-direction: column;
+      }
+      .npc-avatar-box {
+        width: 70px;
+        height: 70px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Canvas for Confetti -->
+  <canvas id="confettiCanvas"></canvas>
+
+  <!-- Header HUD -->
+  <header>
+    <div class="hud-top">
+      <div class="hero-profile">
+        <div id="heroAvatar" class="hero-avatar">C</div>
+        <div>
+          <div id="heroName" class="hero-info-name">캡틴 루카스</div>
+          <div id="heroRole" class="hero-info-role">우주 탐사선 함장</div>
+        </div>
+      </div>
+
+      <!-- Gauges -->
+      <div class="hud-gauges">
+        <div class="gauge-box">
+          <span class="gauge-label">HP</span>
+          <div class="gauge-bar-bg">
+            <div id="fillHp" class="gauge-fill gauge-hp" style="width: 100%;"></div>
+          </div>
+          <span id="valHp" class="gauge-val">100</span>
+        </div>
+
+        <div class="gauge-box">
+          <span class="gauge-label">에너지</span>
+          <div class="gauge-bar-bg">
+            <div id="fillEnergy" class="gauge-fill gauge-energy" style="width: 80%;"></div>
+          </div>
+          <span id="valEnergy" class="gauge-val">80</span>
+        </div>
+
+        <div class="gauge-box">
+          <span class="gauge-label">신뢰도</span>
+          <div class="gauge-bar-bg">
+            <div id="fillTrust" class="gauge-fill gauge-trust" style="width: 60%;"></div>
+          </div>
+          <span id="valTrust" class="gauge-val">60</span>
+        </div>
+      </div>
+
+      <div class="hud-controls">
+        <button class="btn-hud" id="btnAudio" onclick="toggleAudio()">🔊 효과음 ON</button>
+        <button class="btn-hud" onclick="restartGame()">🔄 처음부터</button>
+      </div>
+    </div>
+
+    <!-- Inventory -->
+    <div class="inventory-bar">
+      <span class="inv-title">🎒 소지품:</span>
+      <div id="invList" style="display: flex; gap: 0.4rem;">
+        <span class="inv-item">만능 멀티툴</span>
+        <span class="inv-item">비상 산소 팩</span>
+        <span class="inv-item">보안 암호 칩</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Stage -->
+  <div class="main-stage">
+
+    <!-- Active Gameplay View -->
+    <div id="gameplayStage" class="dialogue-card">
+      <div style="position: relative;">
+        <img id="stageBgImg" class="stage-bg" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1000&auto=format&fit=crop" alt="배경 이미지">
+        <div class="stage-overlay"></div>
+      </div>
+
+      <div class="dialogue-body">
+        <div class="npc-avatar-box">
+          <img id="npcAvatarImg" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop" alt="NPC">
+        </div>
+        <div class="dialogue-content">
+          <div id="speakerBadge" class="speaker-badge">AI 메인 컴퓨터 (ARI)</div>
+          <div id="dialogueText" class="dialogue-text">대화 내용을 불러오는 중...</div>
+        </div>
+      </div>
+
+      <!-- Choices -->
+      <div id="choicesArea" class="choices-area">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Ending Card View -->
+    <div id="endingStage" class="ending-card">
+      <div id="endingIcon" class="ending-icon">🏆</div>
+      <h1 id="endingTitle" class="ending-title" style="color: var(--accent-gold);">임무 완수!</h1>
+      <p id="endingDesc" class="ending-desc">아스테리아호의 비상 산소 장치를 수리하고 미지의 행성에 무사 착륙하였습니다.</p>
+
+      <button class="btn-hud" style="padding: 0.9rem 2.5rem; font-size: 1.1rem; border-radius: 50px; background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));" onclick="restartGame()">
+        🔄 시나리오 다시 시작하기
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    // ----------------------------------------------------
+    // SCENARIO DATA
+    // ----------------------------------------------------
+    const SCENARIO_DATA = {
+      heroName: "캡틴 루카스",
+      heroRole: "우주 탐사선 함장",
+      initialStats: { hp: 100, energy: 80, trust: 60 },
+      initialItems: ["만능 멀티툴", "비상 산소 팩", "보안 암호 칩"],
+      scenes: {
+        scene_1: {
+          bg: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1000&auto=format&fit=crop",
+          npcImg: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop",
+          speaker: "AI 메인 컴퓨터 (ARI)",
+          text: "경고! 주 산소 탱크 밸브에 결함이 발생했습니다. 10분 내로 수리하지 않으면 함내 산소가 고갈됩니다. 함장님, 명령을 내려주십시오.",
+          choices: [
+            { text: "🛠️ 직접 기계실로 내려가 물리 밸브를 수동 조절한다.", effectText: "체력 -20", hpDelta: -20, energyDelta: 0, trustDelta: 0, target: "scene_2A" },
+            { text: "💻 조종석에서 AI 복구 프로토콜 암호를 해독한다.", effectText: "에너지 -15, 신뢰도 +10", hpDelta: 0, energyDelta: -15, trustDelta: 10, target: "scene_2B" }
+          ]
+        },
+        scene_2A: {
+          bg: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1000&auto=format&fit=crop",
+          npcImg: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&auto=format&fit=crop",
+          speaker: "엔지니어 로봇 (보트)",
+          text: "함장님! 파이프에서 유독 가스가 분출되고 있습니다. 만능 멀티툴로 파이프를 밀봉하거나 전압 차단기를 내리십시오!",
+          choices: [
+            { text: "🔧 만능 멀티툴로 고압 파이프를 용접 밀봉한다.", effectText: "에너지 -10, 수리 성공", hpDelta: 0, energyDelta: -10, trustDelta: 15, target: "scene_win" },
+            { text: "⚠️ 맨손으로 강제로 밸브를 잠근다.", effectText: "체력 -80, 치명적 부상", hpDelta: -80, energyDelta: 0, trustDelta: 0, target: "scene_fail" }
+          ]
+        },
+        scene_2B: {
+          bg: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1000&auto=format&fit=crop",
+          npcImg: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop",
+          speaker: "보안 시스템 '아테나'",
+          text: "보안 암호 칩이 인지되었습니다. 코드를 실행하여 오작동 AI 바이러스를 즉시 격리하시겠습니까?",
+          choices: [
+            { text: "🔑 보안 암호 칩으로 AI 메인 프레임을 코딩 초기화한다.", effectText: "신뢰도 +20, 완벽 해결", hpDelta: 0, energyDelta: -5, trustDelta: 20, target: "scene_win" },
+            { text: "🔌 강제로 주 전원 퓨즈를 뽑아버린다.", effectText: "체력 -50, 비상 폭발 위험", hpDelta: -50, energyDelta: -30, trustDelta: -20, target: "scene_fail" }
+          ]
+        },
+        scene_win: {
+          isWin: true,
+          icon: "🏆",
+          title: "임무 완수! (SUCCESS)",
+          desc: "아스테리아호의 비상 산소 장치를 완벽히 수리하고, 미지의 행성에 안전하게 터치다운하였습니다!"
+        },
+        scene_fail: {
+          isFail: true,
+          icon: "💥",
+          title: "임무 실패 (GAME OVER)",
+          desc: "체력이 고갈되었거나 치명적인 시스템 오작동으로 아스테리아호의 미션이 실패하였습니다."
+        }
+      }
+    };
+
+    // ----------------------------------------------------
+    // STATE
+    // ----------------------------------------------------
+    let currentStats = { hp: 100, energy: 80, trust: 60 };
+    let currentSceneId = "scene_1";
+    let soundEnabled = true;
+
+    // Web Audio Synthesizer
+    let audioCtx = null;
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playSound(type) {
+      if (!soundEnabled) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      const now = audioCtx.currentTime;
+
+      if (type === 'click') {
+        osc.frequency.setValueAtTime(500, now);
+        osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      } else if (type === 'victory') {
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.connect(g);
+          g.connect(audioCtx.destination);
+          o.frequency.setValueAtTime(freq, now + idx * 0.12);
+          g.gain.setValueAtTime(0.2, now + idx * 0.12);
+          g.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.12 + 0.25);
+          o.start(now + idx * 0.12);
+          o.stop(now + idx * 0.12 + 0.25);
+        });
+      }
+    }
+
+    function toggleAudio() {
+      soundEnabled = !soundEnabled;
+      document.getElementById('btnAudio').textContent = soundEnabled ? '🔊 효과음 ON' : '🔇 효과음 OFF';
+    }
+
+    // ----------------------------------------------------
+    // INITIALIZATION & RENDER
+    // ----------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      restartGame();
+    });
+
+    function restartGame() {
+      currentStats = { ...SCENARIO_DATA.initialStats };
+      currentSceneId = "scene_1";
+      
+      document.getElementById('heroName').textContent = SCENARIO_DATA.heroName;
+      document.getElementById('heroRole').textContent = SCENARIO_DATA.heroRole;
+      document.getElementById('heroAvatar').textContent = SCENARIO_DATA.heroName.charAt(0);
+
+      updateStatsUI();
+      renderScene(currentSceneId);
+    }
+
+    function updateStatsUI() {
+      // Clamp values
+      currentStats.hp = Math.max(0, Math.min(100, currentStats.hp));
+      currentStats.energy = Math.max(0, Math.min(100, currentStats.energy));
+      currentStats.trust = Math.max(0, Math.min(100, currentStats.trust));
+
+      document.getElementById('fillHp').style.width = `${currentStats.hp}%`;
+      document.getElementById('valHp').textContent = currentStats.hp;
+
+      document.getElementById('fillEnergy').style.width = `${currentStats.energy}%`;
+      document.getElementById('valEnergy').textContent = currentStats.energy;
+
+      document.getElementById('fillTrust').style.width = `${currentStats.trust}%`;
+      document.getElementById('valTrust').textContent = currentStats.trust;
+    }
+
+    function renderScene(sceneId) {
+      const s = SCENARIO_DATA.scenes[sceneId];
+      if (!s) return;
+
+      const gameplayStage = document.getElementById('gameplayStage');
+      const endingStage = document.getElementById('endingStage');
+
+      if (s.isWin || s.isFail || currentStats.hp <= 0) {
+        // ENDING
+        gameplayStage.style.display = 'none';
+        endingStage.classList.add('active');
+
+        if (s.isWin) {
+          playSound('victory');
+          document.getElementById('endingIcon').textContent = s.icon || '🏆';
+          document.getElementById('endingTitle').textContent = s.title;
+          document.getElementById('endingTitle').style.color = 'var(--accent-gold)';
+          document.getElementById('endingDesc').textContent = s.desc;
+          startConfetti();
+        } else {
+          document.getElementById('endingIcon').textContent = '💥';
+          document.getElementById('endingTitle').textContent = '임무 실패 (GAME OVER)';
+          document.getElementById('endingTitle').style.color = 'var(--accent-red)';
+          document.getElementById('endingDesc').textContent = s.desc || '체력이 고갈되어 미션에 실패하였습니다.';
+        }
+        return;
+      }
+
+      gameplayStage.style.display = 'flex';
+      endingStage.classList.remove('active');
+
+      document.getElementById('stageBgImg').src = s.bg;
+      document.getElementById('npcAvatarImg').src = s.npcImg;
+      document.getElementById('speakerBadge').textContent = s.speaker;
+
+      // Typewriter text effect
+      typewriterText(s.text);
+
+      // Render choices
+      const choicesArea = document.getElementById('choicesArea');
+      choicesArea.innerHTML = '';
+
+      s.choices.forEach(c => {
+        const btn = document.createElement('button');
+        btn.className = 'choice-btn';
+        btn.innerHTML = `
+          <span>${c.text}</span>
+          <span class="tag-effect">${c.effectText || ''}</span>
+        `;
+        btn.onclick = () => selectChoice(c);
+        choicesArea.appendChild(btn);
+      });
+    }
+
+    function typewriterText(text) {
+      const el = document.getElementById('dialogueText');
+      el.textContent = '';
+      let i = 0;
+      const speed = 20;
+
+      function type() {
+        if (i < text.length) {
+          el.textContent += text.charAt(i);
+          i++;
+          setTimeout(type, speed);
+        }
+      }
+      type();
+    }
+
+    function selectChoice(choice) {
+      playSound('click');
+
+      // Apply stat deltas
+      if (choice.hpDelta) currentStats.hp += choice.hpDelta;
+      if (choice.energyDelta) currentStats.energy += choice.energyDelta;
+      if (choice.trustDelta) currentStats.trust += choice.trustDelta;
+
+      // Popup stat notification
+      if (choice.effectText) {
+        showStatPopup(choice.effectText);
+      }
+
+      updateStatsUI();
+
+      // Move to target scene
+      currentSceneId = choice.target;
+      renderScene(currentSceneId);
+    }
+
+    function showStatPopup(msg) {
+      const pop = document.createElement('div');
+      pop.className = 'stat-popup';
+      pop.textContent = `⚡ ${msg}`;
+      document.body.appendChild(pop);
+
+      setTimeout(() => {
+        pop.remove();
+      }, 2000);
+    }
+
+    // ----------------------------------------------------
+    // CONFETTI CANVAS ANIMATION
+    // ----------------------------------------------------
+    let confettiActive = false;
+    function startConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const particles = [];
+      const colors = ['#06b6d4', '#8b5cf6', '#f59e0b', '#ec4899', '#10b981'];
+
+      for (let i = 0; i < 150; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speedY: Math.random() * 4 + 2,
+          speedX: Math.random() * 2 - 1,
+          rot: Math.random() * 360,
+          rotSpeed: Math.random() * 5 - 2.5
+        });
+      }
+
+      confettiActive = true;
+      let frameCount = 0;
+
+      function render() {
+        if (!confettiActive) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        particles.forEach(p => {
+          p.y += p.speedY;
+          p.x += p.speedX;
+          p.rot += p.rotSpeed;
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rot * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+
+          if (p.y > canvas.height) {
+            p.y = -10;
+            p.x = Math.random() * canvas.width;
+          }
+        });
+
+        frameCount++;
+        if (frameCount < 250) {
+          requestAnimationFrame(render);
+        } else {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          confettiActive = false;
+        }
+      }
+
+      render();
+    }
+  </script>
+</body>
+</html>

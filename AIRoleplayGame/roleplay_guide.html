@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 롤플레이 시뮬레이션 게임 만들기 — 특강 가이드</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;600;700;800&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --bg-card: rgba(22, 30, 49, 0.75);
+      --border-card: rgba(255, 255, 255, 0.12);
+      --accent-cyan: #06b6d4;
+      --accent-violet: #8b5cf6;
+      --accent-pink: #ec4899;
+      --accent-gold: #f59e0b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: radial-gradient(circle at 50% -10%, #1e1b4b 0%, #090d16 70%, #030712 100%);
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* Navbar */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      backdrop-filter: blur(16px);
+      background: rgba(9, 13, 22, 0.85);
+      border-bottom: 1px solid var(--border-card);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-weight: 800;
+      font-size: 1.25rem;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .logo-icon {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 900;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.4);
+    }
+
+    nav {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.2s ease;
+    }
+
+    nav a:hover {
+      color: var(--text-main);
+    }
+
+    .btn-cta {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet));
+      color: #fff;
+      padding: 0.6rem 1.3rem;
+      border-radius: 50px;
+      font-weight: 700;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+    }
+
+    /* Container */
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 6rem;
+    }
+
+    /* Hero */
+    .hero {
+      text-align: center;
+      padding: 4rem 1rem 3rem;
+      position: relative;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 0.4rem 1.2rem;
+      background: rgba(6, 182, 212, 0.15);
+      border: 1px solid rgba(6, 182, 212, 0.3);
+      color: var(--accent-cyan);
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3rem;
+      font-weight: 900;
+      letter-spacing: -1px;
+      line-height: 1.2;
+      margin-bottom: 1.2rem;
+    }
+
+    .hero h1 span {
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-violet), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 720px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .btn-secondary {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      color: var(--text-main);
+      padding: 0.85rem 1.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: background 0.2s ease;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Section Header */
+    section {
+      margin-top: 5rem;
+    }
+
+    .section-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .section-desc {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+    }
+
+    /* Grid 4 Cards */
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .step-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 1.75rem;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .step-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(6, 182, 212, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .step-num {
+      font-family: 'Outfit', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--accent-cyan), var(--accent-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .step-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    /* Grid 2 Cards */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .scenario-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9));
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      padding: 1.75rem;
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      transition: border-color 0.3s ease;
+    }
+
+    .scenario-card:hover {
+      border-color: var(--accent-violet);
+    }
+
+    .scenario-icon {
+      font-size: 2.5rem;
+      background: rgba(255, 255, 255, 0.05);
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .scenario-info h3 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      margin-bottom: 0.4rem;
+      color: #fff;
+    }
+
+    .scenario-info p {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .scenario-tag {
+      display: inline-block;
+      padding: 0.25rem 0.6rem;
+      background: rgba(139, 92, 246, 0.2);
+      border-radius: 6px;
+      font-size: 0.8rem;
+      color: #c084fc;
+      font-weight: 600;
+    }
+
+    /* CTA Box */
+    .cta-box {
+      text-align: center;
+      background: radial-gradient(circle at center, rgba(6, 182, 212, 0.2) 0%, rgba(15, 23, 42, 0.9) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 28px;
+      padding: 3.5rem 1.5rem;
+      margin-top: 5rem;
+    }
+
+    .cta-box h2 {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 1rem;
+    }
+
+    .cta-box p {
+      color: var(--text-muted);
+      margin-bottom: 2rem;
+      font-size: 1.05rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 2rem;
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      border-top: 1px solid var(--border-card);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header Nav -->
+  <header>
+    <div class="logo-container">
+      <div class="logo-icon">RPG</div>
+      <span>AI 롤플레이 특강</span>
+    </div>
+    <nav>
+      <a href="#goal">목표</a>
+      <a href="#steps">제작 순서</a>
+      <a href="#scenarios">추천 시나리오</a>
+      <a href="roleplay_game.html" target="_blank">샘플 게임 플레이 🎮</a>
+      <a href="roleplay_paper.html" class="btn-cta">기획서 작성하기 🚀</a>
+    </nav>
+  </header>
+
+  <div class="container">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="badge">경기공유학교 2026 · 가족과 함께하는 AI 바이브코딩</div>
+      <h1>AI와 함께 만드는<br><span>스토리 대화형 롤플레이 시뮬레이션</span></h1>
+      <p>내가 주인공이 되어 우주 탐사선, 중세 왕국, 사이버펑크 도시의 사건을 해결하는 대화형 RPG 웹 게임을 기획하고 AI로 완성해보세요!</p>
+      <div class="hero-actions">
+        <a href="roleplay_paper.html" class="btn-cta" style="padding: 0.9rem 2.2rem; font-size: 1.05rem;">
+          🎭 나만의 시나리오 기획 시작하기
+        </a>
+        <a href="roleplay_game.html" target="_blank" class="btn-secondary">
+          🚀 예시 게임 바로 실행하기
+        </a>
+      </div>
+    </div>
+
+    <!-- Section 1: Goals -->
+    <section id="goal">
+      <div class="section-title">✨ 오늘의 학습 목표</div>
+      <div class="section-desc">내가 직접 만든 세계관과 선택지로 진행되는 스토리 시뮬레이션</div>
+      <div class="grid-4">
+        <div class="step-card">
+          <div class="step-num">01</div>
+          <div class="step-title">세계관 & 역할 기획</div>
+          <div class="step-desc">우주선 캡틴, 왕국 탐정 등 원하는 주인공 역할과 미션 스토리를 기획합니다.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">02</div>
+          <div class="step-title">스마트 기획서 작성</div>
+          <div class="step-desc">기획서 작성기 웹앱에서 NPC 대화, 선택지 분기, 상태 스탯을 구성합니다.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">03</div>
+          <div class="step-title">AI 바이브코딩</div>
+          <div class="step-desc">Antigravity AI에 기획서를 입력해 대화창과 인터랙티브 선택지가 동작하는 앱을 생성합니다.</div>
+        </div>
+        <div class="step-card">
+          <div class="step-num">04</div>
+          <div class="step-title">롤플레이 플레이</div>
+          <div class="step-desc">가족과 함께 선택지를 고르며 성공 엔딩을 향해 사건을 해결해봅니다.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Steps Flow -->
+    <section id="steps">
+      <div class="section-title">🗺️ 롤플레이 시뮬레이션 제작 4단계</div>
+      <div class="section-desc">체계적인 워크플로우를 통해 나만의 웹 RPG를 완성해보세요</div>
+      <div class="grid-4">
+        <div class="step-card" style="border-left: 4px solid var(--accent-cyan);">
+          <div class="step-title">1단계: 무대 설정</div>
+          <div class="step-desc">주인공 이름, 현재 위치, 해결해야 할 주요 사건과 최종 승리 조건 설정.</div>
+        </div>
+        <div class="step-card" style="border-left: 4px solid var(--accent-violet);">
+          <div class="step-title">2단계: 스탯 & 아이템</div>
+          <div class="step-desc">플레이어의 체력(HP), 에너지, 그리고 사건 해결에 필요한 시작 아이템 부여.</div>
+        </div>
+        <div class="step-card" style="border-left: 4px solid var(--accent-pink);">
+          <div class="step-title">3단계: 선택지 분기</div>
+          <div class="step-desc">각 장면마다 2~3개의 선택지를 두고, 선택 시 스탯 변동과 다음 장면 연결 지정.</div>
+        </div>
+        <div class="step-card" style="border-left: 4px solid var(--accent-gold);">
+          <div class="step-title">4단계: 멀티 엔딩</div>
+          <div class="step-desc">목표 달성 성공 엔딩, 체력 고갈 실패 엔딩 등 다양한 결과 연출.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 3: Recommended Scenarios -->
+    <section id="scenarios">
+      <div class="section-title">💡 인기 롤플레이 시나리오 아이디어</div>
+      <div class="section-desc">원하는 테마를 선택해 바로 기획서 생성을 시작해보세요</div>
+      <div class="grid-2">
+        <div class="scenario-card">
+          <div class="scenario-icon">🚀</div>
+          <div class="scenario-info">
+            <h3>아스테리아호의 위기 (SF 우주)</h3>
+            <p>미지의 외계 행성 탐사 중 산소 고갈과 AI 시스템 오작동을 해결하는 캡틴의 분투기</p>
+            <span class="scenario-tag">SF / 생존 / 지혜</span>
+          </div>
+        </div>
+        <div class="scenario-card">
+          <div class="scenario-icon">🔍</div>
+          <div class="scenario-info">
+            <h3>국왕 독살 시도 사건 (중세 추리)</h3>
+            <p>왕국 수석 탐정이 되어 연회장 증거를 수집하고 용의자들을 심문해 진범 밝히기</p>
+            <span class="scenario-tag">중세 / 추리 / 단서</span>
+          </div>
+        </div>
+        <div class="scenario-card">
+          <div class="scenario-icon">💻</div>
+          <div class="scenario-info">
+            <h3>사이버펑크 2099 해킹 미션</h3>
+            <p>전설의 백해커 '제로'가 되어 거대 기업의 방화벽을 뚫고 갇힌 동료 구출하기</p>
+            <span class="scenario-tag">미래 / 해킹 / 액션</span>
+          </div>
+        </div>
+        <div class="scenario-card">
+          <div class="scenario-icon">🪄</div>
+          <div class="scenario-info">
+            <h3>금지된 서고의 마법책 (마법 학교)</h3>
+            <p>수습 마법사가 되어 사라진 고대 마법서를 찾고 마법 결계를 복구하는 아카데미 어드벤처</p>
+            <span class="scenario-tag">판타지 / 마법 / 탐험</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer CTA -->
+    <div class="cta-box">
+      <h2>지금 바로 나만의 롤플레이 기획서를 작성해보세요!</h2>
+      <p>기획서 작성기 웹앱에서 원클릭 예시를 로딩하고 마크다운 다운로드를 해보세요.</p>
+      <a href="roleplay_paper.html" class="btn-cta" style="padding: 1rem 2.5rem; font-size: 1.15rem;">
+        🚀 롤플레이 기획서 작성기 시작하기
+      </a>
+    </div>
+
+  </div>
+
+  <footer>
+    경기공유학교 2026 · 가족과 함께하는 AI 바이브코딩 (유한대학교) | AI Role-Playing Simulation Game
+  </footer>
+
+</body>
+</html>
