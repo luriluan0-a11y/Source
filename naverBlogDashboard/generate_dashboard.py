@@ -133,7 +133,7 @@ def title_candidates(keyword: str) -> list[str]:
 
 
 def summary_text(keyword: str) -> str:
-    return f"이 글은 {keyword}를 실천할 때 먼저 확인할 항목과 생활 속 적용 방법을 정리하고, 무리하지 않고 꾸준히 이어갈 수 있는 절약 기준을 안내합니다."
+    return f"이 글은 {keyword}와 관련해 먼저 확인할 항목과 생활 속 적용 방법을 정리하고, 무리하지 않고 꾸준히 이어갈 수 있는 절약 기준을 안내합니다."
 
 
 def make_report(config: dict, records: list[dict], today: dt.date) -> str:
