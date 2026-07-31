@@ -5,11 +5,12 @@
 ## 현재 기능
 
 - `keywords.json`에 분야와 관심 키워드 등록
+- 기본 키워드 5개만 분석
+- `절약` 관련 키워드 최대 3개에만 제목 후보·요약·글 구성 제공
 - 네이버 데이터랩 통합검색어 트렌드 API 연동
 - 최근 30일 데이터 수집
 - 전일 대비 변화율·최근 7일 흐름 분석
 - 추천도 점수 계산
-- 블로그 제목 후보와 글 구성 제안 생성
 - `reports/YYYY-MM-DD_naver_blog_report.md` 생성
 - `dashboard.html` 생성
 - `data/latest.json`, `data/history.json`에 원본·누적 데이터 저장

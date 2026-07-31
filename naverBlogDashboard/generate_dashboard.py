@@ -132,6 +132,10 @@ def title_candidates(keyword: str) -> list[str]:
     ]
 
 
+def summary_text(keyword: str) -> str:
+    return f"이 글은 {keyword}를 실천할 때 먼저 확인할 항목과 생활 속 적용 방법을 정리하고, 무리하지 않고 꾸준히 이어갈 수 있는 절약 기준을 안내합니다."
+
+
 def make_report(config: dict, records: list[dict], today: dt.date) -> str:
     top = sorted(records, key=lambda x: x["recommendation_score"], reverse=True)[:5]
     lines = [
@@ -160,10 +164,13 @@ def make_report(config: dict, records: list[dict], today: dt.date) -> str:
     ]
     for index, item in enumerate(top, 1):
         lines.append(f"| {index} | {item['category']} | **{item['keyword']}** | {item['change']:+.1f}% | {item['weekly_change']:+.1f}% | {item['recommendation_score']:.1f} | {recommendation_text(item)} |")
-    for item in top[:3]:
+    detail_keyword = config.get("detail_keyword", "절약")
+    detailed = [item for item in top if detail_keyword in item["keyword"]][:3]
+    for item in detailed:
         lines += ["", f"## {item['keyword']}", "", f"- 분야: {item['category']}", f"- 현재 관심도 지수: {item['current']}", f"- 전일 대비: {item['change']:+.1f}%", f"- 최근 7일 흐름: {item['weekly_change']:+.1f}%", "", "### 제목 후보", ""]
         lines += [f"- {title}" for title in title_candidates(item["keyword"])]
-        lines += ["", "### 글 구성 제안", "", f"1. 왜 {item['keyword']}이(가) 주목받는지", "2. 초보자가 가장 궁금해하는 핵심 정보", "3. 실제 생활에 적용하는 방법", "4. 주의할 점과 공식 자료 확인 방법"]
+        lines += ["", "### 요약", "", summary_text(item["keyword"]), "", "### 글 구성 제안", "", f"1. 왜 {item['keyword']}이(가) 주목받는지", "2. 절약 효과를 확인하기 전에 점검할 항목", "3. 실제 생활에 적용하는 방법", "4. 무리하지 않고 꾸준히 이어가는 기준"]
+    lines += ["", f"## {detail_keyword} 관련 상세 작성 대상: {len(detailed)}개"]
     lines += ["", "## 전체 키워드 현황", "", "| 분야 | 키워드 | 7일 흐름 | 추천도 |", "|---|---|---:|---:|"]
     for item in sorted(records, key=lambda x: (x["category"], -x["recommendation_score"])):
         lines.append(f"| {item['category']} | {item['keyword']} | {item['weekly_change']:+.1f}% | {item['recommendation_score']:.1f} |")
