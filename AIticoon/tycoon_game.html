@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="ko">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>달콤 포근 디저트 카페 7일 경영 — AI 타이쿤</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Noto+Sans+KR:wght@300;400;600;700;800;900&family=Fredoka:wght@500;600;700&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --bg-main: #fff7f2;
@@ -33,7 +36,7 @@
     body {
       font-family: 'Gowun Dodum', 'Noto Sans KR', sans-serif;
       background: var(--bg-main);
-      background-image: 
+      background-image:
         radial-gradient(at 0% 0%, #ffe5ec 0px, transparent 50%),
         radial-gradient(at 100% 100%, #fff0db 0px, transparent 50%),
         radial-gradient(at 50% 50%, #fff7f2 0px, transparent 100%);
@@ -107,9 +110,20 @@
       box-shadow: 0 4px 12px rgba(180, 120, 100, 0.06);
     }
 
-    .stat-gold { color: var(--accent-gold); border-color: #f0c5a8; }
-    .stat-day { color: #5b92e5; border-color: #d0e1f9; }
-    .stat-rating { color: #d99b26; border-color: #f7e3b5; }
+    .stat-gold {
+      color: var(--accent-gold);
+      border-color: #f0c5a8;
+    }
+
+    .stat-day {
+      color: #5b92e5;
+      border-color: #d0e1f9;
+    }
+
+    .stat-rating {
+      color: #d99b26;
+      border-color: #f7e3b5;
+    }
 
     .btn-hud {
       background: #ffffff;
@@ -155,8 +169,15 @@
     }
 
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     /* Card Panels */
@@ -278,8 +299,15 @@
     }
 
     @keyframes popCustomer {
-      from { transform: scale(0.7) translateY(20px); opacity: 0; }
-      to { transform: scale(1) translateY(0); opacity: 1; }
+      from {
+        transform: scale(0.7) translateY(20px);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
     }
 
     .customer-avatar {
@@ -354,8 +382,13 @@
     }
 
     @keyframes pulseCombo {
-      from { transform: scale(1); }
-      to { transform: scale(1.08); }
+      from {
+        transform: scale(1);
+      }
+
+      to {
+        transform: scale(1.08);
+      }
     }
 
     /* Stage 3: Daily Summary */
@@ -418,9 +451,20 @@
     }
 
     @keyframes floatUp {
-      0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
-      30% { opacity: 1; transform: translate(-50%, -40px) scale(1.1); }
-      100% { opacity: 0; transform: translate(-50%, -100px) scale(1); }
+      0% {
+        opacity: 0;
+        transform: translate(-50%, 0) scale(0.5);
+      }
+
+      30% {
+        opacity: 1;
+        transform: translate(-50%, -40px) scale(1.1);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -100px) scale(1);
+      }
     }
 
     /* Confetti Canvas */
@@ -435,6 +479,7 @@
     }
   </style>
 </head>
+
 <body>
 
   <canvas id="confettiCanvas"></canvas>
@@ -503,7 +548,7 @@
     <div id="stageSummary" class="view-stage">
       <div class="card-panel">
         <div class="panel-title">🌙 3단계: DAY <span class="lblDay">1</span> 영업 정산 리포트</div>
-        
+
         <div class="summary-grid">
           <div class="summary-box">
             <div style="color: var(--text-muted); font-size: 0.9rem;">오늘 총 매출</div>
@@ -519,7 +564,8 @@
           </div>
         </div>
 
-        <div style="background: rgba(255, 243, 235, 0.7); border: 1px solid var(--border-card); border-radius: 20px; padding: 1.5rem; margin-bottom: 2rem;">
+        <div
+          style="background: rgba(255, 243, 235, 0.7); border: 1px solid var(--border-card); border-radius: 20px; padding: 1.5rem; margin-bottom: 2rem;">
           <div style="font-weight: 800; margin-bottom: 0.5rem; color: var(--accent-pink);">📝 사장님의 일일 일기 메모</div>
           <div id="sumDiary" style="color: var(--text-muted); font-size: 0.95rem;">오늘 하루도 손님들이 맛있게 디저트를 즐겨주었습니다!</div>
         </div>
@@ -534,8 +580,10 @@
     <div id="stageEnding" class="view-stage">
       <div class="card-panel" style="text-align: center; padding: 4rem 2rem;">
         <div style="font-size: 4.5rem; margin-bottom: 1rem;">🏆</div>
-        <h1 id="endTitle" style="font-size: 2.5rem; font-weight: 900; color: var(--accent-gold); margin-bottom: 1rem;">7일간의 타이쿤 대경영 완수!</h1>
-        <p id="endDesc" style="color: var(--text-muted); font-size: 1.15rem; max-width: 600px; margin: 0 auto 2rem;">목표 매출 30만 Gold를 달성하여 지역 최고의 디저트 카페 명소로 등극하였습니다!</p>
+        <h1 id="endTitle" style="font-size: 2.5rem; font-weight: 900; color: var(--accent-gold); margin-bottom: 1rem;">
+          7일간의 타이쿤 대경영 완수!</h1>
+        <p id="endDesc" style="color: var(--text-muted); font-size: 1.15rem; max-width: 600px; margin: 0 auto 2rem;">목표
+          매출 30만 Gold를 달성하여 지역 최고의 디저트 카페 명소로 등극하였습니다!</p>
 
         <button class="btn-start-next" onclick="restartGame()">🔄 새 상점 경영 시작하기</button>
       </div>
@@ -548,7 +596,7 @@
     // INITIAL MENU DATA
     // ----------------------------------------------------
     const MENUS = [
-      { id: 1, name: "딸기 타르트", cost: 3000, price: 7500, stock: 20, img: "https://images.unsplash.com/photo-1519869325930-281384150729?w=600&auto=format&fit=crop" },
+      { id: 1, name: "딸기 타르트", cost: 3000, price: 7500, stock: 20, img: "strawberry_tart.png" },
       { id: 2, name: "마카롱 세트", cost: 4000, price: 9000, stock: 15, img: "https://images.unsplash.com/photo-1569864358642-9d1684040f43?w=600&auto=format&fit=crop" },
       { id: 3, name: "아메리카노", cost: 1000, price: 4500, stock: 30, img: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=600&auto=format&fit=crop" },
       { id: 4, name: "크로플", cost: 2500, price: 6500, stock: 25, img: "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=600&auto=format&fit=crop" }
@@ -786,7 +834,7 @@
         dayGrossSales += earnGold;
 
         showGoldPopup(`+${earnGold.toLocaleString()} G (Combo x${comboCount})`);
-        
+
         // Remove served customer
         activeCustomers.splice(targetIdx, 1);
         renderCustomers();
@@ -823,7 +871,7 @@
       const netProfit = dayGrossSales - dayMaterialCost;
       document.getElementById('sumGrossSales').textContent = `+${dayGrossSales.toLocaleString()} Gold`;
       document.getElementById('sumMaterialCost').textContent = `-${dayMaterialCost.toLocaleString()} Gold`;
-      
+
       const elNet = document.getElementById('sumNetProfit');
       elNet.textContent = `${netProfit >= 0 ? '+' : ''}${netProfit.toLocaleString()} Gold`;
       elNet.style.color = netProfit >= 0 ? 'var(--accent-gold)' : 'var(--accent-red)';
@@ -941,4 +989,5 @@
     }
   </script>
 </body>
+
 </html>
