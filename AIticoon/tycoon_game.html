@@ -321,10 +321,10 @@
       font-weight: 800;
       font-size: 0.88rem;
       padding: 0.4rem 0.85rem;
-      border-radius: 50px;
+      border-radius: 20px;
       margin-bottom: 0.5rem;
       display: inline-block;
-      white-space: nowrap;
+      line-height: 1.35;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
       max-width: 100%;
     }
@@ -332,9 +332,9 @@
     /* Serving Tray / Menu Buttons */
     .serving-tray {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 1rem;
-      margin-top: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 0.8rem;
+      margin-top: 1.5rem;
     }
 
     .btn-serve-menu {
@@ -576,6 +576,18 @@
       </div>
     </div>
 
+    <!-- STAGE NEW MENU (DAY 3 신메뉴 추가 이벤트) -->
+    <div id="stageNewMenu" class="view-stage">
+      <div class="card-panel" style="text-align: center;">
+        <div class="panel-title" style="justify-content: center; font-size: 1.4rem;">🎉 DAY 3 특별 이벤트: 카페 신메뉴 연구소!</div>
+        <p style="color: var(--text-muted); margin-bottom: 1.2rem;">축하합니다! 3일간의 놀라운 경영 성과로 카페가 지역 명소로 떠올랐습니다.<br>새로 출시할 <strong>신메뉴 1가지</strong>를 선택하세요! (선택 즉시 <strong>초기 재고 20개</strong>가 발주되어 DAY 4부터 판매됩니다.)</p>
+
+        <div id="newMenuGrid" class="prep-grid" style="grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); margin-bottom: 1rem;">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
     <!-- STAGE 4: FINAL ENDING (7일차 성과 결산) -->
     <div id="stageEnding" class="view-stage">
       <div class="card-panel" style="text-align: center; padding: 4rem 2rem;">
@@ -593,15 +605,22 @@
 
   <script>
     // ----------------------------------------------------
-    // INITIAL MENU DATA
+    // INITIAL MENU DATA & NEW MENU OPTIONS
     // ----------------------------------------------------
-    const MENUS = [
+    const INITIAL_MENUS = [
       { id: 1, name: "딸기 타르트", cost: 3000, price: 7500, stock: 20, img: "strawberry_tart.png" },
       { id: 2, name: "마카롱 세트", cost: 4000, price: 9000, stock: 15, img: "https://images.unsplash.com/photo-1569864358642-9d1684040f43?w=600&auto=format&fit=crop" },
-      { id: 3, name: "아메리카노", cost: 1000, price: 4500, stock: 30, img: "https://images.unsplash.com/photo-1517701604599-bb29b565090c?w=600&auto=format&fit=crop" },
+      { id: 3, name: "아메리카노", cost: 1000, price: 4500, stock: 30, img: "americano.png" },
       { id: 4, name: "크로플", cost: 2500, price: 6500, stock: 25, img: "https://images.unsplash.com/photo-1562376552-0d160a2f238d?w=600&auto=format&fit=crop" }
     ];
 
+    const NEW_MENU_OPTIONS = [
+      { id: 5, name: "카페라떼", cost: 1500, price: 5500, img: "caffe_latte.png", desc: "고소한 우유와 진한 에스프레소의 조화 ☕" },
+      { id: 6, name: "얼그레이<br>조각케이크", cost: 3500, price: 8000, img: "earl_grey_cake.png", desc: "향긋한 홍차 향이 감도는 시그니처 케이크 🍰" },
+      { id: 7, name: "블루베리 요거트 아이스크림", cost: 4000, price: 6500, img: "yogurt_icecream.png", desc: "상큼한 블루베리가 듬뿍 올라간 요거트 아이스크림 🫐" }
+    ];
+
+    let MENUS = JSON.parse(JSON.stringify(INITIAL_MENUS));
     const CUSTOMER_AVATARS = ['🐱', '🐶', '🦊', '🐻', '🐰', '🐼', '🐯', '🦁'];
 
     // ----------------------------------------------------
@@ -612,6 +631,7 @@
     let currentGold = 50000;
     let targetGold = 300000;
     let rating = 4.8;
+    let hasAddedDay3Menu = false;
 
     let dayGrossSales = 0;
     let dayMaterialCost = 0;
@@ -679,7 +699,8 @@
       currentDay = 1;
       currentGold = 50000;
       rating = 4.8;
-      MENUS.forEach(m => m.stock = 20);
+      hasAddedDay3Menu = false;
+      MENUS = JSON.parse(JSON.stringify(INITIAL_MENUS));
 
       updateHud();
       showStage('stagePrep');
@@ -856,7 +877,7 @@
     function showGoldPopup(text) {
       const pop = document.createElement('div');
       pop.className = 'gold-popup';
-      pop.textContent = text;
+      pop.innerHTML = text;
       document.body.appendChild(pop);
 
       setTimeout(() => pop.remove(), 1200);
@@ -889,10 +910,61 @@
       if (currentDay >= totalDays) {
         btnNext.textContent = '🏆 7일차 최종 성과 결산 보기';
         btnNext.onclick = showFinalEnding;
+      } else if (currentDay === 3 && !hasAddedDay3Menu) {
+        btnNext.textContent = '✨ DAY 3 특별 신메뉴 연구 및 발주하기!';
+        btnNext.onclick = showNewMenuStage;
       } else {
         btnNext.textContent = '➡️ 다음 날 영업 준비하기';
         btnNext.onclick = nextDayPrep;
       }
+    }
+
+    // ----------------------------------------------------
+    // STAGE NEW MENU (DAY 3 UNLOCK)
+    // ----------------------------------------------------
+    function showNewMenuStage() {
+      showStage('stageNewMenu');
+      const grid = document.getElementById('newMenuGrid');
+      grid.innerHTML = '';
+
+      NEW_MENU_OPTIONS.forEach(opt => {
+        const card = document.createElement('div');
+        card.className = 'prep-card';
+        card.style.padding = '1.1rem';
+        card.innerHTML = `
+          <img src="${opt.img}" alt="${opt.name}" style="height: 105px; object-fit: cover; border-radius: 12px; margin-bottom: 0.5rem; width: 100%;">
+          <div class="prep-card-name" style="font-size: 1.1rem;">${opt.name}</div>
+          <div style="font-size: 0.8rem; color: var(--accent-pink); font-weight: 700; margin-bottom: 0.4rem;">${opt.desc}</div>
+          <div class="prep-card-info" style="font-size: 0.82rem; margin-bottom: 0.8rem;">
+            원가: ${opt.cost.toLocaleString()} G | 판매가: ${opt.price.toLocaleString()} G<br>
+            <span style="color: var(--accent-green); font-weight: 800;">🎁 신규 20개 재료 무료 발주!</span>
+          </div>
+          <button class="btn-start-next" style="width: 100%; font-size: 0.9rem; padding: 0.65rem 1rem;" onclick="selectNewMenu(${opt.id})">✨ 이 메뉴로 출시하기</button>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function selectNewMenu(optionId) {
+      const selected = NEW_MENU_OPTIONS.find(o => o.id === optionId);
+      if (!selected) return;
+
+      MENUS.push({
+        id: selected.id,
+        name: selected.name,
+        cost: selected.cost,
+        price: selected.price,
+        stock: 20,
+        img: selected.img
+      });
+
+      hasAddedDay3Menu = true;
+      playSound('victory');
+      showGoldPopup(`🎉 신메뉴 '${selected.name}' 20개 발주 완료!`);
+
+      setTimeout(() => {
+        nextDayPrep();
+      }, 900);
     }
 
     function nextDayPrep() {
