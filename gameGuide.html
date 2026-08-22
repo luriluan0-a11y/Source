@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>강의 자료 모음</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0d1117;
+      color: #e6edf3;
+      min-height: 100vh;
+      padding: 40px 20px 80px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 52px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #e6edf3;
+    }
+
+    header p {
+      margin-top: 8px;
+      color: #7d8590;
+      font-size: 0.95rem;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .section {
+      margin-bottom: 44px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .section-icon {
+      font-size: 1.2rem;
+    }
+
+    .section-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #7d8590;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 10px;
+      padding: 20px 22px;
+      text-decoration: none;
+      color: inherit;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+      display: block;
+      position: relative;
+    }
+
+    .card:hover {
+      border-color: #58a6ff;
+      background: #1c2128;
+      transform: translateY(-2px);
+    }
+
+    .card.disabled {
+      opacity: 0.45;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .card.disabled .card-badge {
+      background: #21262d;
+      color: #7d8590;
+      border-color: #30363d;
+    }
+
+    .card-title {
+      font-size: 0.97rem;
+      font-weight: 600;
+      color: #e6edf3;
+      margin-bottom: 6px;
+      line-height: 1.4;
+    }
+
+    .card.disabled .card-title {
+      color: #7d8590;
+    }
+
+    .card-desc {
+      font-size: 0.83rem;
+      color: #7d8590;
+      line-height: 1.5;
+    }
+
+    .card-arrow {
+      position: absolute;
+      top: 20px;
+      right: 18px;
+      color: #7d8590;
+      font-size: 0.85rem;
+      transition: color 0.15s;
+    }
+
+    .card:hover .card-arrow {
+      color: #58a6ff;
+    }
+
+    .card.empty {
+      border-style: dashed;
+      border-color: #21262d;
+      background: transparent;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .card.empty .card-title {
+      color: #30363d;
+      font-size: 0.85rem;
+    }
+
+    .card.empty .card-desc {
+      color: #21262d;
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 60px;
+      color: #30363d;
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+
+    <header>
+      <h1>📚 게임 자료 모음</h1>
+      <p>인공지능을 활용한 게임 학습 자료 모음</p>
+    </header>
+
+
+    <!-- 게임 개발 -->
+    <section class="section">
+      <div class="section-header">
+        <span class="section-icon">🥇</span>
+        <span class="section-title">게임</span>
+      </div>
+      <div class="cards">
+        <a href="AIticoon/tycoon_game.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">AI 타이쿤 게임 만들기</div>
+          <div class="card-desc">카페 운영하기 같은 타이쿤 게임</div>
+        </a>
+        <a href="AIRoleplayGame/roleplay_game.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">AI롤플레이시뮬레이터</div>
+          <div class="card-desc">캐릭터를 만들고 텍스트를 선택해 문제를 푸는 게임</div>
+        </a>
+        <a href="worldcupGame/worldcup_game.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">AI월드컵 토너먼트 게임</div>
+          <div class="card-desc">주제를 정하고, 최종 토너먼트로 살아남은 아이템을 찾는 게임</div>
+        </a>
+        <a href="neighborhoodTreasureHunt/neighborhoodTreasureHunt_app.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">우리동네 보물찾기</div>
+          <div class="card-desc">사라진 보물지도를 찾아라!</div>
+        </a>
+        <a href="neighborhoodTreasureHunt/neighborhoodTreasureHunt_app.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">우리동네 보물찾기</div>
+          <div class="card-desc">유한대에서 숨겨진 보물을 찾아라!</div>
+        </a>
+        <a href="packman/packman.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">Pac-Man 만들기</div>
+          <div class="card-desc">지피터스 23기 실습 고전 게임 만들기</div>
+        </a>
+        <a href="https://luriluan0-a11y.github.io/Source/textAdventureApp/1408_textAdventure_App.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">텍스트 어드벤처 게임 만들기</div>
+          <div class="card-desc">대화를 선택하면서 이야기를 진행하고 엔딩을 출력하는 게임</div>
+        </a>
+        <a href="https://luriluan0-a11y.github.io/Source/edu_chatBot/teacher_ChatBot_ObiWan.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">교육용 챗봇 캐릭터 만들기</div>
+          <div class="card-desc">3개의 키워드를 제시하고 퀴즈 문제를 맞추는 게임</div>
+        </a>
+        <a href="https://luriluan0-a11y.github.io/Source/cardMatchApp/day02.testing-matching-game.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">카드 매칭 게임</div>
+          <div class="card-desc">카드를 뒤집어 단어와 뜻을 매칭하는 게임</div>
+        </a>
+        <a href="https://luriluan0-a11y.github.io/Source/quizKingApp/1408_quizKing_App.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">오늘의 퀴즈왕</div>
+          <div class="card-desc">분야를 골라 10문제에 도전하는 게임</div>
+        </a>
+
+        <a href="https://luriluan0-a11y.github.io/gameContents/specialClass/148_chatBot_Luke.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">키워드 기반 챗봇 만들기</div>
+          <div class="card-desc">간단한 키워드를 입력해 대화하는 챗봇</div>
+        </a>
+
+        <a href="https://luriluan0-a11y.github.io/gameContents/specialClass/147_study-idea-generator.html" class="card">
+          <div class="card-arrow">→</div>
+          <div class="card-title">방학 스터디 아이디어 생성기</div>
+          <div class="card-desc">관심 키워드로 웹앱 아이디어 10개 만들기</div>
+        </a>
+
+      </div>
+    </section>
+
+    <footer>공대언니의 바이브코딩 샘플 · 2026</footer>
+
+  </div>
+</body>
+
+</html>
