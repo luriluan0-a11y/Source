@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>세계여행 대작전 - 16강 이상형 월드컵</title>
+  <meta name="description" content="레오네 가족 기획! 다음 해외 여행지를 결정하는 세계여행 대작전 16강 이상형 월드컵 게임">
+
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="세계여행 대작전 - 16강 이상형 월드컵">
+  <meta property="og:description" content="당신의 최애 해외 여행지는 어디인가요? 16강 무작위 토너먼트로 찾아보세요!">
+  <meta property="og:type" content="website">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&family=Noto+Sans+KR:wght@400;500;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0d1117;
+      --bg-surface: #161b22;
+      --bg-card: #161b22;
+      --bg-card-hover: #21262d;
+
+      --accent-primary: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-right: #f43f5e;
+      --gold-color: #f59e0b;
+
+      --text-main: #e6edf3;
+      --text-muted: #8b949e;
+      --border-color: #30363d;
+      --border-subtle: #21262d;
+
+      --font-title: 'Noto Sans KR', sans-serif;
+      --font-body: 'Noto Sans KR', sans-serif;
+      --font-en: 'Montserrat', sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Ambient background grid */
+    .bg-grid {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-size: 40px 40px;
+      background-image:
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header */
+    header {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      cursor: pointer;
+    }
+
+    .brand-icon {
+      font-size: 1.5rem;
+      color: var(--accent-primary);
+    }
+
+    .brand-text {
+      font-family: var(--font-title);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+    }
+
+    .planner-badge {
+      font-size: 0.75rem;
+      background: var(--border-subtle);
+      border: 1px solid var(--border-color);
+      padding: 0.2rem 0.6rem;
+      border-radius: 20px;
+      color: var(--text-muted);
+      margin-left: 0.5rem;
+      font-weight: 500;
+    }
+
+    .header-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .btn-icon {
+      background: var(--border-subtle);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      width: 38px;
+      height: 38px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .btn-icon:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--text-muted);
+    }
+
+    /* App Container & Views */
+    main {
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .view-screen {
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      animation: fadeIn 0.25s ease forwards;
+    }
+
+    .view-screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(6px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* -------------------------------------------------------------
+       1. START SCREEN
+    ------------------------------------------------------------- */
+    .hero-container {
+      text-align: center;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: var(--accent-primary);
+      padding: 0.35rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+    }
+
+    .hero-title {
+      font-family: var(--font-title);
+      font-size: 3rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 0.85rem;
+      color: var(--text-main);
+      letter-spacing: -0.5px;
+    }
+
+    .hero-desc {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      margin-bottom: 2.25rem;
+      line-height: 1.6;
+    }
+
+    .btn-start {
+      font-family: var(--font-title);
+      font-size: 1.35rem;
+      font-weight: 700;
+      padding: 0.95rem 3rem;
+      background: var(--accent-primary);
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-start:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+
+    /* Candidate Grid Preview */
+    .preview-header {
+      margin-top: 3rem;
+      margin-bottom: 1.25rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 1rem;
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    .preview-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.2s ease, transform 0.15s ease;
+    }
+
+    .preview-card:hover {
+      border-color: var(--accent-primary);
+      transform: translateY(-3px);
+    }
+
+    .preview-img {
+      width: 100%;
+      height: 90px;
+      object-fit: cover;
+    }
+
+    .preview-name {
+      padding: 0.5rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      color: var(--text-main);
+    }
+
+    /* -------------------------------------------------------------
+       2. VS MATCH SCREEN
+    ------------------------------------------------------------- */
+    .match-header {
+      width: 100%;
+      max-width: 1100px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .round-title {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.3px;
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 6px;
+      background: var(--border-subtle);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.75rem;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent-primary);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .match-container {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 1.5rem;
+      width: 100%;
+      max-width: 1100px;
+      align-items: center;
+      position: relative;
+    }
+
+    .vs-badge {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-en);
+      font-weight: 800;
+      font-size: 1.3rem;
+      color: var(--text-main);
+      z-index: 10;
+    }
+
+    .vs-card {
+      position: relative;
+      height: 480px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: border-color 0.2s ease, transform 0.2s ease, opacity 0.25s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+
+    .vs-card:hover {
+      transform: translateY(-4px);
+    }
+
+    .vs-card.left:hover {
+      border-color: var(--accent-primary);
+    }
+
+    .vs-card.right:hover {
+      border-color: var(--accent-right);
+    }
+
+    .vs-card.selected {
+      border-color: var(--gold-color) !important;
+      border-width: 2px;
+      transform: scale(1.02);
+      z-index: 20;
+    }
+
+    .vs-card.dimmed {
+      opacity: 0.3;
+      filter: grayscale(60%);
+      transform: scale(0.97);
+      pointer-events: none;
+    }
+
+    .vs-card-bg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+
+    .vs-card:hover .vs-card-bg {
+      transform: scale(1.04);
+    }
+
+    .vs-card-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(13, 17, 23, 0.65);
+      pointer-events: none;
+    }
+
+    .vs-card-content {
+      position: relative;
+      z-index: 5;
+      padding: 1.75rem;
+    }
+
+    .vs-card-num {
+      display: inline-block;
+      font-family: var(--font-en);
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+
+    .vs-card-title {
+      font-family: var(--font-title);
+      font-size: 2.1rem;
+      font-weight: 800;
+      margin-bottom: 0.6rem;
+      color: #ffffff;
+      line-height: 1.25;
+    }
+
+    .vs-card-desc {
+      font-size: 0.95rem;
+      color: #e6edf3;
+      line-height: 1.5;
+      background: rgba(22, 27, 34, 0.85);
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border-left: 3px solid var(--accent-primary);
+    }
+
+    .vs-card.right .vs-card-desc {
+      border-left-color: var(--accent-right);
+    }
+
+    .vs-hint {
+      margin-top: 1.25rem;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .kbd {
+      background: var(--border-subtle);
+      border: 1px solid var(--border-color);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-family: monospace;
+      color: var(--text-main);
+    }
+
+    /* -------------------------------------------------------------
+       3. WINNER & RESULTS SCREEN
+    ------------------------------------------------------------- */
+    .winner-container {
+      width: 100%;
+      max-width: 1000px;
+      text-align: center;
+    }
+
+    .trophy-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 75px;
+      height: 75px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 2px solid var(--gold-color);
+      color: var(--gold-color);
+      font-size: 2.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .winner-banner {
+      font-family: var(--font-title);
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--gold-color);
+      margin-bottom: 0.4rem;
+      letter-spacing: -0.3px;
+    }
+
+    .winner-message {
+      font-size: 1.2rem;
+      color: var(--text-main);
+      margin-bottom: 1.75rem;
+      font-weight: 500;
+    }
+
+    .winner-spotlight {
+      background: var(--bg-surface);
+      border: 2px solid var(--gold-color);
+      border-radius: 16px;
+      overflow: hidden;
+      max-width: 650px;
+      margin: 0 auto 2.5rem auto;
+      position: relative;
+    }
+
+    .winner-img {
+      width: 100%;
+      height: 350px;
+      object-fit: cover;
+    }
+
+    .winner-info {
+      padding: 1.5rem;
+      background: var(--bg-surface);
+      text-align: center;
+    }
+
+    .winner-name {
+      font-family: var(--font-title);
+      font-size: 2.3rem;
+      font-weight: 800;
+      color: var(--gold-color);
+      margin-bottom: 0.4rem;
+    }
+
+    .winner-desc {
+      font-size: 1.05rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* Tabs for Bracket View & Rankings */
+    .tab-navigation {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+    }
+
+    .tab-btn {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 0.65rem 1.6rem;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tab-btn:hover {
+      border-color: var(--text-muted);
+      color: var(--text-main);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-primary);
+      color: #ffffff;
+      border-color: var(--accent-primary);
+    }
+
+    .tab-content {
+      display: none;
+      width: 100%;
+      animation: fadeIn 0.25s ease forwards;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Bracket Tree View */
+    .bracket-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      padding: 1.25rem;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+    }
+
+    .bracket-container {
+      display: flex;
+      justify-content: space-between;
+      min-width: 850px;
+      gap: 1.25rem;
+    }
+
+    .bracket-column {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      position: relative;
+    }
+
+    .bracket-col-title {
+      font-family: var(--font-en);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--accent-primary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      text-align: center;
+      margin-bottom: 0.85rem;
+    }
+
+    .bracket-match {
+      background: var(--bg-dark);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.4rem;
+      margin: 0.5rem 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .bracket-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.3rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      background: var(--bg-surface);
+      color: var(--text-muted);
+    }
+
+    .bracket-item.winner {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid var(--accent-primary);
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
+    .bracket-item.champion {
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid var(--gold-color);
+      color: var(--gold-color);
+      font-weight: 700;
+    }
+
+    .bracket-item img {
+      width: 20px;
+      height: 20px;
+      border-radius: 3px;
+      object-fit: cover;
+      margin-right: 0.35rem;
+    }
+
+    /* Rankings Table */
+    .rankings-table-container {
+      width: 100%;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .rank-row {
+      display: grid;
+      grid-template-columns: 70px 90px 1fr 2fr;
+      align-items: center;
+      padding: 0.85rem 1.25rem;
+      border-bottom: 1px solid var(--border-subtle);
+      text-align: left;
+    }
+
+    .rank-row:last-child {
+      border-bottom: none;
+    }
+
+    .rank-row.header {
+      background: var(--bg-dark);
+      font-weight: 600;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+
+    .rank-badge {
+      font-family: var(--font-en);
+      font-weight: 700;
+      font-size: 0.95rem;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    .rank-1 .rank-badge {
+      background: var(--gold-color);
+      color: #0d1117;
+    }
+
+    .rank-2 .rank-badge {
+      background: #8b949e;
+      color: #0d1117;
+    }
+
+    .rank-3 .rank-badge {
+      background: #d97706;
+      color: #ffffff;
+    }
+
+    .rank-thumb {
+      width: 55px;
+      height: 38px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .rank-title {
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    .rank-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Actions Bottom Bar */
+    .action-bar {
+      margin-top: 2rem;
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+    }
+
+    .btn-action {
+      padding: 0.8rem 2rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s, transform 0.1s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: var(--accent-primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      transform: translateY(-2px);
+    }
+
+    .btn-secondary {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--bg-surface);
+      border: 1px solid var(--accent-primary);
+      color: var(--text-main);
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      z-index: 100;
+      opacity: 0;
+      transition: all 0.25s ease;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    /* Footer */
+    footer {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 1.25rem;
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-surface);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 900px) {
+      .hero-title {
+        font-size: 2.2rem;
+      }
+
+      .match-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .vs-badge {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 50px;
+        height: 50px;
+        font-size: 1.1rem;
+      }
+
+      .vs-card {
+        height: 380px;
+      }
+
+      .rank-row {
+        grid-template-columns: 50px 70px 1fr;
+      }
+
+      .rank-desc {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-grid"></div>
+
+  <!-- Header -->
+  <header>
+    <div class="brand" onclick="game.resetToStart()">
+      <i class="fa-solid fa-earth-americas brand-icon"></i>
+      <span class="brand-text">세계여행 대작전</span>
+      <span class="planner-badge">기획: 레오네 가족</span>
+    </div>
+    <div class="header-controls">
+      <button class="btn-icon" id="soundToggleBtn" title="음향 온/오프" onclick="game.toggleSound()">
+        <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main>
+
+    <!-- =========================================================
+         VIEW 1: START SCREEN
+    ========================================================= -->
+    <section id="startScreen" class="view-screen active">
+      <div class="hero-container">
+        <div class="hero-badge">
+          <i class="fa-solid fa-plane-departure"></i> 16강 해외 여행지 대결
+        </div>
+        <h1 class="hero-title">다음 여행지는 어디로?</h1>
+        <p class="hero-desc">
+          레오네 가족과 함께 떠나는 "세계여행 대작전"!<br>
+          16개의 매력적인 해외 여행지 중 당신의 최애 후보를 결정해보세요.
+        </p>
+
+        <button class="btn-start" onclick="game.startWorldCup()">
+          <i class="fa-solid fa-play"></i> 16강 시작하기
+        </button>
+
+        <div class="preview-header">
+          <i class="fa-solid fa-compass"></i> 출전 후보 16개국 미리보기
+        </div>
+        <div class="preview-grid" id="previewGrid">
+          <!-- Dynamically populated candidate preview cards -->
+        </div>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         VIEW 2: VS MATCH SCREEN
+    ========================================================= -->
+    <section id="matchScreen" class="view-screen">
+      <div class="match-header">
+        <div class="round-title" id="roundTitle">16강 (1 / 8)</div>
+        <div class="progress-bar-container">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+      </div>
+
+      <div class="match-container">
+        <!-- Left VS Card -->
+        <div class="vs-card left" id="cardLeft" onclick="game.selectCandidate(0)">
+          <img class="vs-card-bg" id="imgLeft" src="" alt="" onerror="game.handleImgError(this)">
+          <div class="vs-card-overlay"></div>
+          <div class="vs-card-content">
+            <span class="vs-card-num" id="numLeft">#1</span>
+            <h2 class="vs-card-title" id="titleLeft">후보 1</h2>
+            <p class="vs-card-desc" id="descLeft">설명 문구</p>
+          </div>
+        </div>
+
+        <!-- Center VS Badge -->
+        <div class="vs-badge">VS</div>
+
+        <!-- Right VS Card -->
+        <div class="vs-card right" id="cardRight" onclick="game.selectCandidate(1)">
+          <img class="vs-card-bg" id="imgRight" src="" alt="" onerror="game.handleImgError(this)">
+          <div class="vs-card-overlay"></div>
+          <div class="vs-card-content">
+            <span class="vs-card-num" id="numRight">#2</span>
+            <h2 class="vs-card-title" id="titleRight">후보 2</h2>
+            <p class="vs-card-desc" id="descRight">설명 문구</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="vs-hint">
+        <span>키보드 조작: <span class="kbd">←</span> 왼쪽 선택 &nbsp;|&nbsp; <span class="kbd">→</span> 오른쪽 선택</span>
+      </div>
+    </section>
+
+    <!-- =========================================================
+         VIEW 3: WINNER & RESULTS SCREEN
+    ========================================================= -->
+    <section id="winnerScreen" class="view-screen">
+      <div class="winner-container">
+
+        <div class="trophy-badge">
+          <i class="fa-solid fa-trophy"></i>
+        </div>
+
+        <h2 class="winner-banner">TOURNAMENT CHAMPION</h2>
+        <p class="winner-message" id="winnerMsg">
+          최종 우승을 축하합니다! 당신의 최애 선택은 바로 [우승자] 입니다!
+        </p>
+
+        <!-- Winner Spotlight Card -->
+        <div class="winner-spotlight">
+          <img class="winner-img" id="winnerImg" src="" alt="" onerror="game.handleImgError(this)">
+          <div class="winner-info">
+            <h3 class="winner-name" id="winnerName">우승 여행지</h3>
+            <p class="winner-desc" id="winnerDesc">우승 설명 문구</p>
+          </div>
+        </div>
+
+        <!-- Tab Controls -->
+        <div class="tab-navigation">
+          <button class="tab-btn active" onclick="game.switchTab('bracket')">
+            <i class="fa-solid fa-sitemap"></i> 토너먼트 대진표 (Bracket View)
+          </button>
+          <button class="tab-btn" onclick="game.switchTab('rankings')">
+            <i class="fa-solid fa-list-ol"></i> 전체 순위표
+          </button>
+        </div>
+
+        <!-- Tab 1: Bracket Tree View -->
+        <div id="bracketTab" class="tab-content active">
+          <div class="bracket-wrapper">
+            <div class="bracket-container" id="bracketTree">
+              <!-- Dynamically populated bracket tree columns -->
+            </div>
+          </div>
+        </div>
+
+        <!-- Tab 2: Rankings List -->
+        <div id="rankingsTab" class="tab-content">
+          <div class="rankings-table-container" id="rankingsList">
+            <!-- Dynamically populated ranking rows -->
+          </div>
+        </div>
+
+        <!-- Action Bar -->
+        <div class="action-bar">
+          <button class="btn-action btn-primary" onclick="game.restartWorldCup()">
+            <i class="fa-solid fa-rotate-right"></i> 다시 도전하기 (새 셔플)
+          </button>
+          <button class="btn-action btn-secondary" onclick="game.shareResult()">
+            <i class="fa-solid fa-share-nodes"></i> 결과 공유하기
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast">메시지</div>
+
+  <!-- Footer -->
+  <footer>
+    세계여행 대작전 &copy; 2026 레오네 가족 기획 | 16강 이상형 월드컵 단일 페이지 웹게임
+  </footer>
+
+  <!-- =========================================================
+       GAME LOGIC SCRIPT
+  ========================================================= -->
+  <script>
+    // Candidate Data array parsed directly from Markdown
+    const CANDIDATE_DATA = [
+      {
+        id: 1,
+        name: "태국",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkWTcXqTv8_okPnV07D6zgSgZPMa6H6JyHoDIA7HzyU_vN6ZxJ0w0WvUxCQZYKqGclz6X_6QMvnN1F97CJ1BzkFP2gEXIiplWvw_JGjrz5X-O4yo2A-REQUmT86BiZoD-toZm9j6A=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1552465011-b4e21bf6e79a?auto=format&fit=crop&w=800&q=80",
+        desc: "서X이네가 있는 도시와 휴양지 투어"
+      },
+      {
+        id: 2,
+        name: "산토리니",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWnMSGngZ9klQlQp2Hy25zS1XjntTfhvbhT0NlR7HFpZRfpa3HFUj4ZSt-upH_d8zSWbyOvyUHPvUQwVqM_1ncNK2f0LLvbR9M9T0jFSoHUdxOuwsFnlSWqfKLhO71tsLJfprJX8=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?auto=format&fit=crop&w=800&q=80",
+        desc: "그렇다!!! 역시 여행은 올인이지! 돈과 시간을 올인하여 그리스로 떠나자!"
+      },
+      {
+        id: 3,
+        name: "베트남",
+        img: "https://lh3.googleusercontent.com/grass-cs/ACvplmNX5U-YcVKqe6ObeAD22CrhpDpY2qf2S5SqbQneis-spXfyz0LT7p9m9q86gym182lBJCaj2RvKOfcRjtEr5hizrBXb2ZZWW3qO2WUAc1XtixrrYGvxX5Mpl_voxS6o7xPwkrcc8MK8Y9Uu=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80",
+        desc: "뭐니뭐니해도 휴양이지~ 호캉스를 베트남에서 즐기고 맛사지도 받아보자!"
+      },
+      {
+        id: 4,
+        name: "캐나다",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWnOJxoqmCaAst-vccw3TJhmwd2XnRE970xNrPwzcB3CvYwOw_dKr-0jbad3dDoD24fW42yHooxhHs07QXNvsQpYH3O5sahm77RUa_f2r5iyWWCAlazqqsYtXNwK3Dh-pJrGXBjfhg=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?auto=format&fit=crop&w=800&q=80",
+        desc: "드넗은 땅, 온타리오 호수의 갈매기와 립군을 보러 캐나다로 고고고~"
+      },
+      {
+        id: 5,
+        name: "일본 도쿄",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWnZ6TiWXlnjVOWIk3YLcCIrRn11Vu029Q3KVR_MbteAy8_xXzdelUNdPcMtM8ZJjGwwMUagTC5UmWzVk8qIiXGROZWeGonm1w23UWvbFhsQ6TPC4vFACWQsjnxQIF5xvjfYg6EJ=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=80",
+        desc: "야경은 도쿄지. 맛있는 음식도 먹고 문구류도 사고!"
+      },
+      {
+        id: 6,
+        name: "몰디브",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWmXthaHZWJxu3kp7mO-kqFRV1Ey3ST517c23J52Hw0sz9SlEkIJ72osQ0nvnCG4Lfg7e7NgVTl8Xm9p3uNjFf5qLsDTzM-p8an_WJI0IbTM3_ItwpfwHstPGV6mpGOMoS_brQ7qeQ=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1514282401047-d79a71a590e8?auto=format&fit=crop&w=800&q=80",
+        desc: "모히또가서 몰디브나 한 잔 할까?"
+      },
+      {
+        id: 7,
+        name: "모리셔스",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlOXAogZhTqhaZKxODIqKcJThtkLjWnkxrjSlk7SNgAtRS7cals7MAYPmfVUKqJbCfNlcCRkD7NrDETozZtQe9SXLzKFrnCE3aP7hO5C6y3xJKV7KTqCnqOicH3mtBluWulqnE=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80",
+        desc: "아름다운 에메랄드빛 바다와 화산 지형을 품고 있는 세계적인 인도양 휴양지"
+      },
+      {
+        id: 8,
+        name: "키프로스(사이프러스)",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlaqNat_3y9BXV-z0FnrG-EGQlHIRZPkfGl1HqM4TSY_GlAeo_OKh3SJCfJ0ybMKinpLhiCljBPvEXN3soLqoR4IelvJLnREGg0OknljYO8rkK1K-9zLVLHCchq5YP9kWPj036E=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1589553468546-3b10b00dfd3d?auto=format&fit=crop&w=800&q=80",
+        desc: "지중해 동부에 위치한 신화와 아름다운 바다를 지닌 환상의 섬나라"
+      },
+      {
+        id: 9,
+        name: "스리랑카",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWmEIw9y7mL-pt1Zl2OGG6_C8WScM8X8mrthEAIy4Ebn20-J4Qp0Hj8LY1lIK_2XLO_ByZcKr_2AgvRcpONmX_GgDM2Kk8mT0OhKYqxeryAJCmE7mqenVboq7XaJnUMd_q0zQ89j3A=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1586861635167-e5223aadc9fe?auto=format&fit=crop&w=800&q=80",
+        desc: "인도양의 눈물이라 불리는 아름다운 홍차와 자연의 나라"
+      },
+      {
+        id: 10,
+        name: "뉴질랜드",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkv9rLL6FHjmROJzMvy4N0SjA_OKmVf6dTdjtu_xRA_gop065Gb_w2nPBkcHwQ_APDJ6CgTC3Hxo4oBux9Bw5HFqHP-OlgArlMV2puAplPf3kT3jtgqkrvnpk7byEbXFMdvBlF-HTArkRU=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=800&q=80",
+        desc: "대자연의 아름다움과 독특한 생태계, 청정 남섬/북섬의 대향연"
+      },
+      {
+        id: 11,
+        name: "아이슬란드",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWnTHA6WmPMYOx02It3e_9tpzWIFUXxg69ObQIffPS3JKXCuyMChWnAam_WIXgh12rOhtgKzrvL4pIENYTAHMJ_jPTbMwzRXanpV4Sqdf73HUcROIFd1wD4cy4AemUMcWkG3zlw=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1504893524553-b855bce32c67?auto=format&fit=crop&w=800&q=80",
+        desc: "오로라와 온천, '불과 얼음의 나라' 북유럽 레이캬비크 감성"
+      },
+      {
+        id: 12,
+        name: "호주(오스트레일리아)",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkj0TV1y1gCOupX8dDYfU1Cd16OrhFuIBp1kNQNdUUQF7su-wWKhULBBxObGjhj8pVn4T3FY-sK1Wv7-deCOmYs3YyJJmcWdv42MBIlz7sfCsTmk2tgiVZ66_i-Uh-4U4F-n4YwbQ=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1523482580672-f109ba8cb9be?auto=format&fit=crop&w=800&q=80",
+        desc: "시드니 오페라하우스와 코알라, 광활한 대륙 탐험"
+      },
+      {
+        id: 13,
+        name: "인도네시아 발리",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWkGWZgVIfRAuW9nOIHkNt_PJCRXBrUwepBqaZpfBHyY_Q2oqO2xXM2mHT4dN2r4SZZAg7V_nWkM8xKDIzyFQp8-_Y2Pojetlt6bFmhIHEz9GXuefWiCKtZcGA0LI8tKcRoVsd4=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=800&q=80",
+        desc: "신들의 섬 발리에서 리조트 힐링과 석양 뷰 감상"
+      },
+      {
+        id: 14,
+        name: "코스타리카",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWnqZ4ujQdDM31kyUVLJ2KMFiRq3GYfn3a2gJSB-f29YbFwryC7HWSmqmcJhGdriq7hlJbSZI3FJg9RTQlSuGwLDYH7bf6y2GPoV7jpOOsb3Xqrl8Z7o8rIMlopI-E0iBFFFkqaN=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=800&q=80",
+        desc: "카리브해와 열대우림, 지구상 최고의 에코 투어리즘 천국"
+      },
+      {
+        id: 15,
+        name: "이탈리아",
+        img: "https://lh3.googleusercontent.com/gps-cs-s/AHRPTWlLwdaeHS2Cm1iJHUOc7EHw0jmZuXcoDFAE4jWDGVIILksorQaxPjmPrpcUP7gYkCTT2LOHJX-jNS_cTav-VHX1B1S8vDw9GfwMOsZeeZNq9OcdF7Eb2icDSmeeOu-Z43ptW5g=s680-w680-h510-rw",
+        fallback: "https://images.unsplash.com/photo-1516483638261-f4dbaf036963?auto=format&fit=crop&w=800&q=80",
+        desc: "피자가 진짜 맛있었는데 말이지!!! 로마와 피렌체의 낭만"
+      },
+      {
+        id: 16,
+        name: "볼리비아 우유니 소금 사막",
+        img: "https://cdn.bfldr.com/UTM69Z3S/at/wbw56tr939rhpbzvmntkh9/loic-mermilliod-H4ThqacLxgg-unsplash-LOWRES.jpg?fit=cover&enable=upscale&auto=webp&quality=60&format=pjpg&width=1280&height=855",
+        fallback: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=800&q=80",
+        desc: "지구에서 가장 큰 거울, 환상의 소금 평원이 펼쳐지는 곳"
+      }
+    ];
+
+    // Sound Synthesizer via Web Audio API
+    class SoundManager {
+      constructor() {
+        this.muted = false;
+        this.ctx = null;
+      }
+
+      initCtx() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      }
+
+      playSelectSound() {
+        if (this.muted) return;
+        this.initCtx();
+        try {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, this.ctx.currentTime); // D5
+          osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.15); // A5
+
+          gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.15);
+        } catch (e) { }
+      }
+
+      playVictorySound() {
+        if (this.muted) return;
+        this.initCtx();
+        try {
+          const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+          notes.forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.12);
+
+            gain.gain.setValueAtTime(0.2, this.ctx.currentTime + idx * 0.12);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.12 + 0.4);
+
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(this.ctx.currentTime + idx * 0.12);
+            osc.stop(this.ctx.currentTime + idx * 0.12 + 0.4);
+          });
+        } catch (e) { }
+      }
+    }
+
+    // World Cup Game Core Engine
+    class WorldCupGame {
+      constructor() {
+        this.sound = new SoundManager();
+        this.candidates = [...CANDIDATE_DATA];
+
+        // Tournament state
+        this.currentRoundList = [];
+        this.nextRoundList = [];
+        this.roundIndex = 0; // Match index in current round
+        this.totalRoundsName = "16강";
+
+        // History tracker for Bracket View
+        this.bracketHistory = {
+          round16: [],
+          round8: [],
+          round4: [],
+          final: null
+        };
+
+        // Placings tracker for Rankings
+        this.eliminatedIn16 = [];
+        this.eliminatedIn8 = [];
+        this.eliminatedIn4 = [];
+        this.runnerUp = null;
+        this.winner = null;
+
+        this.isProcessingChoice = false;
+
+        this.initDOM();
+        this.setupKeyboardListeners();
+        this.renderPreviewGrid();
+      }
+
+      initDOM() {
+        this.screens = {
+          start: document.getElementById('startScreen'),
+          match: document.getElementById('matchScreen'),
+          winner: document.getElementById('winnerScreen')
+        };
+
+        this.cardLeft = document.getElementById('cardLeft');
+        this.cardRight = document.getElementById('cardRight');
+      }
+
+      toggleSound() {
+        this.sound.muted = !this.sound.muted;
+        const icon = document.getElementById('soundIcon');
+        if (this.sound.muted) {
+          icon.className = 'fa-solid fa-volume-xmark';
+          this.showToast('음향 켜기/끄기: 음소거됨');
+        } else {
+          icon.className = 'fa-solid fa-volume-high';
+          this.sound.playSelectSound();
+          this.showToast('음향 활성화됨');
+        }
+      }
+
+      showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+      }
+
+      handleImgError(imgElem) {
+        // Fallback to Unsplash URL if primary Google URL fails
+        const src = imgElem.src;
+        const cand = this.candidates.find(c => c.img === src || c.fallback === src);
+        if (cand && imgElem.src !== cand.fallback) {
+          imgElem.src = cand.fallback;
+        } else {
+          // General fallback placeholder
+          imgElem.src = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=800&q=80';
+        }
+      }
+
+      renderPreviewGrid() {
+        const grid = document.getElementById('previewGrid');
+        grid.innerHTML = this.candidates.map(c => `
+          <div class="preview-card">
+            <img class="preview-img" src="${c.img}" alt="${c.name}" onerror="game.handleImgError(this)">
+            <div class="preview-name">${c.name}</div>
+          </div>
+        `).join('');
+      }
+
+      switchView(viewName) {
+        Object.keys(this.screens).forEach(key => {
+          this.screens[key].classList.remove('active');
+        });
+        this.screens[viewName].classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Shuffle array helper (Fisher-Yates)
+      shuffle(array) {
+        let arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+      }
+
+      startWorldCup() {
+        // Reset state
+        this.currentRoundList = this.shuffle(this.candidates);
+        this.nextRoundList = [];
+        this.roundIndex = 0;
+        this.totalRoundsName = "16강";
+
+        this.bracketHistory = {
+          round16: [],
+          round8: [],
+          round4: [],
+          final: null
+        };
+
+        this.eliminatedIn16 = [];
+        this.eliminatedIn8 = [];
+        this.eliminatedIn4 = [];
+        this.runnerUp = null;
+        this.winner = null;
+
+        this.switchView('match');
+        this.loadCurrentMatch();
+      }
+
+      loadCurrentMatch() {
+        this.isProcessingChoice = false;
+
+        // Remove animation classes
+        this.cardLeft.className = "vs-card left";
+        this.cardRight.className = "vs-card right";
+
+        const totalMatches = this.currentRoundList.length / 2;
+        const currentMatchNum = this.roundIndex + 1;
+
+        document.getElementById('roundTitle').innerText = `${this.totalRoundsName} (${currentMatchNum} / ${totalMatches})`;
+
+        // Calculate progress percentage
+        let globalProgress = 0;
+        if (this.totalRoundsName === "16강") {
+          globalProgress = ((currentMatchNum - 1) / 15) * 100;
+        } else if (this.totalRoundsName === "8강") {
+          globalProgress = ((8 + currentMatchNum - 1) / 15) * 100;
+        } else if (this.totalRoundsName === "4강") {
+          globalProgress = ((12 + currentMatchNum - 1) / 15) * 100;
+        } else if (this.totalRoundsName === "결승전") {
+          globalProgress = (14 / 15) * 100;
+        }
+        document.getElementById('progressBar').style.width = `${globalProgress}%`;
+
+        // Current Pair
+        const cand1 = this.currentRoundList[this.roundIndex * 2];
+        const cand2 = this.currentRoundList[this.roundIndex * 2 + 1];
+
+        // Left Card
+        document.getElementById('imgLeft').src = cand1.img;
+        document.getElementById('numLeft').innerText = `#${cand1.id}`;
+        document.getElementById('titleLeft').innerText = cand1.name;
+        document.getElementById('descLeft').innerText = cand1.desc;
+
+        // Right Card
+        document.getElementById('imgRight').src = cand2.img;
+        document.getElementById('numRight').innerText = `#${cand2.id}`;
+        document.getElementById('titleRight').innerText = cand2.name;
+        document.getElementById('descRight').innerText = cand2.desc;
+      }
+
+      selectCandidate(selectedIndex) {
+        if (this.isProcessingChoice) return;
+        this.isProcessingChoice = true;
+
+        this.sound.playSelectSound();
+
+        const cand1 = this.currentRoundList[this.roundIndex * 2];
+        const cand2 = this.currentRoundList[this.roundIndex * 2 + 1];
+
+        const selected = selectedIndex === 0 ? cand1 : cand2;
+        const loser = selectedIndex === 0 ? cand2 : cand1;
+
+        // Visual selection feedback
+        if (selectedIndex === 0) {
+          this.cardLeft.classList.add('selected');
+          this.cardRight.classList.add('dimmed');
+        } else {
+          this.cardRight.classList.add('selected');
+          this.cardLeft.classList.add('dimmed');
+        }
+
+        // Save round history
+        if (this.totalRoundsName === "16강") {
+          this.bracketHistory.round16.push({ winner: selected, loser: loser });
+          this.eliminatedIn16.push(loser);
+        } else if (this.totalRoundsName === "8강") {
+          this.bracketHistory.round8.push({ winner: selected, loser: loser });
+          this.eliminatedIn8.push(loser);
+        } else if (this.totalRoundsName === "4강") {
+          this.bracketHistory.round4.push({ winner: selected, loser: loser });
+          this.eliminatedIn4.push(loser);
+        } else if (this.totalRoundsName === "결승전") {
+          this.bracketHistory.final = { winner: selected, loser: loser };
+          this.runnerUp = loser;
+          this.winner = selected;
+        }
+
+        this.nextRoundList.push(selected);
+
+        // Delay to allow smooth visual feedback
+        setTimeout(() => {
+          this.roundIndex++;
+          if (this.roundIndex * 2 >= this.currentRoundList.length) {
+            this.advanceRound();
+          } else {
+            this.loadCurrentMatch();
+          }
+        }, 400);
+      }
+
+      advanceRound() {
+        if (this.nextRoundList.length === 1) {
+          // Tournament complete!
+          this.showWinnerScreen();
+        } else {
+          this.currentRoundList = [...this.nextRoundList];
+          this.nextRoundList = [];
+          this.roundIndex = 0;
+
+          if (this.currentRoundList.length === 8) {
+            this.totalRoundsName = "8강";
+          } else if (this.currentRoundList.length === 4) {
+            this.totalRoundsName = "4강";
+          } else if (this.currentRoundList.length === 2) {
+            this.totalRoundsName = "결승전";
+          }
+
+          this.loadCurrentMatch();
+        }
+      }
+
+      showWinnerScreen() {
+        document.getElementById('progressBar').style.width = '100%';
+        this.sound.playVictorySound();
+        this.switchView('winner');
+
+        const winner = this.winner;
+        document.getElementById('winnerMsg').innerText =
+          `최종 우승을 축하합니다! 당신의 최애 선택은 바로 [ ${winner.name} ] 입니다!`;
+
+        document.getElementById('winnerImg').src = winner.img;
+        document.getElementById('winnerName').innerText = winner.name;
+        document.getElementById('winnerDesc').innerText = winner.desc;
+
+        // Trigger Confetti Explosion
+        if (typeof confetti === 'function') {
+          const count = 200;
+          const defaults = { origin: { y: 0.7 } };
+
+          function fire(particleRatio, opts) {
+            confetti(Object.assign({}, defaults, opts, {
+              particleCount: Math.floor(count * particleRatio)
+            }));
+          }
+
+          fire(0.25, { spread: 26, startVelocity: 55 });
+          fire(0.2, { spread: 60 });
+          fire(0.35, { spread: 100, decay: 0.91, scalar: 0.8 });
+          fire(0.1, { spread: 120, startVelocity: 25, decay: 0.92, scalar: 1.2 });
+          fire(0.1, { spread: 120, startVelocity: 45 });
+        }
+
+        this.renderBracketTree();
+        this.renderRankingsList();
+      }
+
+      renderBracketTree() {
+        const container = document.getElementById('bracketTree');
+
+        // 16강 Column
+        const r16MatchesHtml = this.bracketHistory.round16.map((m) => `
+          <div class="bracket-match">
+            <div class="bracket-item winner">
+              <span><img src="${m.winner.img}" onerror="game.handleImgError(this)"> ${m.winner.name}</span>
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <div class="bracket-item">
+              <span><img src="${m.loser.img}" onerror="game.handleImgError(this)"> ${m.loser.name}</span>
+            </div>
+          </div>
+        `).join('');
+
+        // 8강 Column
+        const r8MatchesHtml = this.bracketHistory.round8.map((m) => `
+          <div class="bracket-match">
+            <div class="bracket-item winner">
+              <span><img src="${m.winner.img}" onerror="game.handleImgError(this)"> ${m.winner.name}</span>
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <div class="bracket-item">
+              <span><img src="${m.loser.img}" onerror="game.handleImgError(this)"> ${m.loser.name}</span>
+            </div>
+          </div>
+        `).join('');
+
+        // 4강 Column
+        const r4MatchesHtml = this.bracketHistory.round4.map((m) => `
+          <div class="bracket-match">
+            <div class="bracket-item winner">
+              <span><img src="${m.winner.img}" onerror="game.handleImgError(this)"> ${m.winner.name}</span>
+              <i class="fa-solid fa-check"></i>
+            </div>
+            <div class="bracket-item">
+              <span><img src="${m.loser.img}" onerror="game.handleImgError(this)"> ${m.loser.name}</span>
+            </div>
+          </div>
+        `).join('');
+
+        // Final Column
+        const finalMatch = this.bracketHistory.final;
+        const finalHtml = finalMatch ? `
+          <div class="bracket-match" style="border-color: var(--gold-color);">
+            <div class="bracket-item champion">
+              <span><i class="fa-solid fa-crown" style="color:var(--gold-color); margin-right:4px;"></i> <img src="${finalMatch.winner.img}" onerror="game.handleImgError(this)"> ${finalMatch.winner.name}</span>
+              <span>우승</span>
+            </div>
+            <div class="bracket-item">
+              <span><img src="${finalMatch.loser.img}" onerror="game.handleImgError(this)"> ${finalMatch.loser.name}</span>
+              <span>준우승</span>
+            </div>
+          </div>
+        ` : '';
+
+        container.innerHTML = `
+          <div class="bracket-column">
+            <div class="bracket-col-title">16강 토너먼트</div>
+            ${r16MatchesHtml}
+          </div>
+          <div class="bracket-column">
+            <div class="bracket-col-title">8강 진출</div>
+            ${r8MatchesHtml}
+          </div>
+          <div class="bracket-column">
+            <div class="bracket-col-title">준결승 (4강)</div>
+            ${r4MatchesHtml}
+          </div>
+          <div class="bracket-column">
+            <div class="bracket-col-title">결승전</div>
+            ${finalHtml}
+          </div>
+        `;
+      }
+
+      renderRankingsList() {
+        const container = document.getElementById('rankingsList');
+
+        const fullRankings = [
+          { rank: 1, label: "우승", cand: this.winner, class: "rank-1" },
+          { rank: 2, label: "준우승", cand: this.runnerUp, class: "rank-2" },
+          ...this.eliminatedIn4.map(cand => ({ rank: 3, label: "4강", cand, class: "rank-3" })),
+          ...this.eliminatedIn8.map(cand => ({ rank: 5, label: "8강", cand, class: "" })),
+          ...this.eliminatedIn16.map(cand => ({ rank: 9, label: "16강", cand, class: "" }))
+        ];
+
+        container.innerHTML = `
+          <div class="rank-row header">
+            <div>순위</div>
+            <div>이미지</div>
+            <div>여행지 명</div>
+            <div>한줄 설명</div>
+          </div>
+          ${fullRankings.map(r => `
+            <div class="rank-row ${r.class}">
+              <div class="rank-badge">${r.label}</div>
+              <img class="rank-thumb" src="${r.cand.img}" alt="${r.cand.name}" onerror="game.handleImgError(this)">
+              <div class="rank-title">${r.cand.name}</div>
+              <div class="rank-desc">${r.cand.desc}</div>
+            </div>
+          `).join('')}
+        `;
+      }
+
+      switchTab(tabName) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+        if (tabName === 'bracket') {
+          document.querySelectorAll('.tab-btn')[0].classList.add('active');
+          document.getElementById('bracketTab').classList.add('active');
+        } else {
+          document.querySelectorAll('.tab-btn')[1].classList.add('active');
+          document.getElementById('rankingsTab').classList.add('active');
+        }
+      }
+
+      setupKeyboardListeners() {
+        window.addEventListener('keydown', (e) => {
+          if (this.screens.match.classList.contains('active')) {
+            if (e.key === 'ArrowLeft') {
+              this.selectCandidate(0);
+            } else if (e.key === 'ArrowRight') {
+              this.selectCandidate(1);
+            }
+          }
+        });
+      }
+
+      restartWorldCup() {
+        this.startWorldCup();
+        this.showToast('대진표가 새 무작위 셔플로 재구성되었습니다!');
+      }
+
+      resetToStart() {
+        this.switchView('start');
+      }
+
+      shareResult() {
+        const shareText = `[세계여행 대작전 - 16강 이상형 월드컵]\n나의 최애 선택: 🏆 ${this.winner.name}!\n" ${this.winner.desc} "\n당신의 최애 여행지도 결정해보세요!`;
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(shareText);
+          this.showToast('결과 요약 문구가 클립보드에 복사되었습니다!');
+        } else {
+          alert(shareText);
+        }
+      }
+    }
+
+    // Initialize Game on Load
+    let game;
+    window.addEventListener('DOMContentLoaded', () => {
+      game = new WorldCupGame();
+    });
+  </script>
+</body>
+
+</html>
