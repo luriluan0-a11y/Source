@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS 1주차 실습문제 풀이</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5EFE7;
+    --surface: #FFFFFF;
+    --primary: #1E3A5F;
+    --secondary: #3D7E6B;
+    --accent: #C47B1A;
+    --text: #2A2A2A;
+    --text-muted: #6B6B6B;
+    --border: #E2D9CE;
+    --code-bg: #1C2A3E;
+    --radius: 12px;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+  main { max-width: 860px; margin: 0 auto; }
+  h1 {
+    font-size: 1.6rem;
+    color: var(--primary);
+    margin-bottom: 0.4rem;
+  }
+  .lead { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 2rem; }
+  .problem {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 1.6rem 1.8rem;
+    margin-bottom: 1.4rem;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+  }
+  .problem h2 {
+    font-size: 1.02rem;
+    color: var(--primary);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .num {
+    width: 26px; height: 26px;
+    background: var(--accent); color: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.82rem; font-weight: 700; flex-shrink: 0;
+  }
+  .problem p.desc { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 0.9rem; }
+  pre.code {
+    background: var(--code-bg);
+    color: #E6D8BF;
+    font-family: var(--mono);
+    font-size: 0.83rem;
+    line-height: 1.7;
+    padding: 1rem 1.2rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    white-space: pre;
+    margin-bottom: 0.9rem;
+  }
+  .cmt { color: #6C90B8; }
+  .result-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--secondary);
+    letter-spacing: 0.05em;
+    margin-bottom: 0.4rem;
+  }
+  pre.output {
+    background: #EDF4EF;
+    border: 1px solid #C7DFCD;
+    border-radius: 8px;
+    padding: 0.8rem 1.1rem;
+    font-family: var(--mono);
+    font-size: 0.84rem;
+    color: #234;
+    white-space: pre-wrap;
+  }
+  footer {
+    text-align: center;
+    margin-top: 2.5rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>자바스크립트 1주차 실습문제 풀이</h1>
+  <p class="lead">각 문제의 코드와 실행 결과를 바로 확인할 수 있습니다.</p>
+
+  <div class="problem">
+    <h2><span class="num">1</span>let / const 재할당 비교</h2>
+    <p class="desc">let과 const로 각각 변수를 선언하고, 왜 하나는 값을 바꿀 수 있고 다른 하나는 안 되는지 확인합니다.</p>
+    <pre class="code">let score = 0;
+score = 10;                <span class="cmt">// (O) let은 재할당 가능</span>
+
+const PI = 3.14;
+<span class="cmt">// PI = 3.141592;          // (X) TypeError: Assignment to constant variable.</span></pre>
+    <div class="result-label">RESULT</div>
+    <pre class="output" id="out1"></pre>
+  </div>
+
+  <div class="problem">
+    <h2><span class="num">2</span>1부터 10까지의 합</h2>
+    <p class="desc">for문을 이용해 1부터 10까지의 합을 구합니다.</p>
+    <pre class="code">let sum = 0;
+for (let i = 1; i <= 10; i++) {
+  sum += i;
+}</pre>
+    <div class="result-label">RESULT</div>
+    <pre class="output" id="out2"></pre>
+  </div>
+
+  <div class="problem">
+    <h2><span class="num">3</span>1~20 중 짝수만 출력 (continue)</h2>
+    <p class="desc">홀수를 만나면 continue로 건너뛰고, 짝수만 출력합니다.</p>
+    <pre class="code">for (let i = 1; i <= 20; i++) {
+  if (i % 2 !== 0) {
+    continue;
+  }
+  console.log(i);
+}</pre>
+    <div class="result-label">RESULT</div>
+    <pre class="output" id="out3"></pre>
+  </div>
+
+  <div class="problem">
+    <h2><span class="num">4</span>처음 만나는 7의 배수 (break)</h2>
+    <p class="desc">1부터 반복하다가 처음 7의 배수를 만나면 그 숫자를 출력하고 반복을 멈춥니다.</p>
+    <pre class="code">for (let i = 1; i <= 100; i++) {
+  if (i % 7 === 0) {
+    console.log(i);
+    break;
+  }
+}</pre>
+    <div class="result-label">RESULT</div>
+    <pre class="output" id="out4"></pre>
+  </div>
+</main>
+
+<footer>&copy; 2026 유한대학교 컴퓨터공학과 게임콘텐츠전공 · JS 1주차 실습문제 풀이</footer>
+
+<script>
+  // 문제 1
+  let score = 0;
+  score = 10;
+  const PI = 3.14;
+  let out1 = "score(let) = " + score + "\nPI(const) = " + PI;
+  try {
+    eval("PI = 3.141592");
+  } catch (e) {
+    out1 += "\nPI 재할당 시도 → " + e.constructor.name + ": " + e.message;
+  }
+  document.getElementById('out1').textContent = out1;
+
+  // 문제 2
+  let sum = 0;
+  for (let i = 1; i <= 10; i++) {
+    sum += i;
+  }
+  document.getElementById('out2').textContent = "1부터 10까지의 합 = " + sum;
+
+  // 문제 3
+  let evens = [];
+  for (let i = 1; i <= 20; i++) {
+    if (i % 2 !== 0) continue;
+    evens.push(i);
+  }
+  document.getElementById('out3').textContent = evens.join(' ');
+
+  // 문제 4
+  let firstMultipleOf7 = null;
+  for (let i = 1; i <= 100; i++) {
+    if (i % 7 === 0) {
+      firstMultipleOf7 = i;
+      break;
+    }
+  }
+  document.getElementById('out4').textContent = "처음 만난 7의 배수 = " + firstMultipleOf7;
+</script>
+</body>
+</html>
