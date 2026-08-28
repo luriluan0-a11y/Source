@@ -283,6 +283,7 @@
         <div class="chip-preset" onclick="loadPreset('space')">🚀 SF 우주 탐사선 "아스테리아호의 위기"</div>
         <div class="chip-preset" onclick="loadPreset('detective')">🔍 중세 추리 "국왕 독살 시도 사건"</div>
         <div class="chip-preset" onclick="loadPreset('hacker')">💻 사이버펑크 2099 백해커 미션</div>
+        <div class="chip-preset" onclick="loadPreset('magic')">🪄 금지된 서고의 마법책</div>
       </div>
     </div>
 
@@ -463,6 +464,52 @@
             opt1Target: "scene_2A",
             opt2: "사이버 덱으로 딥웹 바이패스 코드를 입력한다.",
             opt2Target: "scene_2B"
+          }
+        ]
+      },
+      magic: {
+        title: "금지된 서고의 마법책",
+        author: "아카데미 수습생",
+        heroName: "견습 마법사 에이든",
+        heroRole: "마법 아카데미 수습 마법사",
+        worldDesc: "고대 마법서가 봉인된 서고에서 사라지고, 아카데미를 지키던 마법 결계에 균열이 번지기 시작한 위태로운 밤.",
+        winGoal: "사라진 고대 마법서를 되찾고 마법 결계를 복구하여 아카데미를 지켜내기",
+        failCondition: "마나(에너지)가 0이 되거나 어둠의 저주에 완전히 잠식됨",
+        hp: 100, energy: 85, trust: 50,
+        items: "견습 지팡이, 마나 회복 물약, 고대어 사전",
+        scenes: [
+          {
+            id: "scene_1",
+            title: "장면 1: 사라진 마법서의 흔적",
+            speaker: "도서관 사서 유령 '엘디아'",
+            img: "https://images.unsplash.com/photo-1519791883288-dc8bd696e667?w=600&auto=format&fit=crop",
+            text: "수습생, 큰일이다! 봉인된 서고에서 고대 마법서가 사라졌고, 아카데미를 지키던 결계에 균열이 생기고 있어. 서둘러 단서를 찾아야 해.",
+            opt1: "봉인된 서고로 직접 들어가 침입 흔적을 조사한다. [에너지 -20, 단서 확보]",
+            opt1Target: "scene_2A",
+            opt2: "고대어 사전으로 결계 문양을 해독해 균열 원인을 찾는다. [에너지 -15, 신뢰도 +10]",
+            opt2Target: "scene_2B"
+          },
+          {
+            id: "scene_2A",
+            title: "장면 2A: 그림자 수호자의 습격",
+            speaker: "결계를 지키던 그림자 수호자",
+            img: "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=600&auto=format&fit=crop",
+            text: "서고 깊숙한 곳에서 정체를 알 수 없는 그림자 수호자가 나타나 앞을 가로막는다. 침입자로 오해받은 듯하다!",
+            opt1: "견습 지팡이로 정화 주문을 시전해 오해를 푼다. [에너지 -10, 수호자 정화 성공]",
+            opt1Target: "scene_ending_success",
+            opt2: "무모하게 그림자 수호자를 뚫고 돌진한다. [체력 -80, 위험!]",
+            opt2Target: "scene_ending_fail"
+          },
+          {
+            id: "scene_2B",
+            title: "장면 2B: 결계 정령과의 대화",
+            speaker: "마법 결계 정령 '루미네'",
+            img: "https://images.unsplash.com/photo-1516979187457-637abb4f9353?w=600&auto=format&fit=crop",
+            text: "결계 문양 속에서 정령 루미네가 모습을 드러낸다. '진정한 마법사임을 증명하면 결계를 복구할 힘을 나눠주겠다.'",
+            opt1: "마나 회복 물약을 정령에게 바쳐 진심을 증명한다.",
+            opt1Target: "scene_ending_success",
+            opt2: "강제로 결계를 해제하려 시도한다.",
+            opt2Target: "scene_ending_fail"
           }
         ]
       }

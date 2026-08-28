@@ -297,6 +297,58 @@
       font-weight: 600;
     }
 
+    /* Meaning Section */
+    .meaning-points {
+      list-style: none;
+      display: grid;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .meaning-points li {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-left: 4px solid var(--accent-gold);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      color: #e2e8f0;
+      font-size: 0.95rem;
+    }
+
+    .char-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 20px;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+
+    .char-card:hover {
+      transform: translateY(-5px);
+      border-color: rgba(245, 158, 11, 0.4);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    }
+
+    .char-card img {
+      width: 100%;
+      max-height: 70vh;
+      object-fit: contain;
+      background: rgba(0, 0, 0, 0.25);
+      display: block;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    .char-card-body {
+      padding: 1.25rem;
+    }
+
+    .char-card-question {
+      font-weight: 700;
+      color: var(--accent-gold);
+      font-size: 0.95rem;
+    }
+
     /* CTA Box */
     .cta-box {
       text-align: center;
@@ -337,6 +389,7 @@
       <span>AI 롤플레이 특강</span>
     </div>
     <nav>
+      <a href="#meaning">롤플레이란</a>
       <a href="#goal">목표</a>
       <a href="#steps">제작 순서</a>
       <a href="#scenarios">추천 시나리오</a>
@@ -360,6 +413,39 @@
         </a>
       </div>
     </div>
+
+    <!-- Section 0: What is Roleplay -->
+    <section id="meaning">
+      <div class="section-title">🎲 롤플레이의 뜻</div>
+      <div class="section-desc">캐릭터를 이해하는 것이 롤플레이 시뮬레이션 기획의 출발점입니다</div>
+
+      <ul class="meaning-points">
+        <li>캐릭터가 중요함 — 주사위를 통한 캐릭터의 수치, 성장 등이 중요한 요소임</li>
+        <li>캐릭터의 모습에서 이 캐릭터가 가진 특징이 나타나게 됨</li>
+        <li>진지한 캐릭터는 진지한 퀘스트를, 까불까불한 캐릭터는 가벼운 퀘스트를 진행해 스토리로 연결됨</li>
+      </ul>
+
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <div class="char-card">
+          <img src="reo01_final.png" alt="캐릭터 예시 1">
+          <div class="char-card-body">
+            <p class="char-card-question">어떤 역할을 하는 캐릭터인가요?</p>
+          </div>
+        </div>
+        <div class="char-card">
+          <img src="WONHEE_CHEON_sd_blog4.png" alt="캐릭터 예시 2">
+          <div class="char-card-body">
+            <p class="char-card-question">어떤 역할을 하는 캐릭터로 보이시나요?</p>
+          </div>
+        </div>
+        <div class="char-card">
+          <img src="npc.png" alt="던전앤파이터 NPC들">
+          <div class="char-card-body">
+            <p class="char-card-question">던전앤파이터 NPC들</p>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <!-- Section 1: Goals -->
     <section id="goal">
