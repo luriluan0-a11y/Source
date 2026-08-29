@@ -505,55 +505,176 @@
 
   <script>
     // ----------------------------------------------------
-    // SCENARIO DATA
+    // SCENARIO DATA — 아스테리아호의 위기 (분기 확장판)
+    // 총 19개 노드 / 6개의 서로 다른 엔딩 (완벽 성공·상처뿐인 승리·숨겨진 동맹·
+    // 가스 폭발·시스템 폭주·착륙 실패)
     // ----------------------------------------------------
+    const IMG = {
+      bridge: "https://images.unsplash.com/photo-1517976487492-5750f3195933?w=1000&auto=format&fit=crop",
+      console: "https://images.unsplash.com/photo-1614728263952-84ea256f9679?w=1000&auto=format&fit=crop",
+      robot: "https://images.unsplash.com/photo-1614730321146-b6fa6a46bcb4?w=1000&auto=format&fit=crop",
+      robotFace: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&auto=format&fit=crop",
+      nebula: "https://images.unsplash.com/photo-1502134249126-9f3755a50d78?w=1000&auto=format&fit=crop",
+      workspace: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=1000&auto=format&fit=crop",
+      galaxy: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1000&auto=format&fit=crop",
+      astronaut: "https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?w=1000&auto=format&fit=crop",
+      planet: "https://images.unsplash.com/photo-1614624532983-4ce03382d63d?w=1000&auto=format&fit=crop",
+      danger: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1000&auto=format&fit=crop"
+    };
+
     const SCENARIO_DATA = {
       heroName: "캡틴 루카스",
       heroRole: "우주 탐사선 함장",
       initialStats: { hp: 100, energy: 80, trust: 60 },
       initialItems: ["만능 멀티툴", "비상 산소 팩", "보안 암호 칩"],
       scenes: {
+
+        // ── 1. 시작 ────────────────────────────────────
         scene_1: {
-          bg: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=1000&auto=format&fit=crop",
-          npcImg: "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600&auto=format&fit=crop",
+          bg: IMG.bridge, npcImg: IMG.console,
           speaker: "AI 메인 컴퓨터 (ARI)",
           text: "경고! 주 산소 탱크 밸브에 결함이 발생했습니다. 10분 내로 수리하지 않으면 함내 산소가 고갈됩니다. 함장님, 명령을 내려주십시오.",
           choices: [
-            { text: "🛠️ 직접 기계실로 내려가 물리 밸브를 수동 조절한다.", effectText: "체력 -20", hpDelta: -20, energyDelta: 0, trustDelta: 0, target: "scene_2A" },
-            { text: "💻 조종석에서 AI 복구 프로토콜 암호를 해독한다.", effectText: "에너지 -15, 신뢰도 +10", hpDelta: 0, energyDelta: -15, trustDelta: 10, target: "scene_2B" }
+            { text: "🛠️ 직접 기계실로 내려가 물리 밸브를 수동 조절한다.", effectText: "체력 -10", hpDelta: -10, target: "scene_2A" },
+            { text: "💻 조종석에서 AI 복구 프로토콜 암호를 해독한다.", effectText: "에너지 -15, 신뢰도 +10", energyDelta: -15, trustDelta: 10, target: "scene_2B" },
+            { text: "📢 승무원 전체에게 비상방송을 걸어 협조를 구한다.", effectText: "신뢰도 +15, 에너지 -10", energyDelta: -10, trustDelta: 15, target: "scene_2C" }
           ]
         },
+
+        // ── 2A. 기계실 경로 ──────────────────────────────
         scene_2A: {
-          bg: "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=1000&auto=format&fit=crop",
-          npcImg: "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=600&auto=format&fit=crop",
-          speaker: "엔지니어 로봇 (보트)",
-          text: "함장님! 파이프에서 유독 가스가 분출되고 있습니다. 만능 멀티툴로 파이프를 밀봉하거나 전압 차단기를 내리십시오!",
+          bg: IMG.robot, npcImg: IMG.robotFace,
+          speaker: "엔지니어 로봇 '보트'",
+          text: "함장님! 파이프에서 유독 가스가 분출되고 있습니다. 시간이 별로 없습니다 — 어떻게 대응하시겠습니까?",
           choices: [
-            { text: "🔧 만능 멀티툴로 고압 파이프를 용접 밀봉한다.", effectText: "에너지 -10, 수리 성공", hpDelta: 0, energyDelta: -10, trustDelta: 15, target: "scene_win" },
-            { text: "⚠️ 맨손으로 강제로 밸브를 잠근다.", effectText: "체력 -80, 치명적 부상", hpDelta: -80, energyDelta: 0, trustDelta: 0, target: "scene_fail" }
+            { text: "🔧 만능 멀티툴로 고압 파이프를 정밀 용접 밀봉한다.", effectText: "에너지 -10, 완전 수리", energyDelta: -10, trustDelta: 10, addItem: "예비 배터리", target: "scene_3A_success" },
+            { text: "🩹 강력 테이프로 일단 응급 처치하고 서두른다.", effectText: "체력 -5, 임시방편", hpDelta: -5, target: "scene_3A_risky" },
+            { text: "⚠️ 맨손으로 강제로 밸브를 잠근다.", effectText: "체력 -80, 치명적 부상", hpDelta: -80, target: "scene_fail_gas" }
           ]
         },
+        scene_3A_risky: {
+          bg: IMG.robot, npcImg: IMG.robotFace,
+          speaker: "엔지니어 로봇 '보트'",
+          text: "함장님, 테이프가 다시 새기 시작했습니다! 지금이라도 제대로 고치시겠습니까, 아니면 이대로 다음 위기로 넘어가시겠습니까?",
+          choices: [
+            { text: "🔧 돌아가서 제대로 용접한다.", effectText: "에너지 -15, 뒤늦은 완전 수리", energyDelta: -15, trustDelta: 5, target: "scene_3A_success" },
+            { text: "🏃 위험을 감수하고 그대로 다음으로 넘어간다.", effectText: "체력 -15, 불안 요소 남음", hpDelta: -15, target: "scene_hub" }
+          ]
+        },
+        scene_3A_success: {
+          bg: IMG.robot, npcImg: IMG.robotFace,
+          speaker: "엔지니어 로봇 '보트'",
+          text: "밸브 수리 완료! 감사합니다, 함장님. 제가 예비 배터리 하나를 챙겨드리겠습니다. 다음 위기에 도움이 될 겁니다.",
+          choices: [
+            { text: "➡️ 다음 위기로 향한다.", effectText: "", target: "scene_hub" }
+          ]
+        },
+
+        // ── 2B. 조종석 경로 ──────────────────────────────
         scene_2B: {
-          bg: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1000&auto=format&fit=crop",
-          npcImg: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=600&auto=format&fit=crop",
+          bg: IMG.console, npcImg: IMG.console,
           speaker: "보안 시스템 '아테나'",
-          text: "보안 암호 칩이 인지되었습니다. 코드를 실행하여 오작동 AI 바이러스를 즉시 격리하시겠습니까?",
+          text: "보안 암호 칩이 인지되었습니다. 오작동 AI 바이러스가 시스템 깊숙이 자리 잡고 있습니다. 어떻게 하시겠습니까?",
           choices: [
-            { text: "🔑 보안 암호 칩으로 AI 메인 프레임을 코딩 초기화한다.", effectText: "신뢰도 +20, 완벽 해결", hpDelta: 0, energyDelta: -5, trustDelta: 20, target: "scene_win" },
-            { text: "🔌 강제로 주 전원 퓨즈를 뽑아버린다.", effectText: "체력 -50, 비상 폭발 위험", hpDelta: -50, energyDelta: -30, trustDelta: -20, target: "scene_fail" }
+            { text: "🔑 보안 암호 칩으로 즉시 초기화한다.", effectText: "신뢰도 +20, 안전 해결", energyDelta: -5, trustDelta: 20, target: "scene_3C_success" },
+            { text: "🔌 강제로 주 전원 퓨즈를 뽑아버린다.", effectText: "체력 -50, 폭발 위험", hpDelta: -50, energyDelta: -30, trustDelta: -20, target: "scene_fail_explosion" },
+            { text: "❓ 초기화 전에 바이러스의 정체를 먼저 물어본다.", effectText: "위험하지만 궁금하다", target: "scene_2B_twist" }
           ]
         },
-        scene_win: {
-          isWin: true,
-          icon: "🏆",
-          title: "임무 완수! (SUCCESS)",
-          desc: "아스테리아호의 비상 산소 장치를 완벽히 수리하고, 미지의 행성에 안전하게 터치다운하였습니다!"
+        scene_2B_twist: {
+          bg: IMG.nebula, npcImg: IMG.console,
+          speaker: "정체불명의 신호",
+          text: "...구조 요청... 저는 바이러스가 아닙니다. 표류하던 탐사선 '이카로스'의 조난 AI입니다. 도와주실 수 있나요?",
+          choices: [
+            { text: "🤝 신호와 힘을 합쳐 시스템을 함께 복구한다.", effectText: "신뢰도 +25, 새로운 동료 획득", energyDelta: -10, trustDelta: 25, addItem: "이카로스의 코어", target: "scene_3C_ally" },
+            { text: "🔒 믿을 수 없으니 일단 격리부터 한다.", effectText: "신뢰도 +5, 안전 우선", trustDelta: 5, target: "scene_3C_success" }
+          ]
         },
-        scene_fail: {
-          isFail: true,
-          icon: "💥",
-          title: "임무 실패 (GAME OVER)",
-          desc: "체력이 고갈되었거나 치명적인 시스템 오작동으로 아스테리아호의 미션이 실패하였습니다."
+        scene_3C_success: {
+          bg: IMG.workspace, npcImg: IMG.console,
+          speaker: "보안 시스템 '아테나'",
+          text: "시스템이 안정화되었습니다. 함내 모든 기능이 정상 작동합니다, 함장님.",
+          choices: [
+            { text: "➡️ 다음 위기로 향한다.", effectText: "", target: "scene_hub" }
+          ]
+        },
+        scene_3C_ally: {
+          bg: IMG.nebula, npcImg: IMG.workspace,
+          speaker: "이카로스",
+          text: "고맙습니다, 함장님. 제가 가진 항법 데이터를 모두 공유하겠습니다 — 덕분에 아스테리아호는 그 어떤 위기도 완벽하게 넘길 수 있을 겁니다.",
+          choices: [
+            { text: "🌌 이카로스와 함께 안전하게 항해를 마친다.", effectText: "", target: "scene_win_ally" }
+          ]
+        },
+
+        // ── 2C. 팀워크 경로 ──────────────────────────────
+        scene_2C: {
+          bg: IMG.bridge, npcImg: IMG.astronaut,
+          speaker: "1등 항해사 리나",
+          text: "함장님 방송 잘 들었습니다! 승무원들이 각자 위치에서 대응 중입니다. 함장님은 어떻게 움직이시겠습니까?",
+          choices: [
+            { text: "🧭 침착하게 전체를 지휘하며 신뢰를 쌓는다.", effectText: "신뢰도 +20", trustDelta: 20, target: "scene_hub" },
+            { text: "💪 직접 현장에 뛰어들어 함께 돕는다.", effectText: "체력 -10, 에너지 -10, 신뢰도 +10", hpDelta: -10, energyDelta: -10, trustDelta: 10, target: "scene_hub" }
+          ]
+        },
+
+        // ── 허브: 착륙 준비 ───────────────────────────────
+        scene_hub: {
+          bg: IMG.galaxy, npcImg: IMG.astronaut,
+          speaker: "AI 메인 컴퓨터 (ARI)",
+          text: "1차 위기는 넘겼습니다. 하지만 착륙선의 동력이 부족합니다. 미지의 행성 착륙까지 어떻게 대응하시겠습니까?",
+          choices: [
+            { text: "🔋 남은 에너지를 착륙선에 집중 투입한다.", effectText: "에너지 -20, 안전한 착륙", energyDelta: -20, target: "scene_landing_safe" },
+            { text: "🚀 위험을 감수하고 그대로 강행 착륙한다.", effectText: "체력 -20, 도박수", hpDelta: -20, target: "scene_landing_risky" }
+          ]
+        },
+        scene_landing_safe: {
+          bg: IMG.planet, npcImg: IMG.astronaut,
+          speaker: "AI 메인 컴퓨터 (ARI)",
+          text: "착륙선 동력이 안정적으로 확보되었습니다. 마지막 착륙 시퀀스를 시작합니다.",
+          choices: [
+            { text: "🛬 착륙을 마무리한다.", effectText: "", target: (stats) => stats.trust >= 70 ? "scene_win_perfect" : "scene_win_scarred" }
+          ]
+        },
+        scene_landing_risky: {
+          bg: IMG.danger, npcImg: IMG.astronaut,
+          speaker: "AI 메인 컴퓨터 (ARI)",
+          text: "동력이 불안정합니다! 강행 착륙을 시도합니다 — 충격에 대비하십시오!",
+          choices: [
+            { text: "🛬 그대로 강행 착륙한다.", effectText: "", target: (stats) => stats.hp <= 25 ? "scene_fail_crash" : "scene_win_scarred" }
+          ]
+        },
+
+        // ── 엔딩 ──────────────────────────────────────
+        scene_win_perfect: {
+          isWin: true, icon: "🏆",
+          title: "전설의 함장 (PERFECT)",
+          desc: "모든 위기를 완벽하게 넘기고, 승무원 전원의 신뢰를 받으며 미지의 행성에 안전하게 착륙했습니다. 아스테리아호의 전설이 시작됩니다!"
+        },
+        scene_win_scarred: {
+          isWin: true, icon: "🥈",
+          title: "상처뿐인 영광 (SURVIVED)",
+          desc: "우여곡절 끝에 무사히 행성에 착륙했습니다. 곳곳에 상처가 남았지만, 아스테리아호와 승무원 모두 살아남았습니다."
+        },
+        scene_win_ally: {
+          isWin: true, icon: "🌠",
+          title: "예상치 못한 동맹 (SECRET ENDING)",
+          desc: "조난 AI '이카로스'와의 만남은 위기가 아니라 기회였습니다. 새로운 동료와 함께 아스테리아호는 그 누구보다 완벽하게 항해를 마쳤습니다."
+        },
+        scene_fail_gas: {
+          isFail: true, icon: "☠️",
+          title: "유독가스 (GAME OVER)",
+          desc: "기계실에서 입은 치명적 부상을 이기지 못했습니다. 아스테리아호의 미션은 여기서 끝이 났습니다."
+        },
+        scene_fail_explosion: {
+          isFail: true, icon: "💥",
+          title: "시스템 폭주 (GAME OVER)",
+          desc: "강제로 전원을 차단한 여파로 시스템이 폭주했습니다. 아스테리아호는 돌이킬 수 없는 피해를 입었습니다."
+        },
+        scene_fail_crash: {
+          isFail: true, icon: "🌪️",
+          title: "착륙 실패 (GAME OVER)",
+          desc: "체력이 한계에 달한 상태로는 강행 착륙의 충격을 버틸 수 없었습니다. 아스테리아호는 불시착하고 말았습니다."
         }
       }
     };
@@ -563,6 +684,7 @@
     // ----------------------------------------------------
     let currentStats = { hp: 100, energy: 80, trust: 60 };
     let currentSceneId = "scene_1";
+    let currentItems = [];
     let soundEnabled = true;
 
     // Web Audio Synthesizer
@@ -621,13 +743,20 @@
     function restartGame() {
       currentStats = { ...SCENARIO_DATA.initialStats };
       currentSceneId = "scene_1";
-      
+      currentItems = [...SCENARIO_DATA.initialItems];
+
       document.getElementById('heroName').textContent = SCENARIO_DATA.heroName;
       document.getElementById('heroRole').textContent = SCENARIO_DATA.heroRole;
       document.getElementById('heroAvatar').textContent = SCENARIO_DATA.heroName.charAt(0);
 
       updateStatsUI();
+      renderInventory();
       renderScene(currentSceneId);
+    }
+
+    function renderInventory() {
+      const invList = document.getElementById('invList');
+      invList.innerHTML = currentItems.map(item => `<span class="inv-item">${item}</span>`).join('');
     }
 
     function updateStatsUI() {
@@ -724,15 +853,23 @@
       if (choice.energyDelta) currentStats.energy += choice.energyDelta;
       if (choice.trustDelta) currentStats.trust += choice.trustDelta;
 
+      // Item pickup
+      if (choice.addItem && !currentItems.includes(choice.addItem)) {
+        currentItems.push(choice.addItem);
+        renderInventory();
+      }
+
       // Popup stat notification
       if (choice.effectText) {
-        showStatPopup(choice.effectText);
+        showStatPopup(choice.addItem ? `${choice.effectText} · 🎒 ${choice.addItem} 획득` : choice.effectText);
+      } else if (choice.addItem) {
+        showStatPopup(`🎒 ${choice.addItem} 획득`);
       }
 
       updateStatsUI();
 
-      // Move to target scene
-      currentSceneId = choice.target;
+      // Move to target scene (target can be a fixed id or a function of current stats)
+      currentSceneId = typeof choice.target === 'function' ? choice.target(currentStats) : choice.target;
       renderScene(currentSceneId);
     }
 
