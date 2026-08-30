@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>자바스크립트 2주차 · 브라우저 모델과 DOM | 유한대학교</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5EFE7;
+    --surface: #FFFFFF;
+    --primary: #1E3A5F;
+    --primary-hover: #2D5986;
+    --secondary: #3D7E6B;
+    --accent: #C47B1A;
+    --text: #2A2A2A;
+    --text-muted: #6B6B6B;
+    --border: #E2D9CE;
+    --code-bg: #1C2A3E;
+    --shadow: 0 2px 16px rgba(0,0,0,0.08);
+    --shadow-hover: 0 6px 24px rgba(0,0,0,0.14);
+    --radius: 12px;
+    --mono: 'JetBrains Mono', 'Courier New', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Malgun Gothic', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ── Navigation ── */
+  nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: var(--primary);
+    z-index: 1000;
+    padding: 0 2rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.2);
+  }
+
+  .nav-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    height: 56px;
+    gap: 0.2rem;
+    overflow-x: auto;
+  }
+
+  .nav-brand {
+    font-size: 0.92rem;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-right: auto;
+    white-space: nowrap;
+  }
+
+  nav a.nav-link {
+    color: rgba(255,255,255,0.75);
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.4rem 0.65rem;
+    border-radius: 6px;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  nav a.nav-link:hover,
+  nav a.nav-link.active {
+    background: rgba(255,255,255,0.18);
+    color: #FFFFFF;
+  }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 78px 2rem 4rem;
+  }
+
+  /* ── Hero ── */
+  .hero {
+    background: linear-gradient(135deg, #1E3A5F 0%, #2D5986 55%, #3D7E6B 100%);
+    border-radius: var(--radius);
+    padding: 3.4rem 3rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  .hero .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 50px;
+    padding: 0.3rem 1.2rem;
+    font-size: 0.85rem;
+    margin-bottom: 1.3rem;
+    letter-spacing: 0.04em;
+  }
+
+  .hero h1 {
+    font-size: 2.1rem;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+    line-height: 1.35;
+  }
+
+  .hero p {
+    font-size: 0.98rem;
+    opacity: 0.85;
+  }
+
+  /* ── Sections ── */
+  section {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 2.4rem;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+    scroll-margin-top: 72px;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    margin-bottom: 1.6rem;
+  }
+
+  .section-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    flex-shrink: 0;
+  }
+
+  .icon-blue   { background: #E6EEF7; }
+  .icon-green  { background: #E6F3EE; }
+  .icon-amber  { background: #F5EDE0; }
+  .icon-purple { background: #EDE8F5; }
+
+  .section-header h2 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .subtitle {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+  }
+
+  h3.sub-h {
+    font-size: 1.02rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 1.6rem 0 0.7rem;
+  }
+  h3.sub-h:first-of-type { margin-top: 0; }
+
+  p.body-text { font-size: 0.92rem; margin-bottom: 0.6rem; }
+
+  ul.point-list, ol.point-list {
+    margin: 0.4rem 0 0.8rem 1.3rem;
+    font-size: 0.9rem;
+  }
+  ul.point-list li, ol.point-list li { margin-bottom: 0.35rem; }
+  ul.point-list code, ol.point-list code, p.body-text code {
+    background: var(--code-bg); color: #E6D8BF; font-family: var(--mono);
+    padding: 0.08rem 0.4rem; border-radius: 4px; font-size: 0.86em;
+  }
+
+  /* ── Info cards ── */
+  .info-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin: 0.75rem 0;
+    font-size: 0.9rem;
+  }
+
+  .card-highlight {
+    background: #EBF2FA;
+    border-color: #B5CEE5;
+    border-left: 4px solid var(--primary);
+  }
+
+  .card-note {
+    background: #F5F0E6;
+    border-color: #DDD0B8;
+    border-left: 4px solid var(--accent);
+  }
+
+  .card-warn {
+    background: #FBEAE9;
+    border-color: #E5B9B6;
+    border-left: 4px solid #B5453F;
+  }
+
+  .info-card b { color: var(--primary); }
+
+  /* ── Code block ── */
+  .code-block {
+    background: var(--code-bg);
+    border-radius: 10px;
+    padding: 1.1rem 1.3rem;
+    margin: 0.9rem 0;
+    overflow-x: auto;
+  }
+  .code-block pre {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: #E6D8BF;
+    line-height: 1.75;
+    white-space: pre;
+  }
+  .code-block .cmt { color: #6C90B8; }
+  .code-block .bad { color: #E39B95; }
+  .code-block .good { color: #8FCBB0; }
+  .code-block .kw { color: #9DBBD6; }
+  .code-block-label {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 0.5rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Comparison grid ── */
+  .compare-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 0.9rem;
+  }
+  .compare-grid.two { grid-template-columns: repeat(2, 1fr); }
+  .compare-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.1rem 1.2rem;
+  }
+  .compare-card .name {
+    font-family: var(--mono);
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.4rem;
+    font-size: 0.95rem;
+  }
+  .compare-card p { font-size: 0.83rem; color: var(--text-muted); line-height: 1.55; }
+
+  /* ── Table ── */
+  table.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.9rem;
+    font-size: 0.87rem;
+  }
+  table.data-table th, table.data-table td {
+    border: 1px solid var(--border);
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.data-table th {
+    background: var(--bg);
+    color: var(--primary);
+    font-weight: 700;
+  }
+  table.data-table td code {
+    background: var(--code-bg); color: #E6D8BF; font-family: var(--mono);
+    padding: 0.08rem 0.4rem; border-radius: 4px;
+  }
+
+  /* ── Tree diagram ── */
+  .dom-tree {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.3rem 1.5rem;
+    margin: 0.9rem 0;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--text);
+    line-height: 1.9;
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .dom-tree .tag { color: var(--primary); font-weight: 600; }
+  .dom-tree .txt { color: var(--secondary); }
+
+  /* ── Rule cards ── */
+  .rule-card {
+    display: flex;
+    gap: 1rem;
+    padding: 1.05rem 1.2rem;
+    background: var(--bg);
+    border-radius: 10px;
+    border-left: 4px solid var(--accent);
+    margin-bottom: 0.75rem;
+  }
+  .rule-number {
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .rule-title { font-weight: 600; margin-bottom: 0.15rem; font-size: 0.92rem; }
+  .rule-desc { font-size: 0.83rem; color: var(--text-muted); }
+
+  /* ── Practice box ── */
+  .practice-box {
+    background: #EDF4EF;
+    border: 1px solid #C7DFCD;
+    border-radius: 10px;
+    padding: 1.2rem 1.3rem;
+    margin-top: 1rem;
+  }
+  .practice-box .p-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--secondary);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.5rem;
+  }
+  .practice-box ol { margin-left: 1.3rem; font-size: 0.9rem; }
+  .practice-box li { margin-bottom: 0.4rem; }
+
+  footer {
+    text-align: center;
+    padding: 2rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+  }
+
+  @media (max-width: 640px) {
+    .hero { padding: 2.2rem 1.4rem; }
+    .hero h1 { font-size: 1.5rem; }
+    nav a.nav-link { display: none; }
+    .compare-grid, .compare-grid.two { grid-template-columns: 1fr; }
+    section { padding: 1.6rem; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <span class="nav-brand">JS 2주차</span>
+    <a href="#overview" class="nav-link">전체 구조</a>
+    <a href="#bom" class="nav-link">BOM</a>
+    <a href="#window" class="nav-link">window</a>
+    <a href="#location" class="nav-link">location·history</a>
+    <a href="#navigator" class="nav-link">navigator·screen</a>
+    <a href="#dom" class="nav-link">DOM</a>
+    <a href="#select" class="nav-link">요소 선택</a>
+    <a href="#manipulate" class="nav-link">내용·속성</a>
+    <a href="#node" class="nav-link">노드 조작</a>
+    <a href="#event" class="nav-link">이벤트</a>
+  </div>
+</nav>
+
+<main>
+
+  <div class="hero">
+    <span class="badge">유한대학교 · 컴퓨터공학과 게임콘텐츠전공</span>
+    <h1>자바스크립트 2주차<br>브라우저 모델(BOM)과 문서 모델(DOM)</h1>
+    <p>자바스크립트가 브라우저 창과 웹 페이지를 어떻게 객체로 다루는지 익힙니다</p>
+  </div>
+
+  <!-- 0. 전체 구조 -->
+  <section id="overview">
+    <div class="section-header">
+      <div class="section-icon icon-blue">🗺️</div>
+      <div>
+        <h2>먼저 큰 그림부터</h2>
+        <div class="subtitle">브라우저가 자바스크립트에 제공하는 두 개의 객체 묶음</div>
+      </div>
+    </div>
+
+    <p class="body-text">브라우저에서 실행되는 자바스크립트는 언어 자체의 문법(1주차 내용) 외에, 브라우저가 미리 만들어 둔 객체들을 사용할 수 있습니다. 이 객체들은 크게 두 갈래로 나눌 수 있습니다.</p>
+
+    <div class="compare-grid two">
+      <div class="compare-card">
+        <div class="name">BOM</div>
+        <p><b>Browser Object Model</b> · 브라우저 객체 모델. 브라우저 창 자체를 제어합니다. 주소 이동, 창 열기/닫기, 화면 크기, 방문 기록, 브라우저 정보 등.</p>
+      </div>
+      <div class="compare-card">
+        <div class="name">DOM</div>
+        <p><b>Document Object Model</b> · 문서 객체 모델. 현재 열려 있는 웹 페이지(HTML 문서)의 내용을 제어합니다. 요소 찾기, 텍스트 바꾸기, 태그 추가/삭제, 스타일 변경 등.</p>
+      </div>
+    </div>
+
+    <div class="dom-tree">window  <span class="txt">(최상위 전역 객체 · BOM의 중심)</span>
+ ├─ location    <span class="txt">현재 URL, 페이지 이동</span>
+ ├─ history     <span class="txt">앞으로 / 뒤로 가기</span>
+ ├─ navigator   <span class="txt">브라우저·OS 정보</span>
+ ├─ screen      <span class="txt">모니터 해상도</span>
+ ├─ console     <span class="txt">개발자 도구 콘솔</span>
+ └─ document    <span class="txt">← 여기서부터가 DOM (열려 있는 HTML 문서)</span>
+     ├─ html
+     │   ├─ head
+     │   └─ body
+     │       ├─ h1
+     │       └─ p ...</div>
+
+    <div class="info-card card-highlight">
+      <b>핵심</b> — <code>window</code>는 브라우저 안 모든 것의 최상위 객체입니다. <code>document</code>는 그 <code>window</code>가 가진 여러 자식 중 하나이며, "화면에 보이는 문서"를 담당합니다. 그래서 <code>window.document</code>이지만 <code>window.</code>은 생략할 수 있어 그냥 <code>document</code>라고 씁니다.
+    </div>
+  </section>
+
+  <!-- 1. BOM -->
+  <section id="bom">
+    <div class="section-header">
+      <div class="section-icon icon-green">🌐</div>
+      <div>
+        <h2>브라우저 객체 모델 (BOM)</h2>
+        <div class="subtitle">브라우저 창을 다루는 객체들</div>
+      </div>
+    </div>
+
+    <p class="body-text">BOM은 특정 표준으로 완전히 통일되어 있지는 않지만, 모든 브라우저가 거의 동일하게 지원하는 객체들이 있습니다. 모두 <code>window</code>의 하위 객체입니다.</p>
+
+    <table class="data-table">
+      <thead>
+        <tr><th>객체</th><th>담당</th><th>대표 멤버</th></tr>
+      </thead>
+      <tbody>
+        <tr><td><code>window</code></td><td>브라우저 창 전체, 전역 스코프</td><td><code>alert()</code>, <code>setTimeout()</code>, <code>innerWidth</code></td></tr>
+        <tr><td><code>location</code></td><td>현재 페이지의 주소(URL)</td><td><code>href</code>, <code>reload()</code>, <code>assign()</code></td></tr>
+        <tr><td><code>history</code></td><td>방문 기록(뒤로/앞으로)</td><td><code>back()</code>, <code>forward()</code>, <code>go()</code></td></tr>
+        <tr><td><code>navigator</code></td><td>브라우저·기기 정보</td><td><code>userAgent</code>, <code>language</code>, <code>onLine</code></td></tr>
+        <tr><td><code>screen</code></td><td>사용자 모니터 정보</td><td><code>width</code>, <code>height</code></td></tr>
+        <tr><td><code>document</code></td><td>현재 열린 HTML 문서 (= DOM)</td><td><code>getElementById()</code>, <code>querySelector()</code></td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 2. window -->
+  <section id="window">
+    <div class="section-header">
+      <div class="section-icon icon-blue">🪟</div>
+      <div>
+        <h2>window 객체</h2>
+        <div class="subtitle">모든 전역 코드가 살고 있는 집</div>
+      </div>
+    </div>
+
+    <p class="body-text">전역으로 선언한 함수나 <code>var</code> 변수, <code>alert</code> 같은 내장 함수는 모두 <code>window</code>의 속성입니다. 그래서 <code>window.alert("안녕")</code>과 <code>alert("안녕")</code>은 완전히 같습니다.</p>
+
+    <h3 class="sub-h">대화상자 메서드</h3>
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE</div>
+      <pre>alert("저장되었습니다.");            <span class="cmt">// 확인 버튼만 있는 알림창</span>
+
+const ok = confirm("정말 삭제할까요?"); <span class="cmt">// 확인/취소 → true 또는 false 반환</span>
+if (ok) {
+  console.log("삭제 진행");
+}
+
+const name = prompt("이름을 입력하세요", "루크"); <span class="cmt">// 입력창 → 입력한 문자열(또는 null) 반환</span>
+console.log("환영합니다, " + name);</pre>
+    </div>
+
+    <h3 class="sub-h">타이머 메서드</h3>
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE</div>
+      <pre><span class="cmt">// 2초 뒤에 한 번 실행</span>
+setTimeout(function () {
+  console.log("2초 지났습니다");
+}, 2000);
+
+<span class="cmt">// 1초마다 반복 실행</span>
+const id = setInterval(function () {
+  console.log("1초마다 실행");
+}, 1000);
+
+<span class="cmt">// 반복 중지</span>
+clearInterval(id);</pre>
+    </div>
+
+    <h3 class="sub-h">창 제어 & 크기</h3>
+    <table class="data-table">
+      <thead><tr><th>멤버</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td><code>window.open(url)</code></td><td>새 창(또는 탭)을 연다</td></tr>
+        <tr><td><code>window.close()</code></td><td>스크립트로 연 창을 닫는다</td></tr>
+        <tr><td><code>window.innerWidth</code> / <code>innerHeight</code></td><td>내용이 보이는 영역의 가로·세로 픽셀</td></tr>
+        <tr><td><code>window.scrollTo(x, y)</code></td><td>지정한 좌표로 스크롤 이동</td></tr>
+      </tbody>
+    </table>
+
+    <div class="info-card card-warn">
+      <b>주의</b> — <code>alert</code>, <code>confirm</code>, <code>prompt</code>는 창이 떠 있는 동안 코드 실행과 페이지 조작이 모두 멈춥니다(동기 방식). 실제 서비스에서는 잘 쓰지 않고, 학습·디버깅 용도로 이해하면 됩니다.
+    </div>
+  </section>
+
+  <!-- 3. location / history -->
+  <section id="location">
+    <div class="section-header">
+      <div class="section-icon icon-amber">🧭</div>
+      <div>
+        <h2>location · history 객체</h2>
+        <div class="subtitle">주소를 읽고, 페이지를 이동한다</div>
+      </div>
+    </div>
+
+    <h3 class="sub-h">location — 현재 URL</h3>
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE</div>
+      <pre>console.log(location.href);      <span class="cmt">// 전체 주소: https://yu.ac.kr/board?page=2</span>
+console.log(location.protocol); <span class="cmt">// "https:"</span>
+console.log(location.host);     <span class="cmt">// "yu.ac.kr"</span>
+console.log(location.pathname); <span class="cmt">// "/board"</span>
+console.log(location.search);   <span class="cmt">// "?page=2"</span>
+
+location.href = "https://yu.ac.kr";  <span class="cmt">// 해당 주소로 이동</span>
+location.reload();                    <span class="cmt">// 새로고침(F5)</span>
+location.assign("/login");            <span class="cmt">// 이동 (뒤로가기 기록 남음)</span>
+location.replace("/login");           <span class="cmt">// 이동 (현재 기록을 덮어씀)</span></pre>
+    </div>
+
+    <h3 class="sub-h">history — 방문 기록</h3>
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE</div>
+      <pre>history.back();     <span class="cmt">// 뒤로 가기 (브라우저 ← 버튼과 동일)</span>
+history.forward();  <span class="cmt">// 앞으로 가기</span>
+history.go(-2);     <span class="cmt">// 2단계 뒤로</span>
+console.log(history.length); <span class="cmt">// 현재 탭의 기록 개수</span></pre>
+    </div>
+
+    <div class="info-card card-note">
+      <b>보안 참고</b> — <code>history</code>로는 "몇 단계 이동"만 할 수 있고, 사용자가 어떤 사이트를 방문했는지 목록을 읽을 수는 없습니다. 개인정보 보호를 위한 제한입니다.
+    </div>
+  </section>
+
+  <!-- 4. navigator / screen -->
+  <section id="navigator">
+    <div class="section-header">
+      <div class="section-icon icon-purple">💻</div>
+      <div>
+        <h2>navigator · screen 객체</h2>
+        <div class="subtitle">브라우저와 화면 환경을 알아낸다</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE</div>
+      <pre><span class="cmt">// navigator — 브라우저 / 기기 정보</span>
+console.log(navigator.userAgent);  <span class="cmt">// 브라우저 종류·버전 문자열</span>
+console.log(navigator.language);   <span class="cmt">// "ko-KR"</span>
+console.log(navigator.onLine);     <span class="cmt">// 온라인 여부 true / false</span>
+
+<span class="cmt">// screen — 사용자 모니터 정보</span>
+console.log(screen.width, screen.height);  <span class="cmt">// 예: 1920 1080</span>
+console.log(screen.availWidth);            <span class="cmt">// 작업 표시줄을 뺀 사용 가능 너비</span></pre>
+    </div>
+
+    <div class="info-card card-highlight">
+      <code>window.innerWidth</code>는 <b>브라우저 창</b> 크기, <code>screen.width</code>는 <b>모니터 전체</b> 크기입니다. 반응형 판단에는 보통 <code>window.innerWidth</code>를 씁니다.
+    </div>
+  </section>
+
+  <!-- 5. DOM 개요 -->
+  <section id="dom">
+    <div class="section-header">
+      <div class="section-icon icon-green">🌳</div>
+      <div>
+        <h2>문서 객체 모델 (DOM)</h2>
+        <div class="subtitle">HTML 문서를 나무 모양 객체로</div>
+      </div>
+    </div>
+
+    <p class="body-text">브라우저는 HTML 문서를 읽어들이면서 각 태그를 <b>객체(노드)</b>로 바꾸고, 태그의 포함 관계를 그대로 <b>트리 구조</b>로 만듭니다. 이 트리 전체가 DOM이고, 자바스크립트는 이 트리를 탐색·수정해서 화면을 바꿉니다.</p>
+
+    <div class="compare-grid two">
+      <div class="compare-card">
+        <div class="name">원본 HTML</div>
+        <p style="font-family:var(--mono); color:var(--text); white-space:pre-line;">&lt;body&gt;
+  &lt;h1&gt;공지&lt;/h1&gt;
+  &lt;p class="msg"&gt;안녕하세요&lt;/p&gt;
+&lt;/body&gt;</p>
+      </div>
+      <div class="compare-card">
+        <div class="name">DOM 트리</div>
+        <p style="font-family:var(--mono); color:var(--text); white-space:pre-line;">body
+ ├─ h1
+ │   └─ "공지" (텍스트 노드)
+ └─ p.msg
+     └─ "안녕하세요"</p>
+      </div>
+    </div>
+
+    <h3 class="sub-h">노드의 종류</h3>
+    <ul class="point-list">
+      <li><b>요소 노드(element)</b> — <code>&lt;div&gt;</code>, <code>&lt;p&gt;</code> 같은 태그</li>
+      <li><b>텍스트 노드(text)</b> — 태그 사이의 글자</li>
+      <li><b>속성 노드(attribute)</b> — <code>class="msg"</code>, <code>id="title"</code> 같은 속성</li>
+      <li><b>문서 노드(document)</b> — 트리의 뿌리, <code>document</code> 그 자체</li>
+    </ul>
+
+    <h3 class="sub-h">탐색용 속성</h3>
+    <table class="data-table">
+      <thead><tr><th>속성</th><th>가리키는 것</th></tr></thead>
+      <tbody>
+        <tr><td><code>parentElement</code></td><td>부모 요소</td></tr>
+        <tr><td><code>children</code></td><td>자식 요소들의 목록</td></tr>
+        <tr><td><code>firstElementChild</code> / <code>lastElementChild</code></td><td>첫 번째 / 마지막 자식 요소</td></tr>
+        <tr><td><code>nextElementSibling</code> / <code>previousElementSibling</code></td><td>다음 / 이전 형제 요소</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 6. 요소 선택 -->
+  <section id="select">
+    <div class="section-header">
+      <div class="section-icon icon-blue">🎯</div>
+      <div>
+        <h2>요소 선택하기</h2>
+        <div class="subtitle">트리에서 원하는 노드를 찾아온다</div>
+      </div>
+    </div>
+
+    <p class="body-text">DOM을 조작하려면 먼저 대상 요소를 변수로 가져와야 합니다. 가장 많이 쓰는 방법은 <code>querySelector</code> 계열입니다.</p>
+
+    <table class="data-table">
+      <thead><tr><th>메서드</th><th>반환</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td><code>getElementById("id")</code></td><td>요소 1개</td><td>id로 찾기. 가장 빠름</td></tr>
+        <tr><td><code>querySelector("CSS선택자")</code></td><td>요소 1개</td><td>조건에 맞는 <b>첫 번째</b> 요소</td></tr>
+        <tr><td><code>querySelectorAll("CSS선택자")</code></td><td>NodeList</td><td>조건에 맞는 <b>모든</b> 요소</td></tr>
+        <tr><td><code>getElementsByClassName("cls")</code></td><td>HTMLCollection</td><td>클래스로 찾기(실시간 목록)</td></tr>
+        <tr><td><code>getElementsByTagName("p")</code></td><td>HTMLCollection</td><td>태그 이름으로 찾기</td></tr>
+      </tbody>
+    </table>
+
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE</div>
+      <pre>const title  = document.getElementById("title");
+const first  = document.querySelector(".msg");        <span class="cmt">// class="msg" 첫 요소</span>
+const all    = document.querySelectorAll("ul li");    <span class="cmt">// ul 안 모든 li</span>
+const btn    = document.querySelector("#save-btn");   <span class="cmt">// # 은 id, . 은 class</span>
+
+<span class="cmt">// querySelectorAll 결과는 for...of 로 순회</span>
+for (const li of all) {
+  console.log(li.textContent);
+}</pre>
+    </div>
+
+    <div class="info-card card-warn">
+      <b>주의</b> — 찾는 요소가 없으면 <code>getElementById</code>·<code>querySelector</code>는 <code>null</code>을 반환합니다. 이 상태에서 <code>null.textContent</code>처럼 접근하면 오류가 납니다. 또한 <code>&lt;script&gt;</code>가 요소보다 위에 있으면 아직 만들어지지 않은 요소를 못 찾습니다 → 스크립트를 <code>&lt;/body&gt;</code> 직전에 두거나 <code>defer</code>를 사용합니다.
+    </div>
+  </section>
+
+  <!-- 7. 내용·속성 조작 -->
+  <section id="manipulate">
+    <div class="section-header">
+      <div class="section-icon icon-amber">✏️</div>
+      <div>
+        <h2>내용 · 속성 · 스타일 바꾸기</h2>
+        <div class="subtitle">가져온 요소를 실제로 수정한다</div>
+      </div>
+    </div>
+
+    <h3 class="sub-h">텍스트와 HTML 내용</h3>
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE</div>
+      <pre>const box = document.querySelector("#box");
+
+box.textContent = "순수 텍스트로 교체";       <span class="cmt">// 태그는 글자 그대로 표시됨(안전)</span>
+box.innerHTML   = "&lt;b&gt;굵은&lt;/b&gt; 글씨";        <span class="cmt">// HTML로 해석해서 삽입</span>
+
+const input = document.querySelector("#name");
+console.log(input.value);   <span class="cmt">// 입력 요소의 값은 value 로 읽고 쓴다</span>
+input.value = "루크";</pre>
+    </div>
+
+    <div class="info-card card-warn">
+      <b>보안</b> — 사용자가 입력한 값을 <code>innerHTML</code>에 그대로 넣으면 악성 스크립트가 실행될 수 있습니다(XSS). 사용자 입력을 표시할 때는 <code>textContent</code>를 사용하세요.
+    </div>
+
+    <h3 class="sub-h">속성(attribute)</h3>
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE</div>
+      <pre>const img = document.querySelector("img");
+
+img.getAttribute("src");            <span class="cmt">// 속성 읽기</span>
+img.setAttribute("src", "b.png");   <span class="cmt">// 속성 쓰기</span>
+img.setAttribute("alt", "설명");
+img.removeAttribute("width");       <span class="cmt">// 속성 삭제</span>
+
+<span class="cmt">// 자주 쓰는 속성은 . 으로 바로 접근 가능</span>
+img.src = "c.png";
+const link = document.querySelector("a");
+link.href = "https://yu.ac.kr";</pre>
+    </div>
+
+    <h3 class="sub-h">클래스와 스타일</h3>
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE</div>
+      <pre>const menu = document.querySelector("#menu");
+
+menu.classList.add("active");        <span class="cmt">// 클래스 추가</span>
+menu.classList.remove("hidden");     <span class="cmt">// 클래스 제거</span>
+menu.classList.toggle("open");       <span class="cmt">// 있으면 제거, 없으면 추가</span>
+menu.classList.contains("active");   <span class="cmt">// 포함 여부 true / false</span>
+
+<span class="cmt">// 인라인 스타일 직접 지정 (CSS 속성은 camelCase)</span>
+menu.style.color = "#1E3A5F";
+menu.style.backgroundColor = "#F5EFE7";
+menu.style.display = "none";</pre>
+    </div>
+
+    <div class="info-card card-highlight">
+      스타일을 여러 개 바꿔야 할 때는 <code>style</code>을 하나씩 지정하기보다, CSS에 클래스를 미리 정의해 두고 <code>classList.add/remove</code>로 전환하는 방식이 더 깔끔합니다.
+    </div>
+  </section>
+
+  <!-- 8. 노드 생성·추가·삭제 -->
+  <section id="node">
+    <div class="section-header">
+      <div class="section-icon icon-purple">🧩</div>
+      <div>
+        <h2>노드 생성 · 추가 · 삭제</h2>
+        <div class="subtitle">트리에 새 가지를 붙이고 잘라낸다</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE — 목록에 항목 추가</div>
+      <pre>const ul = document.querySelector("#todo");
+
+<span class="cmt">// 1) 요소 만들기</span>
+const li = document.createElement("li");
+
+<span class="cmt">// 2) 내용·속성 채우기</span>
+li.textContent = "자바스크립트 복습";
+li.classList.add("item");
+
+<span class="cmt">// 3) 트리에 붙이기</span>
+ul.appendChild(li);          <span class="cmt">// 맨 뒤에 추가</span>
+ul.prepend(li);              <span class="cmt">// 맨 앞에 추가</span>
+ul.insertBefore(li, ul.firstElementChild); <span class="cmt">// 특정 요소 앞에</span></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE — 삭제</div>
+      <pre>const item = document.querySelector(".item");
+
+item.remove();                 <span class="cmt">// 자기 자신을 트리에서 제거</span>
+ul.removeChild(ul.lastElementChild); <span class="cmt">// 부모가 자식을 제거</span>
+
+<span class="cmt">// 안의 내용 전부 비우기</span>
+ul.innerHTML = "";</pre>
+    </div>
+
+    <table class="data-table">
+      <thead><tr><th>메서드</th><th>하는 일</th></tr></thead>
+      <tbody>
+        <tr><td><code>document.createElement(tag)</code></td><td>새 요소 노드 생성</td></tr>
+        <tr><td><code>parent.appendChild(node)</code> / <code>append()</code></td><td>자식으로 맨 뒤에 추가</td></tr>
+        <tr><td><code>parent.prepend(node)</code></td><td>자식으로 맨 앞에 추가</td></tr>
+        <tr><td><code>node.remove()</code></td><td>해당 노드 삭제</td></tr>
+        <tr><td><code>node.cloneNode(true)</code></td><td>노드 복제(하위 포함)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 9. 이벤트 -->
+  <section id="event">
+    <div class="section-header">
+      <div class="section-icon icon-green">👆</div>
+      <div>
+        <h2>이벤트 다루기</h2>
+        <div class="subtitle">사용자의 동작에 반응한다</div>
+      </div>
+    </div>
+
+    <p class="body-text">클릭·입력·스크롤 같은 사용자 동작을 이벤트라고 합니다. <code>addEventListener</code>로 "이 요소에서 이 이벤트가 일어나면 이 함수를 실행하라"고 등록합니다.</p>
+
+    <div class="code-block">
+      <div class="code-block-label">EXAMPLE</div>
+      <pre>const btn = document.querySelector("#save-btn");
+
+btn.addEventListener("click", function (event) {
+  console.log("버튼이 클릭됨");
+  console.log(event.target);   <span class="cmt">// 이벤트가 일어난 요소</span>
+});
+
+<span class="cmt">// 입력값이 바뀔 때마다</span>
+const input = document.querySelector("#search");
+input.addEventListener("input", function () {
+  console.log("현재 입력값:", input.value);
+});
+
+<span class="cmt">// 폼 제출 시 기본 동작(새로고침) 막기</span>
+const form = document.querySelector("form");
+form.addEventListener("submit", function (e) {
+  e.preventDefault();
+  console.log("검증 후 직접 처리");
+});</pre>
+    </div>
+
+    <table class="data-table">
+      <thead><tr><th>이벤트</th><th>발생 시점</th></tr></thead>
+      <tbody>
+        <tr><td><code>click</code></td><td>요소를 클릭했을 때</td></tr>
+        <tr><td><code>input</code> / <code>change</code></td><td>입력값이 바뀔 때 / 바뀌고 포커스가 떠날 때</td></tr>
+        <tr><td><code>submit</code></td><td>폼이 제출될 때</td></tr>
+        <tr><td><code>keydown</code> / <code>keyup</code></td><td>키를 누를 때 / 뗄 때</td></tr>
+        <tr><td><code>mouseover</code> / <code>mouseout</code></td><td>마우스가 요소에 올라올 때 / 벗어날 때</td></tr>
+        <tr><td><code>DOMContentLoaded</code></td><td>HTML 파싱이 끝났을 때(<code>document</code>에 등록)</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="sub-h">이벤트 객체 event</h3>
+    <ul class="point-list">
+      <li><code>event.target</code> — 실제로 이벤트가 발생한 요소</li>
+      <li><code>event.preventDefault()</code> — 기본 동작 취소(링크 이동, 폼 전송 등)</li>
+      <li><code>event.stopPropagation()</code> — 이벤트가 부모로 전파되는 것을 중단</li>
+      <li><code>event.key</code> — 키보드 이벤트에서 누른 키 이름 (<code>"Enter"</code>, <code>"a"</code> 등)</li>
+    </ul>
+
+    <div class="info-card card-note">
+      <b>흐름 정리</b> — ① <code>querySelector</code>로 요소를 찾고 → ② <code>addEventListener</code>로 이벤트를 등록하고 → ③ 콜백 함수 안에서 <code>textContent</code>·<code>classList</code>·<code>createElement</code> 등으로 DOM을 바꾼다. 대부분의 웹 인터랙션이 이 세 단계입니다.
+    </div>
+  </section>
+
+  <!-- 실습 -->
+  <section id="practice">
+    <div class="section-header">
+      <div class="section-icon icon-amber">🧪</div>
+      <div>
+        <h2>정리 &amp; 실습 문제</h2>
+        <div class="subtitle">직접 손으로 확인해 봅니다</div>
+      </div>
+    </div>
+
+    <div class="rule-card">
+      <div class="rule-number">1</div>
+      <div>
+        <div class="rule-title">BOM은 창, DOM은 문서</div>
+        <div class="rule-desc"><code>window</code>가 최상위이고 <code>document</code>는 그 하위에서 페이지 내용을 담당한다</div>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-number">2</div>
+      <div>
+        <div class="rule-title">선택 → 수정 → 반응</div>
+        <div class="rule-desc"><code>querySelector</code>로 찾고, <code>textContent</code>/<code>classList</code>로 바꾸고, <code>addEventListener</code>로 이벤트에 연결한다</div>
+      </div>
+    </div>
+    <div class="rule-card">
+      <div class="rule-number">3</div>
+      <div>
+        <div class="rule-title">스크립트 위치와 null 체크</div>
+        <div class="rule-desc">스크립트는 <code>&lt;/body&gt;</code> 직전에 두거나 <code>defer</code>, 선택 결과가 <code>null</code>일 수 있음에 주의</div>
+      </div>
+    </div>
+
+    <div class="practice-box">
+      <div class="p-label">✏️ 실습 문제</div>
+      <ol>
+        <li><code>confirm</code>으로 "페이지를 떠나시겠습니까?"를 물어보고, 확인을 누르면 <code>location.href</code>로 <code>https://yu.ac.kr</code>로 이동하는 코드를 작성해 보세요.</li>
+        <li>버튼과 <code>&lt;p id="count"&gt;0&lt;/p&gt;</code>를 만들고, 버튼을 누를 때마다 숫자가 1씩 올라가도록 <code>addEventListener</code>와 <code>textContent</code>로 구현해 보세요.</li>
+        <li>입력창과 "추가" 버튼, 빈 <code>&lt;ul&gt;</code>을 만들고, 버튼을 누르면 입력한 내용을 <code>&lt;li&gt;</code>로 만들어 목록에 추가하는 간단한 할 일 목록을 만들어 보세요.</li>
+        <li>3번에서 만든 각 <code>&lt;li&gt;</code>를 클릭하면 <code>classList.toggle("done")</code>로 취소선 스타일이 켜지고 꺼지도록 해 보세요. (CSS <code>.done { text-decoration: line-through; }</code>)</li>
+        <li><code>setInterval</code>로 1초마다 화면의 <code>&lt;span&gt;</code>에 현재 시각(<code>new Date().toLocaleTimeString()</code>)을 표시하는 시계를 만들어 보세요.</li>
+      </ol>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  &copy; 2026 유한대학교 컴퓨터공학과 게임콘텐츠전공 · 자바스크립트 2주차 · 브라우저 모델과 DOM
+</footer>
+
+<script>
+  const navLinks = document.querySelectorAll('nav a.nav-link');
+  const sections = document.querySelectorAll('main section[id]');
+
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(sec => {
+      const rect = sec.getBoundingClientRect();
+      if (rect.top <= 100) current = sec.id;
+    });
+    navLinks.forEach(link => {
+      link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+    });
+  });
+</script>
+
+</body>
+</html>
