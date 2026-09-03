@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>포트폴리오 구조 설계 가이드</title>
+<style>
+  :root{
+    --bg:#f6f4ef;
+    --paper:#fffdf8;
+    --ink:#25231f;
+    --muted:#6f6a61;
+    --accent:#8b6f47;
+    --accent-soft:#efe5d6;
+    --line:#ddd5c9;
+    --deep:#40372d;
+    --ok:#3f7d4f;
+    --danger:#a4453a;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    background:
+      radial-gradient(circle at top left,#fffaf0 0,transparent 32%),
+      linear-gradient(180deg,var(--bg),#ece8e0 100%);
+    color:var(--ink);
+    line-height:1.75;
+  }
+  .wrap{width:min(940px,calc(100% - 32px));margin:0 auto;padding:48px 0 96px}
+  .hero{
+    background:linear-gradient(145deg,#40372d,#655443);
+    color:#fff;border-radius:26px;padding:46px 42px;
+    box-shadow:0 22px 60px rgba(63,52,40,.18);
+    position:relative;overflow:hidden;
+  }
+  .hero:after{content:"";position:absolute;width:230px;height:230px;border-radius:50%;
+    background:rgba(255,255,255,.08);right:-70px;top:-80px}
+  .eyebrow{letter-spacing:.14em;font-size:.76rem;opacity:.72;text-transform:uppercase;margin-bottom:12px}
+  h1{margin:0;font-size:clamp(1.9rem,4.5vw,3.1rem);line-height:1.2;letter-spacing:-.04em}
+  .hero p{max-width:720px;margin:18px 0 0;font-size:1.02rem;color:rgba(255,255,255,.86)}
+  .hero .note{margin-top:14px;font-size:.9rem;color:rgba(255,255,255,.62)}
+
+  .rules{
+    background:var(--paper);border:1px solid rgba(125,108,82,.16);border-radius:20px;
+    padding:26px 30px;margin-top:20px;box-shadow:0 8px 26px rgba(59,48,35,.05);
+  }
+  .rules h2{margin:0 0 12px;font-size:1.15rem;color:var(--deep)}
+  .rules ul{margin:0;padding-left:20px}
+  .rules li{margin-bottom:6px}
+  .rules b{color:#4d3925}
+
+  section.block{
+    background:var(--paper);border:1px solid rgba(125,108,82,.16);border-radius:20px;
+    padding:30px 30px 26px;margin-top:20px;box-shadow:0 8px 26px rgba(59,48,35,.05);
+  }
+  .num{
+    display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;
+    border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:800;margin-bottom:10px;
+  }
+  section.block h2{margin:0 0 6px;font-size:1.35rem;letter-spacing:-.02em;color:var(--deep)}
+  .desc{color:var(--muted);font-size:.95rem;margin:0 0 16px}
+  .tip{
+    border-left:4px solid var(--accent);background:#f6efe5;padding:12px 16px;margin:0 0 16px;
+    border-radius:0 12px 12px 0;font-size:.9rem;color:#4b3b2c;
+  }
+  .tip b{color:#4d3925}
+
+  label{display:block;font-weight:700;font-size:.9rem;margin:12px 0 5px;color:var(--deep)}
+  input[type=text],input[type=email],input[type=month],textarea,select{
+    width:100%;font:inherit;color:var(--ink);background:#fffefb;
+    border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+  }
+  input:focus,textarea:focus,select:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+  textarea{min-height:84px;resize:vertical;line-height:1.6}
+  .hint{font-size:.8rem;color:var(--muted);margin-top:4px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .period{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center}
+  .period .sep{color:var(--muted);padding-top:4px}
+  .curr{display:flex;align-items:center;gap:6px;font-weight:500;font-size:.85rem;margin-top:6px;color:var(--muted)}
+  .curr input{width:auto}
+
+  .entry{
+    border:1px solid var(--line);border-radius:14px;padding:18px 18px 14px;margin-top:14px;background:#fffaf3;
+    position:relative;
+  }
+  .entry-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+  .entry-head .tag{font-size:.78rem;color:var(--accent);font-weight:800;letter-spacing:.04em}
+  .entry-tools{display:flex;gap:6px}
+
+  button{font:inherit;cursor:pointer;border-radius:9px;border:1px solid var(--line);
+    background:#fff;color:var(--deep);padding:7px 12px;transition:background .15s,border-color .15s}
+  button:hover{background:var(--accent-soft);border-color:var(--accent)}
+  button.mini{padding:4px 9px;font-size:.8rem}
+  button.add{background:var(--accent-soft);border-color:#e5d6bf;font-weight:700;margin-top:14px}
+  button.danger{color:var(--danger);border-color:#e6c9c4}
+  button.danger:hover{background:#f3e0dc}
+
+  .actions{
+    position:sticky;bottom:0;margin-top:26px;
+    background:linear-gradient(180deg,rgba(246,244,239,0),var(--bg) 32%);
+    padding:20px 0 8px;display:flex;gap:10px;flex-wrap:wrap;
+  }
+  button.primary{background:var(--deep);color:#fff;border-color:var(--deep);font-weight:700;padding:11px 20px}
+  button.primary:hover{background:#2e281f}
+
+  .preview-wrap{margin-top:22px}
+  .preview-wrap h2{font-size:1.15rem;color:var(--deep)}
+  pre.preview{
+    background:#2b2620;color:#f3ece0;border-radius:14px;padding:20px 22px;overflow-x:auto;
+    font-family:"Fira Code",Consolas,Monaco,monospace;font-size:.86rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;
+  }
+  .saved{font-size:.82rem;color:var(--ok);margin-left:4px;align-self:center}
+
+  footer{text-align:center;color:var(--muted);padding:30px 10px 0;font-size:.86rem}
+
+  @media (max-width:640px){
+    .wrap{padding-top:18px}
+    .hero{padding:34px 22px;border-radius:20px}
+    section.block{padding:24px 20px}
+    .grid2{grid-template-columns:1fr}
+    .period{grid-template-columns:1fr;gap:4px}
+    .period .sep{display:none}
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow">Portfolio Structure Guide</div>
+    <h1>포트폴리오 구조 설계 가이드</h1>
+    <p>아래 항목을 차례대로 채우면 포트폴리오의 뼈대가 완성됩니다. 다 작성한 뒤 <b>마크다운(.md) 파일로 내려받기</b> 버튼을 누르세요.</p>
+    <p class="note">작성 내용은 이 브라우저에만 자동 저장됩니다. 다른 기기로 옮기려면 반드시 파일로 내려받아 두세요.</p>
+  </header>
+
+  <div class="rules">
+    <h2>작성 원칙 두 가지</h2>
+    <ul>
+      <li><b>최신순 정렬</b> &mdash; 기간이 들어가는 항목(학력·경력·프로젝트)은 <b>가장 최근 것이 맨 위</b>로 옵니다. 시작 연월을 적어두면 내려받을 때 자동으로 정렬됩니다.</li>
+      <li><b>직무 우선순위 배치</b> &mdash; 프로젝트 경험은 지원 직무와 관련이 깊은 것을 위로 올립니다. 예를 들어 <b>QA 직무</b>라면 테스트 케이스(TC)·버그 리포트 경험을 위로, 순수 개발 경험은 아래로 내립니다. 각 프로젝트의 <b>정렬 우선순위</b> 값과 ▲▼ 버튼으로 순서를 조정하세요.</li>
+    </ul>
+  </div>
+
+  <!-- 1 -->
+  <section class="block">
+    <div class="num">1</div>
+    <h2>나를 설명하는 한 마디</h2>
+    <p class="desc">읽는 사람이 3초 안에 &ldquo;이 사람은 이런 사람이구나&rdquo;를 느끼도록, 강점을 담은 한 문장으로 표현합니다.</p>
+    <div class="tip">
+      <b>예시</b><br>
+      &bull; 숨겨진 버그를 찾아내는 버그 탐색자<br>
+      &bull; 누구나 함께 일하고 싶어하는 Unity 개발 신동
+    </div>
+    <label for="tagline">한 마디</label>
+    <input type="text" id="tagline" placeholder="예: 사용자의 불편을 먼저 발견하는 QA 엔지니어" />
+    <div class="hint">직책·기술·성향 중 하나를 강조하면 좋습니다. 20자 안팎을 권장합니다.</div>
+  </section>
+
+  <!-- 2 -->
+  <section class="block">
+    <div class="num">2</div>
+    <h2>기본 정보</h2>
+    <p class="desc">개인정보는 <b>연락에 꼭 필요한 최소한</b>만 적습니다. 주민번호·상세 주소·사진은 넣지 않습니다.</p>
+    <div class="grid2">
+      <div>
+        <label for="name">이름</label>
+        <input type="text" id="name" placeholder="홍길동" />
+      </div>
+      <div>
+        <label for="email">이메일</label>
+        <input type="email" id="email" placeholder="name@example.com" />
+        <div class="hint">평소 확인하는 주소로. 이름 기반의 단정한 주소를 권장합니다.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="block">
+    <div class="num">3</div>
+    <h2>학력</h2>
+    <p class="desc">최종 학력부터. 시작 연월을 적으면 최신순으로 자동 정렬됩니다.</p>
+    <div class="tip"><b>고등학교부터</b> 작성합니다. 오래된 학교부터 입력해도 시작 연월을 적어두면 내려받을 때 최신순으로 자동 정렬됩니다.</div>
+    <div id="eduList"></div>
+    <button class="add" type="button" data-add="edu">+ 학력 추가</button>
+  </section>
+
+  <!-- 4 -->
+  <section class="block">
+    <div class="num">4</div>
+    <h2>경력</h2>
+    <p class="desc">인턴·아르바이트·계약직도 직무와 관련 있으면 적습니다. 최신순 자동 정렬됩니다.</p>
+    <div class="tip">한 일을 <b>동사 + 결과</b>로 적습니다. 예: &ldquo;회원 가입 플로우 테스트 케이스 120건 작성, 출시 전 결함 18건 발견&rdquo;</div>
+    <div id="careerList"></div>
+    <button class="add" type="button" data-add="career">+ 경력 추가</button>
+  </section>
+
+  <!-- 5 -->
+  <section class="block">
+    <div class="num">5</div>
+    <h2>프로젝트 경험</h2>
+    <p class="desc">지원 직무와 관련이 깊은 프로젝트를 위로 배치합니다. <b>정렬 우선순위</b> 숫자가 작을수록 위로 오고, 같은 값이면 최신순입니다. ▲▼ 버튼으로도 조정할 수 있습니다.</p>
+    <div class="tip">
+      각 프로젝트는 <b>무엇을 / 어떤 역할로 / 어떤 기술로 / 어떤 성과</b> 순서로 적으면 읽기 쉽습니다.<br>
+      QA 지원이라면 &ldquo;테스트 설계&rdquo;, &ldquo;버그 리포트&rdquo; 성격의 항목을 위로, &ldquo;기능 개발&rdquo; 성격은 아래로.
+    </div>
+    <div id="projList"></div>
+    <button class="add" type="button" data-add="proj">+ 프로젝트 추가</button>
+  </section>
+
+  <div class="preview-wrap">
+    <h2>미리보기 (Markdown)</h2>
+    <pre class="preview" id="preview"></pre>
+  </div>
+
+  <div class="actions">
+    <button class="primary" type="button" id="download">⬇ 마크다운(.md) 파일로 내려받기</button>
+    <button type="button" id="copy">📋 마크다운 복사</button>
+    <button type="button" id="reset" class="danger">전체 초기화</button>
+    <span class="saved" id="savedMsg"></span>
+  </div>
+
+  <footer>
+    포트폴리오 구조 설계 가이드 &bull; 작성 후 .md 파일을 제출하세요.
+  </footer>
+</main>
+
+<!-- 항목 템플릿 -->
+<template id="tpl-edu">
+  <div class="entry" data-kind="edu">
+    <div class="entry-head">
+      <span class="tag">학력</span>
+      <div class="entry-tools">
+        <button type="button" class="mini" data-move="up">▲</button>
+        <button type="button" class="mini" data-move="down">▼</button>
+        <button type="button" class="mini danger" data-remove>삭제</button>
+      </div>
+    </div>
+    <label>재학 기간</label>
+    <div class="period">
+      <input type="month" data-f="start" />
+      <span class="sep">~</span>
+      <input type="month" data-f="end" />
+    </div>
+    <label class="curr"><input type="checkbox" data-f="ongoing" /> 재학 중 / 졸업 예정</label>
+    <div class="grid2">
+      <div>
+        <label>학교</label>
+        <input type="text" data-f="org" placeholder="OO고등학교 / OO대학교" />
+      </div>
+      <div>
+        <label>전공 / 계열 / 학위</label>
+        <input type="text" data-f="role" placeholder="예: 자연계열 · 이수 / 컴퓨터공학과 (학사)" />
+      </div>
+    </div>
+    <label>비고 (선택)</label>
+    <input type="text" data-f="note" placeholder="예: 학점 3.8/4.5, 캡스톤 우수상" />
+  </div>
+</template>
+
+<template id="tpl-career">
+  <div class="entry" data-kind="career">
+    <div class="entry-head">
+      <span class="tag">경력</span>
+      <div class="entry-tools">
+        <button type="button" class="mini" data-move="up">▲</button>
+        <button type="button" class="mini" data-move="down">▼</button>
+        <button type="button" class="mini danger" data-remove>삭제</button>
+      </div>
+    </div>
+    <label>근무 기간</label>
+    <div class="period">
+      <input type="month" data-f="start" />
+      <span class="sep">~</span>
+      <input type="month" data-f="end" />
+    </div>
+    <label class="curr"><input type="checkbox" data-f="ongoing" /> 재직 중</label>
+    <div class="grid2">
+      <div>
+        <label>회사 / 조직</label>
+        <input type="text" data-f="org" placeholder="OO소프트" />
+      </div>
+      <div>
+        <label>직무 / 직책</label>
+        <input type="text" data-f="role" placeholder="QA 엔지니어 (인턴)" />
+      </div>
+    </div>
+    <label>담당 업무와 성과</label>
+    <textarea data-f="detail" placeholder="한 줄에 하나씩. 동사 + 결과로 작성.&#10;예: 결제 모듈 회귀 테스트 케이스 90건 작성 및 자동화&#10;예: 릴리스 전 결함 12건 리포트, 재현율 100%"></textarea>
+  </div>
+</template>
+
+<template id="tpl-proj">
+  <div class="entry" data-kind="proj">
+    <div class="entry-head">
+      <span class="tag">프로젝트</span>
+      <div class="entry-tools">
+        <button type="button" class="mini" data-move="up">▲</button>
+        <button type="button" class="mini" data-move="down">▼</button>
+        <button type="button" class="mini danger" data-remove>삭제</button>
+      </div>
+    </div>
+    <div class="grid2">
+      <div>
+        <label>프로젝트명</label>
+        <input type="text" data-f="title" placeholder="모바일 러닝 앱 QA" />
+      </div>
+      <div>
+        <label>정렬 우선순위 <span class="hint" style="display:inline">(작을수록 위)</span></label>
+        <input type="text" inputmode="numeric" data-f="priority" placeholder="1" value="1" />
+      </div>
+    </div>
+    <label>기간</label>
+    <div class="period">
+      <input type="month" data-f="start" />
+      <span class="sep">~</span>
+      <input type="month" data-f="end" />
+    </div>
+    <label class="curr"><input type="checkbox" data-f="ongoing" /> 진행 중</label>
+    <div class="grid2">
+      <div>
+        <label>구분 (직무 관련도)</label>
+        <select data-f="category">
+          <option value="">선택 안 함</option>
+          <option>테스트 설계 / TC 작성</option>
+          <option>버그 리포트 / 결함 관리</option>
+          <option>테스트 자동화</option>
+          <option>기능 개발</option>
+          <option>기획 / 문서</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div>
+        <label>맡은 역할</label>
+        <input type="text" data-f="role" placeholder="QA 담당 (팀 4명 중 1명)" />
+      </div>
+    </div>
+    <label>사용 기술 / 도구</label>
+    <input type="text" data-f="stack" placeholder="예: TestRail, Charles, Android Studio, Jira" />
+    <label>한 일 &amp; 성과</label>
+    <textarea data-f="detail" placeholder="한 줄에 하나씩.&#10;예: 신규 기능 3종 테스트 케이스 75건 설계&#10;예: 출시 전 크래시 5건 발견, 원인 로그 첨부하여 리포트&#10;예: 회귀 테스트 시간을 2시간 → 30분으로 단축"></textarea>
+  </div>
+</template>
+
+<script>
+(function(){
+  "use strict";
+  var STORAGE_KEY = "portfolio_structure_guide_v1";
+  var $ = function(s,el){return (el||document).querySelector(s);};
+  var lists = { edu:$("#eduList"), career:$("#careerList"), proj:$("#projList") };
+  var tpls  = { edu:$("#tpl-edu"), career:$("#tpl-career"), proj:$("#tpl-proj") };
+  var preview = $("#preview");
+  var savedMsg = $("#savedMsg");
+
+  /* ---------- 항목 추가 ---------- */
+  function addEntry(kind, data){
+    var node = tpls[kind].content.firstElementChild.cloneNode(true);
+    if(data){
+      Object.keys(data).forEach(function(k){
+        var f = node.querySelector('[data-f="'+k+'"]');
+        if(!f) return;
+        if(f.type === "checkbox") f.checked = !!data[k];
+        else f.value = data[k];
+      });
+    }
+    node.addEventListener("input", schedule);
+    node.addEventListener("change", schedule);
+    node.querySelector("[data-remove]").addEventListener("click", function(){
+      node.remove(); schedule();
+    });
+    node.querySelector('[data-move="up"]').addEventListener("click", function(){
+      var prev = node.previousElementSibling;
+      if(prev) node.parentNode.insertBefore(node, prev);
+      schedule();
+    });
+    node.querySelector('[data-move="down"]').addEventListener("click", function(){
+      var next = node.nextElementSibling;
+      if(next) node.parentNode.insertBefore(next, node);
+      schedule();
+    });
+    lists[kind].appendChild(node);
+    return node;
+  }
+
+  document.querySelectorAll("[data-add]").forEach(function(btn){
+    btn.addEventListener("click", function(){ addEntry(btn.getAttribute("data-add")); schedule(); });
+  });
+
+  /* ---------- 값 수집 ---------- */
+  function readEntry(node){
+    var o = {};
+    node.querySelectorAll("[data-f]").forEach(function(f){
+      o[f.getAttribute("data-f")] = (f.type === "checkbox") ? f.checked : f.value.trim();
+    });
+    return o;
+  }
+  function collect(){
+    return {
+      tagline: $("#tagline").value.trim(),
+      name: $("#name").value.trim(),
+      email: $("#email").value.trim(),
+      edu: [].map.call(lists.edu.children, readEntry),
+      career: [].map.call(lists.career.children, readEntry),
+      proj: [].map.call(lists.proj.children, readEntry)
+    };
+  }
+
+  /* ---------- 정렬 ---------- */
+  function ym(v){ return v ? parseInt(v.replace("-",""),10) : -1; }        // 2025-02 -> 202502
+  function fmt(v){ return v ? v.replace("-",".") : ""; }                    // 2025-02 -> 2025.02
+  function periodText(e){
+    var s = fmt(e.start);
+    var end = e.ongoing ? "현재" : fmt(e.end);
+    if(!s && !end) return "";
+    return (s || "?") + " ~ " + (end || "?");
+  }
+  function byRecent(a,b){ return ym(b.start) - ym(a.start); }
+  function byPriorityThenRecent(a,b){
+    var pa = parseInt(a.priority,10); if(isNaN(pa)) pa = 999;
+    var pb = parseInt(b.priority,10); if(isNaN(pb)) pb = 999;
+    if(pa !== pb) return pa - pb;
+    return byRecent(a,b);
+  }
+
+  /* ---------- Markdown 생성 ---------- */
+  function bullets(text, indent){
+    indent = indent || "";
+    return String(text||"").split(/\r?\n/).map(function(l){return l.trim();})
+      .filter(Boolean).map(function(l){
+        return indent + (/^[-*]/.test(l) ? l : "- " + l);
+      }).join("\n");
+  }
+
+  function toMarkdown(d){
+    var out = [];
+    out.push("# " + (d.name || "이름"));
+    out.push("");
+    if(d.tagline) out.push("> " + d.tagline);
+    if(d.tagline) out.push("");
+    if(d.email) out.push("- 이메일: " + d.email);
+    if(d.email) out.push("");
+
+    // 학력
+    out.push("## 학력");
+    out.push("");
+    var edu = d.edu.slice().sort(byRecent);
+    if(!edu.length){ out.push("_작성 필요_",""); }
+    edu.forEach(function(e){
+      var head = [periodText(e), e.org, e.role].filter(Boolean).join(" | ");
+      out.push("### " + (head || "항목"));
+      if(e.note) out.push("- " + e.note);
+      out.push("");
+    });
+
+    // 경력
+    out.push("## 경력");
+    out.push("");
+    var career = d.career.slice().sort(byRecent);
+    if(!career.length){ out.push("_작성 필요_",""); }
+    career.forEach(function(e){
+      var head = [periodText(e), e.org, e.role].filter(Boolean).join(" | ");
+      out.push("### " + (head || "항목"));
+      var b = bullets(e.detail);
+      if(b) out.push(b);
+      out.push("");
+    });
+
+    // 프로젝트 경험 (직무 우선순위 -> 최신순)
+    out.push("## 프로젝트 경험");
+    out.push("");
+    var proj = d.proj.slice().sort(byPriorityThenRecent);
+    if(!proj.length){ out.push("_작성 필요_",""); }
+    proj.forEach(function(e){
+      var t = e.title || "프로젝트";
+      var p = periodText(e);
+      out.push("### " + t + (p ? " (" + p + ")" : ""));
+      if(e.category) out.push("- 구분: " + e.category);
+      if(e.role) out.push("- 역할: " + e.role);
+      if(e.stack) out.push("- 사용 기술: " + e.stack);
+      var b = bullets(e.detail);
+      if(b){ out.push("- 한 일 & 성과:"); out.push(bullets(e.detail, "  ")); }
+      out.push("");
+    });
+
+    return out.join("\n").replace(/\n{3,}/g,"\n\n").trim() + "\n";
+  }
+
+  /* ---------- 저장 / 렌더 ---------- */
+  var timer = null;
+  function schedule(){
+    if(timer) clearTimeout(timer);
+    timer = setTimeout(render, 150);
+  }
+  function render(){
+    var d = collect();
+    preview.textContent = toMarkdown(d);
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(d));
+      savedMsg.textContent = "저장됨 · " + new Date().toLocaleTimeString("ko-KR");
+    }catch(e){ savedMsg.textContent = ""; }
+  }
+
+  function load(){
+    var raw;
+    try{ raw = localStorage.getItem(STORAGE_KEY); }catch(e){ raw = null; }
+    if(!raw){
+      addEntry("edu"); addEntry("career"); addEntry("proj");
+      render(); return;
+    }
+    var d;
+    try{ d = JSON.parse(raw); }catch(e){ d = null; }
+    if(!d){ addEntry("edu"); addEntry("career"); addEntry("proj"); render(); return; }
+    $("#tagline").value = d.tagline || "";
+    $("#name").value = d.name || "";
+    $("#email").value = d.email || "";
+    (d.edu && d.edu.length ? d.edu : [null]).forEach(function(x){ addEntry("edu", x); });
+    (d.career && d.career.length ? d.career : [null]).forEach(function(x){ addEntry("career", x); });
+    (d.proj && d.proj.length ? d.proj : [null]).forEach(function(x){ addEntry("proj", x); });
+    render();
+  }
+
+  /* ---------- 버튼 ---------- */
+  function safeName(s){
+    return String(s||"").replace(/[\\\/:*?"<>|]/g,"").replace(/\s+/g,"_").trim() || "무명";
+  }
+  $("#download").addEventListener("click", function(){
+    var d = collect();
+    var md = toMarkdown(d);
+    var blob = new Blob([md], {type:"text/markdown;charset=utf-8"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "포트폴리오_" + safeName(d.name) + ".md";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  });
+  $("#copy").addEventListener("click", function(){
+    var md = toMarkdown(collect());
+    var done = function(){ savedMsg.textContent = "복사됨"; };
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(md).then(done, function(){ fallbackCopy(md); done(); });
+    }else{ fallbackCopy(md); done(); }
+  });
+  function fallbackCopy(text){
+    var ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); }catch(e){}
+    document.body.removeChild(ta);
+  }
+  $("#reset").addEventListener("click", function(){
+    if(!confirm("작성한 내용을 모두 지웁니다. 계속할까요?")) return;
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+    location.reload();
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>
