@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>게임 분석과 포트폴리오</title>
+<style>
+  :root{
+    --bg:#05060a;
+    --bg2:#0a0d16;
+    --surface:#0d1220;
+    --surface-2:#111830;
+    --text:#dff5ff;
+    --text-soft:#7fa3b8;
+    --border:#1c3348;
+    --border-glow:#1f4a5c;
+    --cyan:#2ef2e8;
+    --magenta:#ff3ddb;
+    --violet:#9b6bff;
+    --amber:#ffcb47;
+    --shadow:0 0 0 1px rgba(46,242,232,.06), 0 12px 40px rgba(0,0,0,.55);
+    --radius:14px;
+    --mono:"Consolas","SFMono-Regular","Cascadia Code","JetBrains Mono",ui-monospace,monospace;
+    --sans:"Pretendard","Apple SD Gothic Neo","Malgun Gothic",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(46,242,232,.10), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 100% 10%, rgba(255,61,219,.08), transparent 55%),
+      repeating-linear-gradient(0deg, rgba(46,242,232,.035) 0px, rgba(46,242,232,.035) 1px, transparent 1px, transparent 42px),
+      repeating-linear-gradient(90deg, rgba(46,242,232,.035) 0px, rgba(46,242,232,.035) 1px, transparent 1px, transparent 42px),
+      var(--bg);
+    color:var(--text);
+    line-height:1.7;
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:rgba(46,242,232,.3);color:#fff}
+  a{color:var(--cyan)}
+  .wrap{max-width:920px;margin:0 auto;padding:0 22px}
+  .mono{font-family:var(--mono)}
+
+  /* scanline overlay */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;z-index:200;
+    background:repeating-linear-gradient(0deg, rgba(0,0,0,.08) 0px, rgba(0,0,0,.08) 1px, transparent 1px, transparent 3px);
+    mix-blend-mode:overlay;opacity:.5;
+  }
+
+  /* ---- nav ---- */
+  header.nav{position:sticky;top:0;z-index:50;background:rgba(5,6,10,.72);
+    backdrop-filter:blur(10px) saturate(140%);border-bottom:1px solid var(--border)}
+  .nav-inner{max-width:920px;margin:0 auto;padding:14px 22px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .brand{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--cyan);letter-spacing:.04em;
+    text-shadow:0 0 8px rgba(46,242,232,.6)}
+  .brand::before{content:"▍";color:var(--magenta);margin-right:6px;animation:blink 1.1s steps(1) infinite}
+  .nav-links{display:flex;gap:20px;font-size:12.5px;font-family:var(--mono);color:var(--text-soft)}
+  .nav-links a{color:inherit;text-decoration:none;letter-spacing:.03em}
+  .nav-links a::before{content:"// "}
+  .nav-links a:hover{color:var(--cyan)}
+  .theme-btn{border:1px solid var(--border);background:var(--surface);color:var(--cyan);
+    width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:13px;display:grid;place-items:center;
+    box-shadow:0 0 10px rgba(46,242,232,.15) inset}
+  .theme-btn:hover{border-color:var(--cyan)}
+  @media(max-width:660px){.nav-links{display:none}}
+
+  @keyframes blink{50%{opacity:0}}
+  @keyframes flicker{
+    0%,100%{opacity:1} 92%{opacity:1} 93%{opacity:.4} 94%{opacity:1} 96%{opacity:.6} 97%{opacity:1}
+  }
+  @keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100%)}}
+
+  /* ---- hero ---- */
+  .hero{padding:70px 0 44px;position:relative}
+  .tag-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+  .eyebrow{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;font-weight:600;
+    color:var(--cyan);border:1px solid var(--border-glow);background:rgba(46,242,232,.06);
+    padding:6px 12px;border-radius:999px;letter-spacing:.04em;box-shadow:0 0 14px rgba(46,242,232,.12) inset}
+  .eyebrow.pink{color:var(--magenta);border-color:#4a1c3f;background:rgba(255,61,219,.06);box-shadow:0 0 14px rgba(255,61,219,.12) inset}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:currentColor;box-shadow:0 0 6px currentColor;animation:blink 1.6s infinite}
+
+  h1{font-family:var(--mono);font-size:clamp(1.7rem,5vw,2.7rem);letter-spacing:-.01em;font-weight:800;line-height:1.3;
+    color:#fff;text-shadow:0 0 18px rgba(46,242,232,.35), 0 0 40px rgba(255,61,219,.12);
+    animation:flicker 7s infinite}
+  h1 .grad{background:linear-gradient(90deg,var(--cyan),var(--violet) 55%,var(--magenta));
+    -webkit-background-clip:text;background-clip:text;color:transparent}
+  .hero p{margin-top:18px;color:var(--text-soft);max-width:58ch;font-size:15px}
+
+  /* ---- sections ---- */
+  section{padding:48px 0;border-top:1px solid var(--border);position:relative}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:8px}
+  .idx{font-family:var(--mono);font-size:12.5px;font-weight:700;color:var(--magenta);
+    background:rgba(255,61,219,.08);border:1px solid #4a1c3f;padding:3px 9px;border-radius:6px}
+  h2{font-family:var(--mono);font-size:1.3rem;letter-spacing:-.01em;font-weight:700;color:#fff}
+  h2::before{content:"# ";color:var(--cyan)}
+  .sub{color:var(--text-soft);font-size:13.5px;margin-bottom:24px;max-width:62ch;font-family:var(--mono)}
+
+  /* ---- card (terminal window) ---- */
+  .card{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--border);
+    border-radius:var(--radius);padding:0;box-shadow:var(--shadow);overflow:hidden}
+  .card + .card{margin-top:14px}
+  .card .tbar{display:flex;align-items:center;gap:6px;padding:9px 14px;border-bottom:1px solid var(--border);
+    background:rgba(255,255,255,.02)}
+  .tbar i{width:9px;height:9px;border-radius:50%;display:inline-block}
+  .tbar i:nth-child(1){background:#ff5f57}
+  .tbar i:nth-child(2){background:#febc2e}
+  .tbar i:nth-child(3){background:#28c840}
+  .tbar span{margin-left:8px;font-family:var(--mono);font-size:11px;color:var(--text-soft)}
+  .card .body{padding:20px 22px}
+  .card p{color:var(--text-soft);font-size:14.5px}
+  .card p + p{margin-top:12px}
+  .card b{color:var(--text)}
+
+  .quote{border-left:2px solid var(--magenta);background:rgba(255,61,219,.05);border-radius:0 10px 10px 0;
+    padding:16px 20px;font-size:15px;font-weight:600;color:#fff;margin-top:16px;position:relative}
+  .quote::before{content:">";font-family:var(--mono);color:var(--magenta);margin-right:8px}
+  .quote small{display:block;margin-top:8px;font-weight:400;font-size:12.5px;color:var(--text-soft);font-family:var(--sans)}
+
+  /* ---- flow ---- */
+  .flow{display:flex;flex-direction:column;gap:0}
+  .flow-step{display:flex;gap:16px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow);position:relative}
+  .flow-num{flex:none;width:36px;height:36px;border-radius:8px;border:1px solid var(--cyan);color:var(--cyan);
+    display:grid;place-items:center;font-weight:800;font-size:14px;font-family:var(--mono);
+    box-shadow:0 0 14px rgba(46,242,232,.35) inset, 0 0 10px rgba(46,242,232,.25)}
+  .flow-step h3{font-size:1rem;font-weight:700;margin-bottom:4px;color:#fff}
+  .flow-step p{font-size:13.5px;color:var(--text-soft)}
+  .flow-line{width:1px;height:22px;background:linear-gradient(var(--cyan),transparent);margin-left:37px}
+
+  /* ---- cases ---- */
+  .cases{display:flex;flex-direction:column;gap:16px}
+  .case{background:linear-gradient(180deg,var(--surface),var(--bg2));border:1px solid var(--border);
+    border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .case-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    padding:16px 20px 0}
+  .case-title{font-size:1.02rem;font-weight:700;letter-spacing:-.01em;color:#fff}
+  .pill{font-family:var(--mono);font-size:11px;font-weight:700;padding:4px 10px;border-radius:6px;
+    color:var(--cyan);background:rgba(46,242,232,.08);border:1px solid var(--border-glow);white-space:nowrap}
+  .pill.warn{color:var(--amber);background:rgba(255,203,71,.08);border-color:#5a4416}
+  .case .body{padding:14px 20px 20px}
+  .case p{font-size:14px;color:var(--text-soft)}
+  .case .insight{margin-top:12px;font-size:13.5px;background:rgba(155,107,255,.07);border:1px solid #33235c;
+    border-radius:10px;padding:12px 14px;color:var(--text-soft)}
+  .case .insight b{color:var(--violet)}
+  .case .src{margin-top:12px;font-size:12px;font-family:var(--mono);color:var(--text-soft)}
+  .case .src a{word-break:break-all}
+
+  /* ---- questions ---- */
+  .qs{display:flex;flex-direction:column;gap:10px}
+  .qs li{list-style:none;display:flex;gap:12px;font-size:14.5px;background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);color:var(--text-soft)}
+  .qs .n{flex:none;font-family:var(--mono);font-weight:800;color:var(--magenta)}
+
+  footer{padding:36px 0 60px;text-align:center;color:var(--text-soft);font-size:12px;border-top:1px solid var(--border);
+    font-family:var(--mono)}
+  footer::before{content:"// ";color:var(--cyan)}
+
+  @media(prefers-reduced-motion:reduce){h1,.eyebrow .dot,.brand::before{animation:none}}
+
+  /* low-glow mode, toggled by the nav button — same palette, calmer for long reading */
+  body.lite::before{opacity:.15}
+  body.lite h1{animation:none;text-shadow:none}
+  body.lite .eyebrow .dot,body.lite .brand::before{animation:none}
+  body.lite .flow-num{box-shadow:none}
+  body.lite .quote,body.lite .eyebrow,body.lite .eyebrow.pink{box-shadow:none}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <span class="brand">GAME_ANALYSIS.EXE</span>
+    <nav class="nav-links">
+      <a href="#purpose">purpose</a>
+      <a href="#idea">idea</a>
+      <a href="#cases">cases</a>
+      <a href="#think">think</a>
+    </nav>
+    <button class="theme-btn" id="themeBtn" aria-label="글로우 효과 전환" title="글로우 효과 끄기/켜기">◐</button>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+
+    <section class="hero" style="border-top:none">
+      <div class="tag-row">
+        <span class="eyebrow"><span class="dot"></span>LECTURE // 2026.09.17</span>
+        <span class="eyebrow pink"><span class="dot"></span>DATA &gt; INSIGHT &gt; PEOPLE</span>
+      </div>
+      <h1>데이터 너머에 있는<br><span class="grad">사람을 보는</span> 게임 분석</h1>
+      <p>이력서·자기소개서와 게임 분석은 결국 같은 일을 합니다. 상대방이 내 의견에 동의하도록, 데이터로 근거를 만드는 것입니다.</p>
+    </section>
+
+    <section id="purpose">
+      <div class="sec-head"><span class="idx">01</span><h2>purpose.md</h2></div>
+      <div class="card">
+        <div class="tbar"><i></i><i></i><i></i><span>resume.md</span></div>
+        <div class="body">
+          <p><b>이력서 &amp; 자기소개서의 목적</b> — "나를 뽑아주세요"라는 나의 의견에 상대방이 동의하도록 만드는 것입니다.</p>
+          <div class="quote">게임 분석의 목적은 의사결정권자에게 향후 무엇을 개선하거나 변경할지에 대한 <u>데이터</u>를 제공하는 것이다.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="tbar"><i></i><i></i><i></i><span>revenue.md</span></div>
+        <div class="body">
+          <p>지난주 우리는 매출 순위를 살펴봤습니다. 매출을 무시할 수 없기 때문입니다. 어떤 것이 매출을 만드는가는 게임의 궁극적 목표인 <b>재미</b>와 연결되어 있습니다.</p>
+          <div class="quote">결국 우리가 파악해야 할 것은 <b>데이터 너머에 있는 사람</b>이라는 사실을 잊지 않아야 한다.
+            <small>기업의 영리 목적을 인정하는 동시에, 숫자 뒤의 플레이어를 읽는 것이 게임 분석의 본질입니다.</small>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="idea">
+      <div class="sec-head"><span class="idx">02</span><h2>core_idea.flow</h2></div>
+      <p class="sub">// 세 가지 질문을 순서대로 따라가면, 게임 분석이 포트폴리오의 소재가 되는 과정을 볼 수 있습니다.</p>
+      <div class="flow">
+        <div class="flow-step">
+          <div class="flow-num">01</div>
+          <div><h3>시장에서 어떤 데이터를 획득할 수 있는가?</h3><p>매출 순위, 리뷰, SNS 반응, 플레이 로그처럼 이미 존재하는 데이터의 출처를 파악합니다.</p></div>
+        </div>
+        <div class="flow-line"></div>
+        <div class="flow-step">
+          <div class="flow-num">02</div>
+          <div><h3>데이터를 어떻게 활용할 것인가?</h3><p>숫자를 그대로 나열하지 않고, 그 뒤에 있는 사람의 행동과 감정을 해석해 의사결정에 쓸 수 있는 형태로 만듭니다.</p></div>
+        </div>
+        <div class="flow-line"></div>
+        <div class="flow-step">
+          <div class="flow-num">03</div>
+          <div><h3>이것이 포트폴리오의 아이디어가 될 수 있을까?</h3><p>내가 찾은 데이터와 해석을, 지원 회사에 실질적으로 도움이 되는 제안으로 연결합니다.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="cases">
+      <div class="sec-head"><span class="idx">03</span><h2>case_studies[5]</h2></div>
+      <p class="sub">// 빅데이터를 분석해 실제 의사결정으로 이어진 사례입니다. 마지막 사례는 "데이터가 전부 결정했다"는 과장된 통설을 함께 짚어봅니다.</p>
+
+      <div class="cases">
+
+        <div class="case">
+          <div class="case-top"><div class="case-title">비 오는 날 SNS 분석 → 저도수 주류 출시</div><span class="pill">SOCIAL DATA</span></div>
+          <div class="body">
+            <p>비 오는 날 SNS 데이터를 분석해보니 여성들은 언니와 함께 술을 마시고, 도수가 낮은 술을 선호한다는 패턴이 발견되었습니다. 이 인사이트를 바탕으로 저도수 주류가 출시되었습니다.</p>
+            <div class="insight"><b>POINT</b> — 날씨·SNS 게시글처럼 평범한 데이터도 "누가, 언제, 무엇을 원하는가"로 해석하면 신제품 기획 근거가 됩니다.</div>
+            <div class="src">$ src → <a href="https://www.getnews.co.kr/news/articleView.html?idxno=3755" target="_blank" rel="noopener">getnews.co.kr — "오늘 어떤 맥주 마실까?"</a></div>
+          </div>
+        </div>
+
+        <div class="case">
+          <div class="case-top"><div class="case-title">King · Candy Crush Saga — 데이터로 레벨 난이도 설계</div><span class="pill">GAME DATA</span></div>
+          <div class="body">
+            <p>King은 수억 판의 플레이 데이터를 분석해 각 레벨의 클리어율·재도전 횟수를 측정하고, 이를 기준으로 "좋은 레벨"을 정의합니다. 기준에 못 미치는 레벨은 지속적으로 수정하거나 삭제(prune)합니다.</p>
+            <div class="insight"><b>POINT</b> — 기획자의 감각(휴먼 디자인)과 AI·데이터 분석을 함께 써서 "재미"라는 추상적 목표를 측정 가능한 지표로 바꾼 사례입니다.</div>
+            <div class="src">$ src → <a href="https://mobilegamer.biz/how-king-defines-a-good-candy-crush-saga-level-and-why-it-constantly-prunes-the-bad-ones/" target="_blank" rel="noopener">mobilegamer.biz — How King defines a 'good' level</a><br>$ src → <a href="https://mobilegamer.biz/how-king-balances-human-and-ai-powered-design-in-candy-crush-saga/" target="_blank" rel="noopener">mobilegamer.biz — human vs AI-powered design</a></div>
+          </div>
+        </div>
+
+        <div class="case">
+          <div class="case-top"><div class="case-title">Riot Games · League of Legends — 행동 데이터로 독성 완화</div><span class="pill">GAME DATA</span></div>
+          <div class="body">
+            <p>Riot의 Player Behavior 팀은 수십만 건의 신고·채팅 로그를 분석해 어떤 상황에서 독성(toxic) 행동이 발생하는지 유형화하고, 이를 바탕으로 페널티·신고 시스템과 매치 후 피드백 기능을 실험·개선했습니다.</p>
+            <div class="insight"><b>POINT</b> — 매출과 직접 관련 없어 보이는 "유저 행동" 데이터도 장기 리텐션(잔존율)에 영향을 주는 핵심 지표가 됩니다.</div>
+            <div class="src">$ src → <a href="https://www.gamedeveloper.com/design/video-fixing-toxic-online-behavior-in-i-league-of-legends-i-" target="_blank" rel="noopener">gamedeveloper.com — Fixing toxic online behavior</a><br>$ src → <a href="https://kotaku.com/league-of-legends-neverending-war-on-toxic-behavior-1636894289" target="_blank" rel="noopener">kotaku.com — Neverending War on Toxic Behavior</a></div>
+          </div>
+        </div>
+
+        <div class="case">
+          <div class="case-top"><div class="case-title">서울시 올빼미버스 — 통신 데이터로 심야버스 노선 설계</div><span class="pill">PUBLIC DATA</span></div>
+          <div class="body">
+            <p>서울시는 심야 택시 승하차 데이터(약 500만 건)와 KT의 통화량 데이터(약 30억 건)를 결합해 심야 유동인구를 지도화하고, 이를 근거로 올빼미버스 노선을 설계했습니다.</p>
+            <div class="insight"><b>POINT</b> — 게임이 아닌 산업의 데이터 활용 사례이지만 방식은 동일합니다: 이미 존재하는 데이터를 결합해 "사람이 실제로 어디에 있는가"를 찾아낸 것입니다.</div>
+            <div class="src">$ src → <a href="https://www.etnews.com/201312240348" target="_blank" rel="noopener">etnews.com — 서울시 빅데이터 활용 '심야버스 노선 수립'</a></div>
+          </div>
+        </div>
+
+        <div class="case">
+          <div class="case-top"><div class="case-title">넷플릭스 &lt;하우스 오브 카드&gt; — 통설과 실제</div><span class="pill warn">READ CRITICALLY</span></div>
+          <div class="body">
+            <p>"넷플릭스가 시청 데이터를 분석해 감독·배우·줄거리까지 결정했다"는 이야기가 널리 퍼졌지만, 실제로는 제작사(미디어라이트캐피탈)가 데이비드 핀처 감독을 중심으로 결정했고 넷플릭스는 데이터로 판권 입찰 여부를 보완적으로 판단했을 뿐입니다.</p>
+            <div class="insight"><b>POINT</b> — 데이터가 인상적인 이야기로 과장되기 쉽습니다. 포트폴리오에서 사례를 인용할 때는 "데이터가 무엇을 실제로 결정했는가"까지 확인하는 습관이 필요합니다. 이것이 바로 <b>데이터 너머의 사람</b>을 보는 태도입니다.</div>
+            <div class="src">$ src → <a href="https://byline.network/2016/01/1-31/" target="_blank" rel="noopener">byline.network — 넷플릭스에 대한 과장된 환상</a></div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="think">
+      <div class="sec-head"><span class="idx">04</span><h2>think.exec</h2></div>
+      <p class="sub">// 오늘 배운 흐름을 자신의 포트폴리오에 적용해봅시다.</p>
+      <ul class="qs">
+        <li><span class="n">Q1</span><span>내가 오래 플레이한 게임에서, 지금 당장 확인해볼 수 있는 데이터는 무엇인가? (매출 순위, 커뮤니티 반응, 업데이트 로그 등)</span></li>
+        <li><span class="n">Q2</span><span>그 데이터 너머에는 어떤 사람(플레이어)이 있는가? 그들은 무엇을 원하고, 무엇에 불만을 느끼는가?</span></li>
+        <li><span class="n">Q3</span><span>이 해석을 지원하려는 회사에게 "개선 또는 변경 제안"의 형태로 정리한다면 어떤 한 문장이 될까?</span></li>
+        <li><span class="n">Q4</span><span>내가 인용하려는 사례는 실제로 데이터가 결정한 것인가, 아니면 이야기로 과장된 것은 아닌가?</span></li>
+      </ul>
+    </section>
+
+  </div>
+</main>
+
+<footer><div class="wrap">GAME_ANALYSIS.EXE · source: 포트폴리오 게임 분석.md</div></footer>
+
+<script>
+  var root=document.documentElement, btn=document.getElementById('themeBtn');
+  // committed cyber-dark look; toggle nudges a lighter variant of the same palette
+  btn.addEventListener('click',function(){
+    document.body.classList.toggle('lite');
+  });
+</script>
+
+</body>
+</html>
