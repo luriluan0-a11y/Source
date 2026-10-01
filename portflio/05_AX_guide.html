@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AX란 무엇인가</title>
+<style>
+  :root{
+    --bg:#f7f7f9;
+    --paper:#ffffff;
+    --ink:#1f2330;
+    --muted:#626878;
+    --line:#e3e5eb;
+    --accent:#4f46e5;
+    --accent-soft:#ecebfd;
+    --shadow:0 6px 20px rgba(20,24,40,.06);
+  }
+  :root[data-theme="dark"]{
+    --bg:#15171d;
+    --paper:#1d2029;
+    --ink:#e8e9ee;
+    --muted:#a0a5b3;
+    --line:#2e323e;
+    --accent:#8b85f5;
+    --accent-soft:#2a2850;
+    --shadow:0 6px 20px rgba(0,0,0,.3);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15171d;
+      --paper:#1d2029;
+      --ink:#e8e9ee;
+      --muted:#a0a5b3;
+      --line:#2e323e;
+      --accent:#8b85f5;
+      --accent-soft:#2a2850;
+      --shadow:0 6px 20px rgba(0,0,0,.3);
+    }
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);line-height:1.75;
+    font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  }
+  .wrap{width:min(880px,calc(100% - 32px));margin:0 auto;padding:40px 0 80px}
+  .topbar{display:flex;justify-content:flex-end;margin-bottom:16px}
+  .toggle{
+    font:inherit;font-size:.85rem;cursor:pointer;color:var(--ink);background:var(--paper);
+    border:1px solid var(--line);border-radius:999px;padding:6px 14px;
+  }
+  .hero{
+    background:var(--paper);border:1px solid var(--line);border-radius:20px;
+    padding:40px 36px;box-shadow:var(--shadow);
+  }
+  .eyebrow{display:inline-block;background:var(--accent-soft);color:var(--accent);
+    font-weight:700;font-size:.8rem;letter-spacing:.06em;padding:4px 12px;border-radius:999px}
+  h1{margin:14px 0 8px;font-size:clamp(1.8rem,4.5vw,2.6rem);line-height:1.25;letter-spacing:-.03em}
+  h1 em{font-style:normal;color:var(--accent)}
+  .hero p{margin:0;color:var(--muted);font-size:1.02rem}
+  section{
+    background:var(--paper);border:1px solid var(--line);border-radius:20px;
+    padding:30px 32px;margin-top:20px;box-shadow:var(--shadow);
+  }
+  h2{margin:0 0 14px;font-size:1.3rem;letter-spacing:-.02em}
+  h3{margin:22px 0 10px;font-size:1.05rem}
+  ul{margin:0;padding-left:20px}
+  li{margin-bottom:6px}
+  strong{color:var(--accent)}
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
+  .card{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:var(--bg)}
+  .card .tag{display:inline-block;font-weight:800;color:var(--accent);background:var(--accent-soft);
+    border-radius:8px;padding:2px 10px;font-size:.9rem;margin-bottom:8px}
+  .card h4{margin:0 0 6px;font-size:1rem}
+  .card p{margin:0;font-size:.93rem;color:var(--muted)}
+  .arrow{text-align:center;color:var(--muted);font-size:.9rem;margin:12px 0 0}
+  .note{border-left:4px solid var(--accent);background:var(--accent-soft);
+    padding:12px 16px;border-radius:0 12px 12px 0;margin-top:16px;font-size:.95rem}
+  .examples{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .examples .card ul{padding-left:18px;font-size:.92rem;color:var(--muted)}
+  .other{display:grid;gap:12px}
+  .other .card p{color:var(--ink)}
+  footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:32px}
+  @media (max-width:640px){
+    .hero,section{padding:26px 20px}
+    .compare,.examples{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <button class="toggle" id="themeToggle" type="button">라이트 / 다크</button>
+  </div>
+
+  <header class="hero">
+    <span class="eyebrow">AI TRANSFORMATION</span>
+    <h1><em>AX</em>란 무엇인가?</h1>
+    <p>AX는 보통 <b>AI Transformation(AI 전환)</b>을 뜻합니다. 요즘 한국 기업·교육·공공 분야에서 가장 많이 쓰이는 의미입니다.</p>
+  </header>
+
+  <section>
+    <h2>AX = AI 전환</h2>
+    <ul>
+      <li>조직의 업무, 서비스, 의사결정을 <strong>AI 중심으로 다시 설계하는 것</strong>을 말합니다.</li>
+      <li>단순히 AI 도구를 하나 쓰는 데서 그치지 않습니다. <strong>업무 방식, 조직 문화, 인재 역량까지 함께 바뀌는 것</strong>을 강조합니다.</li>
+    </ul>
+
+    <h3>DX 다음 단계, AX</h3>
+    <div class="compare">
+      <div class="card">
+        <span class="tag">DX</span>
+        <h4>Digital Transformation · 디지털 전환</h4>
+        <p>종이·오프라인 업무를 디지털로 옮기는 것<br>예: 전자결재, 클라우드 도입</p>
+      </div>
+      <div class="card">
+        <span class="tag">AX</span>
+        <h4>AI Transformation · AI 전환</h4>
+        <p>디지털로 옮긴 업무에 AI를 넣어 자동화하고 지능화하는 것<br>예: 생성형 AI로 보고서 초안 작성, AI 상담 챗봇, AI 기반 수요 예측</p>
+      </div>
+    </div>
+    <p class="arrow">DX로 업무를 디지털화한 뒤 → AX로 업무를 지능화합니다</p>
+  </section>
+
+  <section>
+    <h2>분야별 예시</h2>
+    <div class="examples">
+      <div class="card">
+        <span class="tag">기업</span>
+        <ul>
+          <li>AI 에이전트로 고객 응대</li>
+          <li>마케팅 콘텐츠 생성</li>
+          <li>코드 작성 자동화</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="tag">교육</span>
+        <ul>
+          <li>AI 튜터</li>
+          <li>맞춤형 학습</li>
+          <li>AI로 수업 자료·평가 제작 (AI 디지털교과서 등)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <span class="tag">공공</span>
+        <ul>
+          <li>민원 처리 자동화</li>
+          <li>AI 행정 비서</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>다른 의미로 쓰이는 AX</h2>
+    <div class="other">
+      <div class="card">
+        <span class="tag">Agent Experience</span>
+        <p>AI 에이전트가 쓰기 쉽게 서비스나 API를 설계하는 것. UX(사용자 경험)에 대응하는 개념입니다.</p>
+      </div>
+      <div class="card">
+        <span class="tag">○○ Experience</span>
+        <p>분야에 따라 Customer eXperience(CX)처럼 "○○ 경험"이라는 뜻으로 쓰이기도 합니다.</p>
+      </div>
+    </div>
+    <div class="note">같은 약어라도 맥락에 따라 뜻이 달라집니다. 어디에서 본 표현인지 확인하고 해석하세요.</div>
+  </section>
+
+  <footer>AX(AI Transformation) 개념 정리</footer>
+</div>
+
+<script>
+  (function(){
+    var root = document.documentElement;
+    try{
+      var saved = localStorage.getItem('theme');
+      if(saved) root.setAttribute('data-theme', saved);
+    }catch(e){}
+    document.getElementById('themeToggle').addEventListener('click', function(){
+      var cur = root.getAttribute('data-theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      var next = cur === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem('theme', next); }catch(e){}
+    });
+  })();
+</script>
+</body>
+</html>
