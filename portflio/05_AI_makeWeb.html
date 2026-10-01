@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AI가 만든 웹 페이지, 티 안 나게 만드는 법</title>
+<meta name="description" content="AI로 만든 웹 페이지에서 '평균값 티'를 지우는 방법 — 전형적인 신호 체크리스트, 다섯 단계 작업 순서, Before/After 예시." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f7f4ee;
+    --paper-2:#efe9dd;
+    --ink:#1f1d1a;
+    --muted:#6b665d;
+    --accent:#9c3b2e;
+    --accent-ink:#7d2f24;
+    --rule:#d8d2c6;
+    --serif:"Gowun Batang", Batang, "Nanum Myeongjo", "Times New Roman", serif;
+    --sans:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--sans);
+    font-size:17px;
+    line-height:1.85;
+    letter-spacing:-.003em;
+  }
+  .page{
+    max-width:760px;
+    margin:0 auto;
+    padding:64px 24px 120px;
+  }
+
+  /* ---- header ---- */
+  header.doc{border-bottom:2px solid var(--ink);padding-bottom:28px;margin-bottom:8px}
+  .eyebrow{
+    font-size:.78rem;letter-spacing:.22em;text-transform:uppercase;
+    color:var(--accent-ink);margin-bottom:18px;
+  }
+  h1{
+    font-family:var(--serif);
+    font-weight:700;
+    font-size:clamp(1.9rem,5.4vw,2.9rem);
+    line-height:1.28;
+    letter-spacing:-.01em;
+    margin:0 0 22px;
+  }
+  .standfirst{
+    font-family:var(--serif);
+    font-size:1.12rem;
+    line-height:1.75;
+    color:#3b3833;
+    margin:0;
+    padding-left:16px;
+    border-left:2px solid var(--accent);
+  }
+  .standfirst b{color:var(--ink)}
+  .meta{
+    margin-top:24px;font-size:.85rem;color:var(--muted);
+    display:flex;gap:14px;flex-wrap:wrap;
+  }
+  .meta span:not(:last-child)::after{content:"·";margin-left:14px;color:var(--rule)}
+
+  /* ---- sections ---- */
+  section{margin-top:64px}
+  .sec-head{display:flex;align-items:baseline;gap:14px;margin-bottom:22px}
+  .sec-no{
+    font-family:var(--serif);font-size:1.05rem;color:var(--accent);
+    font-weight:700;flex:none;padding-top:2px;
+  }
+  h2{
+    font-family:var(--serif);font-weight:700;
+    font-size:clamp(1.4rem,3.6vw,1.8rem);
+    line-height:1.35;margin:0;letter-spacing:-.01em;
+  }
+  h3{
+    font-family:var(--sans);font-weight:700;font-size:1.02rem;
+    margin:32px 0 10px;color:var(--accent-ink);
+    letter-spacing:.01em;
+  }
+  p{margin:0 0 18px}
+  a{color:var(--accent-ink);text-underline-offset:3px}
+  strong{font-weight:700}
+  code{
+    font-family:"SF Mono",ui-monospace,Consolas,monospace;
+    font-size:.86em;background:var(--paper-2);
+    padding:1px 5px;border-radius:2px;
+  }
+
+  ul,ol{margin:0 0 18px;padding-left:1.3em}
+  li{margin-bottom:8px}
+  li::marker{color:var(--muted)}
+  ul.tight li{margin-bottom:4px}
+
+  .callout{
+    font-family:var(--serif);
+    font-size:1.15rem;line-height:1.7;
+    margin:26px 0;padding:20px 22px;
+    background:var(--paper-2);
+    border-left:3px solid var(--accent);
+  }
+  .callout b{color:var(--accent-ink)}
+
+  /* ---- table ---- */
+  .table-wrap{overflow-x:auto;margin:22px 0;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink)}
+  table{width:100%;border-collapse:collapse;font-size:.95rem;min-width:440px}
+  th,td{text-align:left;padding:13px 14px;vertical-align:top;border-bottom:1px solid var(--rule)}
+  tr:last-child td{border-bottom:0}
+  th{font-weight:700;color:var(--muted);font-size:.82rem;letter-spacing:.04em;text-transform:uppercase}
+  td:first-child{width:38%;font-weight:600}
+
+  /* ---- checklist ---- */
+  .checkgroup{margin:14px 0 8px}
+  .checkgroup label{
+    display:flex;gap:11px;align-items:flex-start;
+    padding:9px 0;border-bottom:1px solid var(--rule);
+    cursor:pointer;line-height:1.6;
+  }
+  .checkgroup label:first-of-type{border-top:1px solid var(--rule)}
+  .checkgroup input{
+    flex:none;margin-top:6px;width:15px;height:15px;
+    accent-color:var(--accent);cursor:pointer;
+  }
+  .checkgroup input:checked + span{color:var(--muted);text-decoration:line-through;text-decoration-color:var(--accent)}
+  .tally{
+    margin-top:14px;font-size:.9rem;color:var(--muted);
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+  }
+  .tally strong{font-family:var(--serif);font-size:1.15rem;color:var(--ink)}
+  .tally.warn strong{color:var(--accent)}
+  button.reset{
+    font:inherit;font-size:.82rem;color:var(--muted);
+    background:none;border:1px solid var(--rule);border-radius:2px;
+    padding:5px 10px;cursor:pointer;
+  }
+  button.reset:hover{border-color:var(--muted);color:var(--ink)}
+
+  /* ---- steps ---- */
+  .step{margin-top:30px;padding-left:0}
+  .step-title{
+    font-family:var(--sans);font-weight:700;font-size:1.05rem;
+    margin-bottom:8px;
+  }
+  .step-title .n{
+    font-family:var(--serif);color:var(--accent);margin-right:8px;
+  }
+
+  /* ---- before / after ---- */
+  .ba{margin:22px 0 8px}
+  .ba-row{display:grid;gap:14px;margin-bottom:18px}
+  @media (min-width:620px){.ba-row{grid-template-columns:1fr 1fr}}
+  .ba-card{padding:16px 18px;font-size:.95rem;line-height:1.7}
+  .ba-card .tag{
+    display:block;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;
+    margin-bottom:8px;font-weight:700;
+  }
+  .ba-before{border:1px dashed var(--rule);background:transparent;color:var(--muted)}
+  .ba-before .tag{color:var(--muted)}
+  .ba-after{border:1px solid var(--rule);border-left:3px solid var(--accent);background:var(--paper-2)}
+  .ba-after .tag{color:var(--accent-ink)}
+  .ba-card ul{margin:0;padding-left:1.2em}
+  .ba-card p{margin:0}
+
+  /* ---- principles ---- */
+  ul.principles{list-style:none;padding:0;margin:20px 0}
+  ul.principles li{
+    padding:14px 0;border-bottom:1px solid var(--rule);margin:0;
+  }
+  ul.principles li:first-child{border-top:1px solid var(--rule)}
+  ul.principles b{display:block;font-family:var(--serif);font-size:1.08rem;margin-bottom:2px}
+
+  .closing{
+    font-family:var(--serif);font-size:1.2rem;line-height:1.7;
+    margin-top:44px;padding-top:28px;border-top:2px solid var(--ink);
+  }
+  .closing b{color:var(--accent-ink)}
+
+  footer.doc{
+    margin-top:80px;padding-top:24px;border-top:1px solid var(--rule);
+    font-size:.82rem;color:var(--muted);line-height:1.8;
+  }
+
+  @media (max-width:520px){
+    body{font-size:16px}
+    .page{padding:44px 18px 90px}
+    .sec-head{flex-direction:column;gap:4px}
+  }
+  @media print{
+    :root{--paper:#fff;--paper-2:#f2f2f2}
+    body{font-size:11pt}
+    .page{max-width:none;padding:0}
+    button.reset{display:none}
+    section{page-break-inside:avoid}
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <header class="doc">
+    <div class="eyebrow">제작 가이드</div>
+    <h1>AI가 만든 웹 페이지,<br />티 안 나게 만드는 법</h1>
+    <p class="standfirst">
+      &ldquo;AI로 만든 티가 난다&rdquo;는 건 대개 <b>디자인이 못생겨서</b>가 아니라,
+      <b>내용이 비어 있고 &middot; 선택에 이유가 없고 &middot; 어디서 본 것 같아서</b> 생기는 인상이다.
+      아래는 그 인상을 지우는 방법을 정리한 것이다.
+    </p>
+    <div class="meta">
+      <span>업데이트 2026.09</span>
+      <span>읽는 시간 약 6분</span>
+      <span>체크리스트 포함</span>
+    </div>
+  </header>
+
+  <!-- 01 -->
+  <section>
+    <div class="sec-head"><span class="sec-no">01</span><h2>왜 &lsquo;AI 티&rsquo;가 나는가</h2></div>
+    <p>AI 생성물은 <strong>가장 무난한 평균값</strong>을 내놓는다. 그래서 이런 특징이 생긴다.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>원인</th><th>겉으로 드러나는 모습</th></tr></thead>
+        <tbody>
+          <tr><td>학습 데이터의 평균을 출력</td><td>어디선가 본 듯한 히어로 섹션, 3단 카드, 보라색 그라데이션</td></tr>
+          <tr><td>도메인 지식이 없음</td><td>구체적인 숫자·사례·고유명사가 없는 뜬구름 문장</td></tr>
+          <tr><td>맥락이 없음</td><td>실제 회사·서비스와 맞지 않는 일반론</td></tr>
+          <tr><td>&lsquo;채우기&rsquo;에 최적화</td><td>의미 없는 섹션이 계속 반복됨</td></tr>
+          <tr><td>선택의 근거가 없음</td><td>폰트·색·여백이 &lsquo;왜 이걸 골랐는지&rsquo; 설명이 안 됨</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="callout">
+      핵심: 사람이 만든 페이지에는 <b>&lsquo;결정&rsquo;</b>이 있고,
+      AI가 만든 페이지에는 <b>&lsquo;기본값&rsquo;</b>이 있다.
+    </p>
+  </section>
+
+  <!-- 02 -->
+  <section>
+    <div class="sec-head"><span class="sec-no">02</span><h2>전형적인 신호 체크리스트</h2></div>
+    <p>내 페이지에 해당하는 항목을 눌러 표시해 보자. 표시된 개수가 많을수록 손볼 곳이 많다는 뜻이다.</p>
+
+    <div class="checkgroup" data-check="signals">
+      <h3>콘텐츠</h3>
+      <label><input type="checkbox" /><span>&ldquo;Lorem ipsum&rdquo;, &ldquo;회사명&rdquo;, &ldquo;여기에 내용을 입력하세요&rdquo;가 남아 있다</span></label>
+      <label><input type="checkbox" /><span>숫자가 하나도 없다 (고객 수, 연도, 가격, 성능 수치 등)</span></label>
+      <label><input type="checkbox" /><span>고유명사가 없다 (실제 제품명, 사람 이름, 지역, 날짜)</span></label>
+      <label><input type="checkbox" /><span>후기(testimonial)의 이름이 &ldquo;김민수 / CEO&rdquo;처럼 가짜 티가 난다</span></label>
+      <label><input type="checkbox" /><span>모든 문장이 장점만 말하고 한계·조건·가격이 없다</span></label>
+
+      <h3>디자인 · 비주얼</h3>
+      <label><input type="checkbox" /><span>보라→파랑 그라데이션, 유리 질감(glassmorphism), 네온 글로우</span></label>
+      <label><input type="checkbox" /><span>모든 모서리가 과하게 둥글고(16px 이상) 그림자가 진하다</span></label>
+      <label><input type="checkbox" /><span>섹션 제목마다 이모지가 붙어 있다 (🚀 ✨ 💡 🔥)</span></label>
+      <label><input type="checkbox" /><span>아이콘이 전부 똑같은 스타일의 기본 아이콘 세트</span></label>
+      <label><input type="checkbox" /><span>이미지가 없거나, 있어도 AI로 만든 티가 나는 일러스트</span></label>
+      <label><input type="checkbox" /><span>폰트가 Inter / 시스템 기본값 하나로만 되어 있다</span></label>
+
+      <h3>레이아웃</h3>
+      <label><input type="checkbox" /><span>히어로 = 가운데 정렬 제목 + 부제 + 버튼 2개 (한쪽은 외곽선)</span></label>
+      <label><input type="checkbox" /><span>&ldquo;기능 1 / 기능 2 / 기능 3&rdquo; 완벽 대칭 3단 카드</span></label>
+      <label><input type="checkbox" /><span>모든 섹션이 &ldquo;제목 + 한 줄 설명 + 카드 그리드&rdquo; 같은 구조</span></label>
+      <label><input type="checkbox" /><span>전부 가운데 정렬이라 시선이 멈출 곳이 없다</span></label>
+      <label><input type="checkbox" /><span>섹션 간 여백이 전부 똑같다 (리듬이 없음)</span></label>
+
+      <h3>카피라이팅(문장)</h3>
+      <label><input type="checkbox" /><span>&ldquo;오늘날 빠르게 변화하는 시대에…&rdquo; 로 시작</span></label>
+      <label><input type="checkbox" /><span>&ldquo;혁신 / 원활한(seamless) / 한 단계 끌어올리다 / 여정을 시작하세요&rdquo;</span></label>
+      <label><input type="checkbox" /><span>&ldquo;단순한 X가 아닙니다. Y입니다.&rdquo; 구문 반복</span></label>
+      <label><input type="checkbox" /><span>세 개씩 나열하는 문장이 계속 나온다</span></label>
+      <label><input type="checkbox" /><span>줄표(—)가 문장마다 들어간다</span></label>
+      <label><input type="checkbox" /><span>무엇을 하는 서비스인지 3초 안에 파악이 안 된다</span></label>
+
+      <h3>코드 · 기술</h3>
+      <label><input type="checkbox" /><span>버튼·링크가 <code>href="#"</code> 이고 눌러도 아무 일도 없다</span></label>
+      <label><input type="checkbox" /><span><code>&lt;title&gt;</code>, meta description이 &ldquo;Document&rdquo; 또는 일반 문구</span></label>
+      <label><input type="checkbox" /><span>시맨틱 태그 없이 <code>&lt;div&gt;</code>만 가득</span></label>
+      <label><input type="checkbox" /><span>alt 텍스트, 포커스 스타일, 명도 대비가 무시됨</span></label>
+      <label><input type="checkbox" /><span>반응형이 깨지거나, 반대로 모든 게 <code>max-width</code> 하나로만 처리</span></label>
+
+      <div class="tally">
+        <span>해당 항목 <strong data-count>0</strong> / <span data-total>0</span></span>
+        <button class="reset" type="button" data-reset>표시 지우기</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 -->
+  <section>
+    <div class="sec-head"><span class="sec-no">03</span><h2>티를 없애는 작업 순서</h2></div>
+
+    <div class="step">
+      <div class="step-title"><span class="n">1단계</span>내용을 진짜로 채운다 <span style="color:var(--muted);font-weight:400">(가장 중요)</span></div>
+      <ul class="tight">
+        <li>실제 숫자를 넣는다: &ldquo;2019년 설립&rdquo;, &ldquo;월 9,900원&rdquo;, &ldquo;응답 속도 120ms&rdquo;, &ldquo;누적 3,200팀&rdquo;</li>
+        <li>고유명사를 넣는다: 실제 기능 이름, 사람 이름, 도시, 파트너사</li>
+        <li><strong>모르면 지어내지 말고</strong> 비운 채로 두거나 <code>TODO:</code> 로 표시한다</li>
+        <li>장점만 쓰지 말고 조건·가격·대상·한계를 함께 쓴다</li>
+        <li>후기는 실명·소속·구체적 상황이 있어야 한다. 없으면 아예 빼는 게 낫다</li>
+      </ul>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="n">2단계</span>문장을 사람 말투로 고친다</div>
+      <ul class="tight">
+        <li>관용구를 지운다: &ldquo;빠르게 변화하는 시대&rdquo;, &ldquo;혁신을 경험하세요&rdquo;, &ldquo;그 이상입니다&rdquo;</li>
+        <li>첫 문장에서 <strong>누구를 위한 · 무엇을 하는</strong> 서비스인지 바로 말한다</li>
+        <li>3개씩 나열하는 습관, 줄표(—) 남발을 줄인다</li>
+        <li>소리 내어 읽어서 어색하면 고친다</li>
+        <li>한 페이지에 하나의 목소리(톤)를 유지한다</li>
+      </ul>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="n">3단계</span>디자인에서 &lsquo;기본값&rsquo;을 걷어낸다</div>
+      <ul class="tight">
+        <li>색: 기본 팔레트(Tailwind indigo, 보라 그라데이션)를 <strong>직접 고른 색</strong>으로 교체 &mdash; 브랜드 색 1개 + 중성색 2~3개면 충분하다</li>
+        <li>폰트: 제목용/본문용을 구분하고, 최소한 본문 폰트는 의도적으로 고른다</li>
+        <li>모서리·그림자: <code>border-radius</code>를 4~8px로 낮추고 그림자는 얕게(또는 테두리로 대체)</li>
+        <li>이모지 제목을 없앤다. 아이콘은 꼭 필요한 곳에만</li>
+        <li>이미지: 실제 스크린샷·사진을 쓴다. 없으면 도형·타이포로 대체하고 억지 일러스트는 피한다</li>
+      </ul>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="n">4단계</span>레이아웃에 리듬을 만든다</div>
+      <ul class="tight">
+        <li>히어로를 왼쪽 정렬로 바꾸거나, 텍스트+이미지 2단으로 바꾼다</li>
+        <li>3단 카드가 꼭 필요한지 다시 본다. 2개면 2개, 5개면 리스트로</li>
+        <li>섹션마다 레이아웃을 조금씩 다르게 한다 (좌우 번갈아, 넓이 다르게)</li>
+        <li>여백에 강약을 준다: 큰 전환에는 큰 여백, 관련 내용은 붙인다</li>
+        <li>한 화면에 &lsquo;시선이 처음 닿을 곳&rsquo;을 하나만 만든다</li>
+      </ul>
+    </div>
+
+    <div class="step">
+      <div class="step-title"><span class="n">5단계</span>마감(디테일)을 챙긴다</div>
+      <ul class="tight">
+        <li>모든 링크·버튼이 실제로 동작하거나, 최소한 목적지가 있다</li>
+        <li><code>&lt;title&gt;</code>, meta description, OG 태그를 내용에 맞게 작성</li>
+        <li><code>header / nav / main / section / footer</code> 시맨틱 태그 사용</li>
+        <li>이미지 <code>alt</code>, 키보드 포커스 스타일, 본문 명도 대비 4.5:1 이상</li>
+        <li>푸터에 실제 정보: 연락처, 사업자 정보, 업데이트 날짜, 저작권 연도</li>
+        <li>오탈자·띄어쓰기 검수</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section>
+    <div class="sec-head"><span class="sec-no">04</span><h2>빠른 자가 점검 &mdash; 10초 테스트</h2></div>
+    <p>내 페이지에 &lsquo;걸리는&rsquo; 항목을 눌러 보자.</p>
+    <div class="checkgroup" data-check="selftest">
+      <label><input type="checkbox" /><span><strong>3초 룰</strong> &mdash; 첫 화면만 보고 &lsquo;무엇을 하는 곳&rsquo;인지 말할 수 <em>없다</em></span></label>
+      <label><input type="checkbox" /><span><strong>숫자 세기</strong> &mdash; 구체적인 숫자가 3개 미만이다</span></label>
+      <label><input type="checkbox" /><span><strong>고유명사 세기</strong> &mdash; 실제 이름·제품·지역이 등장하지 않는다</span></label>
+      <label><input type="checkbox" /><span><strong>삭제 테스트</strong> &mdash; 지워도 아무도 아쉽지 않은 섹션이 있다</span></label>
+      <label><input type="checkbox" /><span><strong>관용구 검색</strong> &mdash; &ldquo;혁신 / 원활한 / 여정 / 그 이상 / 빠르게 변화하는&rdquo;이 있다</span></label>
+      <label><input type="checkbox" /><span><strong>대칭 확인</strong> &mdash; 모든 섹션이 똑같은 구조로 반복된다</span></label>
+      <label><input type="checkbox" /><span><strong>클릭 테스트</strong> &mdash; 버튼 5개 중 동작하지 않는 것이 있다</span></label>
+      <label><input type="checkbox" /><span><strong>색 출처</strong> &mdash; 메인 색을 왜 골랐는지 한 문장으로 설명할 수 없다</span></label>
+      <div class="tally">
+        <span>걸린 항목 <strong data-count>0</strong> / <span data-total>0</span></span>
+        <button class="reset" type="button" data-reset>표시 지우기</button>
+      </div>
+    </div>
+    <p style="margin-top:16px" data-verdict>절반 이상 걸리면 아직 &lsquo;AI 티&rsquo;가 남아 있는 상태다.</p>
+  </section>
+
+  <!-- 05 -->
+  <section>
+    <div class="sec-head"><span class="sec-no">05</span><h2>Before / After 예시</h2></div>
+
+    <div class="ba">
+      <h3>히어로 문구</h3>
+      <div class="ba-row">
+        <div class="ba-card ba-before">
+          <span class="tag">Before &mdash; AI 기본값</span>
+          <p>오늘날 빠르게 변화하는 디지털 시대에, 저희는 원활한 경험을 통해 여러분의 비즈니스를 한 단계 끌어올립니다. 지금 바로 여정을 시작하세요.</p>
+        </div>
+        <div class="ba-card ba-after">
+          <span class="tag">After &mdash; 사람이 쓴 문장</span>
+          <p>소규모 카페를 위한 예약·재고 관리 도구입니다. 사장님 혼자 써도 5분이면 세팅되고, 월 9,900원입니다.</p>
+        </div>
+      </div>
+
+      <h3>기능 소개</h3>
+      <div class="ba-row">
+        <div class="ba-card ba-before">
+          <span class="tag">Before</span>
+          <p>✨ 강력한 기능 &nbsp;·&nbsp; 🚀 빠른 속도 &nbsp;·&nbsp; 💡 스마트한 자동화</p>
+        </div>
+        <div class="ba-card ba-after">
+          <span class="tag">After</span>
+          <ul>
+            <li>예약이 들어오면 카카오톡으로 바로 알림</li>
+            <li>원두 재고가 2kg 이하로 떨어지면 발주 알림</li>
+            <li>마감 후 매출·인기 메뉴를 한 장으로 요약</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>후기</h3>
+      <div class="ba-row">
+        <div class="ba-card ba-before">
+          <span class="tag">Before</span>
+          <p>&ldquo;정말 최고의 서비스입니다!&rdquo; &mdash; 김민수, CEO</p>
+        </div>
+        <div class="ba-card ba-after">
+          <span class="tag">After</span>
+          <p>&ldquo;예약 노쇼가 줄어서 하루 2~3만 원씩 덜 버렸어요.&rdquo;<br />
+          &mdash; 망원동 &lsquo;오분커피&rsquo; 이OO 사장 (2024년 3월부터 사용)</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section>
+    <div class="sec-head"><span class="sec-no">06</span><h2>마무리 원칙</h2></div>
+    <ul class="principles">
+      <li><b>디자인을 다듬기 전에 내용부터 채운다</b>빈 껍데기는 아무리 예뻐도 티가 난다.</li>
+      <li><b>모든 선택에 이유를 붙인다</b>색, 폰트, 레이아웃, 섹션 개수 전부.</li>
+      <li><b>평균에서 벗어난다</b>가장 흔한 형태를 알아보고 일부러 다르게 만든다.</li>
+      <li><b>덜어낸다</b>섹션, 문장, 효과, 이모지를 줄이면 대체로 더 진짜처럼 보인다.</li>
+      <li><b>직접 검수한다</b>AI가 쓴 문장을 소리 내어 읽고, 링크를 눌러보고, 모바일에서 확인한다.</li>
+    </ul>
+    <p class="closing">
+      결국 &lsquo;AI 티&rsquo;를 지우는 건 도구의 문제가 아니라
+      <b>얼마나 개입했는가</b>의 문제다.
+    </p>
+  </section>
+
+  <footer class="doc">
+    AI가 만든 웹 페이지, 티 안 나게 만드는 법 &nbsp;·&nbsp; 수업 자료<br />
+    이 페이지도 위 원칙에 따라 손봤습니다 &mdash; 보라색 그라데이션 대신 벽돌색 한 가지, 제목엔 이모지 대신 명조체, 3단 카드 대신 문서형 레이아웃.<br />
+    &copy; 2026. 자유롭게 수정·배포.
+  </footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var KEY = "ai_tell_guide_checks_v1";
+  var saved = {};
+  try{ saved = JSON.parse(localStorage.getItem(KEY) || "{}") || {}; }catch(e){ saved = {}; }
+
+  function persist(){
+    try{ localStorage.setItem(KEY, JSON.stringify(saved)); }catch(e){}
+  }
+
+  document.querySelectorAll(".checkgroup").forEach(function(group){
+    var id = group.getAttribute("data-check");
+    var boxes = [].slice.call(group.querySelectorAll('input[type=checkbox]'));
+    var countEl = group.querySelector("[data-count]");
+    var totalEl = group.querySelector("[data-total]");
+    var tally = group.querySelector(".tally");
+    var verdict = group.parentNode.querySelector("[data-verdict]");
+    if(totalEl) totalEl.textContent = boxes.length;
+    saved[id] = saved[id] || {};
+
+    function update(){
+      var n = 0;
+      boxes.forEach(function(b,i){ if(b.checked) n++; });
+      if(countEl) countEl.textContent = n;
+      if(tally) tally.classList.toggle("warn", n >= Math.ceil(boxes.length/2));
+      if(verdict){
+        if(n === 0) verdict.textContent = "내 페이지에 걸리는 항목을 눌러 보자.";
+        else if(n >= 4) verdict.innerHTML = "<strong style='color:var(--accent)'>" + n + "개가 걸렸다.</strong> 아직 &lsquo;AI 티&rsquo;가 뚜렷하게 남아 있는 상태다. 3단계 작업 순서로 돌아가자.";
+        else verdict.textContent = n + "개 걸렸다. 나쁘지 않지만, 걸린 항목부터 하나씩 고치자.";
+      }
+    }
+
+    boxes.forEach(function(b,i){
+      if(saved[id][i]) b.checked = true;
+      b.addEventListener("change", function(){
+        saved[id][i] = b.checked;
+        persist();
+        update();
+      });
+    });
+
+    var resetBtn = group.querySelector("[data-reset]");
+    if(resetBtn) resetBtn.addEventListener("click", function(){
+      boxes.forEach(function(b,i){ b.checked = false; saved[id][i] = false; });
+      persist();
+      update();
+    });
+
+    update();
+  });
+})();
+</script>
+</body>
+</html>
