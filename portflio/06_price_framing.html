@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>가격 프레이밍 마케팅</title>
+<style>
+  :root{
+    --bg:#f7f7f9; --paper:#ffffff; --ink:#1f2330; --muted:#626878; --line:#e3e5eb;
+    --accent:#4f46e5; --accent-soft:#ecebfd; --warn:#b4472c; --warn-soft:#fbeee9;
+    --shadow:0 6px 20px rgba(20,24,40,.06);
+  }
+  :root[data-theme="dark"]{
+    --bg:#15171d; --paper:#1d2029; --ink:#e8e9ee; --muted:#a0a5b3; --line:#2e323e;
+    --accent:#8b85f5; --accent-soft:#2a2850; --warn:#e58a6f; --warn-soft:#3a2620;
+    --shadow:0 6px 20px rgba(0,0,0,.3);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#15171d; --paper:#1d2029; --ink:#e8e9ee; --muted:#a0a5b3; --line:#2e323e;
+      --accent:#8b85f5; --accent-soft:#2a2850; --warn:#e58a6f; --warn-soft:#3a2620;
+      --shadow:0 6px 20px rgba(0,0,0,.3);
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.75;
+    font-family:"Pretendard","Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+  .wrap{width:min(920px,calc(100% - 32px));margin:0 auto;padding:32px 0 80px}
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap}
+  .toc{display:flex;gap:6px;flex-wrap:wrap}
+  .toc a{font-size:.82rem;color:var(--muted);text-decoration:none;border:1px solid var(--line);
+    background:var(--paper);border-radius:999px;padding:4px 12px}
+  .toc a:hover{color:var(--accent);border-color:var(--accent)}
+  .toggle{font:inherit;font-size:.82rem;cursor:pointer;color:var(--ink);background:var(--paper);
+    border:1px solid var(--line);border-radius:999px;padding:5px 14px}
+  .hero,section{background:var(--paper);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+  .hero{padding:40px 36px}
+  section{padding:30px 32px;margin-top:20px;scroll-margin-top:16px}
+  .eyebrow{display:inline-block;background:var(--accent-soft);color:var(--accent);font-weight:700;
+    font-size:.8rem;letter-spacing:.06em;padding:4px 12px;border-radius:999px}
+  h1{margin:14px 0 10px;font-size:clamp(1.7rem,4.4vw,2.5rem);line-height:1.3;letter-spacing:-.03em}
+  h1 em{font-style:normal;color:var(--accent)}
+  .hero p{margin:0;color:var(--muted);font-size:1.02rem}
+  h2{margin:0 0 6px;font-size:1.35rem;letter-spacing:-.02em}
+  h2 .n{color:var(--accent);margin-right:6px}
+  .lead{color:var(--muted);margin:0 0 18px}
+  h3{margin:0 0 6px;font-size:1.05rem}
+  p{margin:0 0 10px}
+  strong{color:var(--accent)}
+  table{width:100%;border-collapse:collapse;font-size:.93rem}
+  th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:700;font-size:.85rem;background:var(--bg)}
+  .tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px}
+  .tbl tr:last-child td{border-bottom:none}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .tag{display:inline-block;font-weight:800;font-size:.8rem;color:var(--accent);background:var(--accent-soft);
+    border-radius:8px;padding:2px 10px;margin-bottom:8px}
+  .card{border:1px solid var(--line);border-radius:14px;padding:18px 20px;background:var(--bg)}
+  .price-old{color:var(--muted);text-decoration:line-through;font-size:.95rem}
+  .price{font-size:1.6rem;font-weight:800;letter-spacing:-.02em}
+  .badge{display:inline-block;background:var(--warn);color:#fff;font-weight:800;font-size:.8rem;
+    border-radius:6px;padding:1px 8px;margin-left:6px;vertical-align:middle}
+  .feel{margin-top:8px;font-size:.92rem;color:var(--muted)}
+
+  .tech{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+  .tech .card h3 .num{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;
+    border-radius:50%;background:var(--accent);color:#fff;font-size:.8rem;margin-right:8px}
+  .tech .card p{font-size:.93rem;margin:0 0 8px}
+  .ex{font-size:.88rem;background:var(--paper);border:1px dashed var(--line);border-radius:10px;padding:8px 12px;color:var(--ink)}
+
+  .lab{display:grid;grid-template-columns:260px 1fr;gap:18px}
+  .lab label{display:block;font-weight:700;font-size:.88rem;margin:10px 0 4px}
+  .lab input{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);
+    border-radius:10px;padding:9px 12px}
+  .lab input:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+  .frames{display:grid;gap:10px}
+  .frame{display:flex;justify-content:space-between;align-items:center;gap:12px;border:1px solid var(--line);
+    border-radius:12px;padding:12px 16px;background:var(--bg)}
+  .frame .k{font-size:.82rem;color:var(--muted)}
+  .frame .v{font-size:1.15rem;font-weight:800}
+  .frame.best{border-color:var(--accent);background:var(--accent-soft)}
+  .frame.best .k::after{content:" · 더 커 보이는 표시";color:var(--accent);font-weight:700}
+  .hint{font-size:.85rem;color:var(--muted);margin-top:10px}
+
+  .note{border-left:4px solid var(--accent);background:var(--accent-soft);padding:12px 16px;
+    border-radius:0 12px 12px 0;margin-top:14px;font-size:.93rem}
+  .warn{border-left-color:var(--warn);background:var(--warn-soft)}
+  .warn strong{color:var(--warn)}
+
+  details{border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-top:10px;background:var(--bg)}
+  summary{cursor:pointer;font-weight:700}
+  details p{margin:10px 0 0;font-size:.93rem}
+
+  ol.sum{margin:0;padding-left:22px}
+  ol.sum li{margin-bottom:6px}
+  footer{text-align:center;color:var(--muted);font-size:.85rem;margin-top:32px}
+
+  @media (max-width:720px){
+    .hero,section{padding:24px 20px}
+    .compare,.tech,.lab{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="topbar">
+    <nav class="toc">
+      <a href="#why">왜 할인?</a><a href="#concept">핵심 개념</a><a href="#tech">8가지 기법</a>
+      <a href="#lab">실험실</a><a href="#game">게임 상점</a><a href="#ethics">윤리</a><a href="#activity">실습</a>
+    </nav>
+    <button class="toggle" id="themeToggle" type="button">라이트 / 다크</button>
+  </div>
+
+  <header class="hero">
+    <span class="eyebrow">PRICE FRAMING</span>
+    <h1>할인은 왜 지갑을 열게 할까?<br><em>가격 프레이밍</em> 마케팅</h1>
+    <p>같은 가격도 <b>어떻게 보여주느냐(프레임)</b>에 따라 비싸 보이기도, 싸 보이기도 합니다. 할인은 가격 자체를 바꾸기보다 <b>가격을 바라보는 기준을 바꾸는 기술</b>입니다.</p>
+  </header>
+
+  <section id="why">
+    <h2><span class="n">01</span>왜 할인이 필요한가</h2>
+    <p class="lead">사람은 가격을 절대적인 숫자로 판단하지 않고, 머릿속의 <b>기준점과 비교</b>해서 판단합니다.</p>
+    <div class="compare">
+      <div class="card">
+        <span class="tag">프레임 없음</span>
+        <div class="price">29,900원</div>
+        <div class="feel">"음… 그냥 그렇네."</div>
+      </div>
+      <div class="card">
+        <span class="tag">할인 프레임</span>
+        <div class="price-old">59,000원</div>
+        <div class="price">29,900원<span class="badge">49%</span></div>
+        <div class="feel">"반값이네? 지금 사야겠다!"</div>
+      </div>
+    </div>
+    <div class="note">내는 돈은 똑같습니다. 달라진 건 <b>비교 대상(기준점)</b>이 생겼다는 것뿐입니다. 할인은 "이 물건이 얼마인가?"를 <b>"지금 사면 얼마나 이득인가?"</b>로 바꿔 줍니다.</div>
+  </section>
+
+  <section id="concept">
+    <h2><span class="n">02</span>핵심 개념 5가지</h2>
+    <p class="lead">가격 프레이밍 뒤에는 행동경제학의 기본 개념들이 있습니다.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>개념</th><th>설명</th><th>예시</th></tr></thead>
+        <tbody>
+          <tr><td><b>프레이밍 효과</b></td><td>같은 정보라도 표현 방식에 따라 선택이 달라진다 (Tversky &amp; Kahneman, 1981)</td><td>"지방 20%" vs "무지방 80%"</td></tr>
+          <tr><td><b>준거가격</b></td><td>소비자가 "원래 이 정도"라고 기억하는 기준 가격</td><td>정가, 경쟁사 가격, 지난번 구매가</td></tr>
+          <tr><td><b>앵커링</b></td><td>처음 본 숫자가 이후 판단의 닻이 된다</td><td>비싼 상품을 먼저 보면 다음 상품이 싸 보임</td></tr>
+          <tr><td><b>손실 회피</b></td><td>같은 크기라도 얻는 기쁨보다 잃는 고통이 더 크다 (전망 이론, 1979)</td><td>"오늘 지나면 혜택이 사라집니다"</td></tr>
+          <tr><td><b>심적 회계</b></td><td>돈을 머릿속에서 용도별 계좌로 나눠 다르게 취급한다 (Thaler)</td><td>게임 속 다이아는 '현금'처럼 느껴지지 않음</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="tech">
+    <h2><span class="n">03</span>가격 프레임을 바꾸는 8가지 기법</h2>
+    <p class="lead">실제 상점과 광고에서 가장 자주 쓰이는 방식들입니다.</p>
+    <div class="tech">
+      <div class="card">
+        <h3><span class="num">1</span>앵커 가격</h3>
+        <p>정가에 취소선을 긋고 할인가를 옆에 둡니다. 취소된 정가가 <b>기준점</b> 역할을 합니다.</p>
+        <div class="ex"><s>50,000원</s> → <b>29,900원</b> (40% OFF)</div>
+      </div>
+      <div class="card">
+        <h3><span class="num">2</span>% vs 금액 (100의 법칙)</h3>
+        <p>저가 상품은 <b>%</b>, 고가 상품은 <b>금액</b>으로 표시해야 할인이 커 보입니다. 아래 실험실에서 직접 확인해 보세요.</p>
+        <div class="ex">8,000원 상품: "25% 할인" &gt; "2,000원 할인"</div>
+      </div>
+      <div class="card">
+        <h3><span class="num">3</span>쪼개기</h3>
+        <p>큰 금액을 작은 단위로 나누면 부담이 줄어듭니다. 구독·월정액이 자주 씁니다.</p>
+        <div class="ex">연 99,000원 → "하루 약 270원"</div>
+      </div>
+      <div class="card">
+        <h3><span class="num">4</span>끝자리 가격</h3>
+        <p>사람은 왼쪽 숫자부터 읽기 때문에 "만 원대"가 아니라 "9천 원대"로 느낍니다 (왼쪽 자릿수 효과).</p>
+        <div class="ex">10,000원 → <b>9,900원</b></div>
+      </div>
+      <div class="card">
+        <h3><span class="num">5</span>미끼 효과</h3>
+        <p>아무도 안 고를 선택지를 일부러 넣어, 원래 팔고 싶은 상품을 이득처럼 보이게 합니다 (이코노미스트 구독 사례).</p>
+        <div class="ex">웹 $59 · 인쇄본 $125 · <b>웹+인쇄본 $125</b></div>
+      </div>
+      <div class="card">
+        <h3><span class="num">6</span>무료의 힘</h3>
+        <p>0원은 '싼 것'이 아니라 <b>'손해 볼 위험이 없는 것'</b>으로 느껴집니다.</p>
+        <div class="ex">"배송비 3,000원 할인" &lt; "무료 배송"</div>
+      </div>
+      <div class="card">
+        <h3><span class="num">7</span>손실 프레임</h3>
+        <p>손실 회피 때문에 "얻는다"보다 <b>"잃는다"</b>는 표현이 더 강하게 행동을 이끕니다.</p>
+        <div class="ex">"10,000원 절약!" &lt; "오늘 지나면 10,000원 더 내야 합니다"</div>
+      </div>
+      <div class="card">
+        <h3><span class="num">8</span>할인 대신 더 주기</h3>
+        <p>가격이 내려가는 것보다 <b>양이 늘어나는 것</b>을 더 쉽게 받아들이는 경우가 많습니다.</p>
+        <div class="ex">"25% 할인" = "33% 더 드려요" (단가 동일)</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="lab">
+    <h2><span class="n">04</span>실험실 — 같은 할인, 다른 프레임</h2>
+    <p class="lead">정가와 할인가를 바꿔 보면서 어떤 표시가 더 크게 느껴지는지 비교해 보세요.</p>
+    <div class="lab">
+      <div>
+        <label for="orig">정가 (원)</label>
+        <input id="orig" type="number" min="1" step="100" value="30000" />
+        <label for="sale">할인가 (원)</label>
+        <input id="sale" type="number" min="0" step="100" value="22000" />
+        <p class="hint">해 볼 것: 8,000 → 6,000 / 1,500,000 → 1,275,000</p>
+      </div>
+      <div class="frames">
+        <div class="frame" id="fPct"><span class="k">% 프레임</span><span class="v" id="vPct"></span></div>
+        <div class="frame" id="fWon"><span class="k">금액 프레임</span><span class="v" id="vWon"></span></div>
+        <div class="frame"><span class="k">더 주기 프레임 (같은 가격에 양을 늘린다면)</span><span class="v" id="vMore"></span></div>
+        <div class="frame"><span class="k">쪼개기 프레임 (1년 구독이라면)</span><span class="v" id="vDay"></span></div>
+      </div>
+    </div>
+    <div class="note">원래 법칙은 "100달러 미만은 %, 100달러 이상은 금액"(Jonah Berger, 『Contagious』)입니다. 이 실험실은 원화로 옮겨 <b>정가 약 10만 원</b>을 기준으로 강조 표시를 바꿉니다. 정확한 경계가 아니라 대략적인 경험칙으로 이해하세요.</div>
+  </section>
+
+  <section id="game">
+    <h2><span class="n">05</span>게임 상점 속 가격 프레이밍</h2>
+    <p class="lead">게임 상점은 이 기법들이 가장 촘촘하게 쓰이는 공간입니다.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>상점에서 보이는 것</th><th>숨어 있는 기법</th></tr></thead>
+        <tbody>
+          <tr><td>"가치 300%!", "보너스 +50%" 배지</td><td>앵커 가격, 더 주기</td></tr>
+          <tr><td>가장 비싼 패키지를 맨 앞(또는 가운데)에 배치</td><td>앵커링</td></tr>
+          <tr><td>원화 대신 다이아·젬·크리스탈로 가격 표시</td><td>심적 회계</td></tr>
+          <tr><td>"첫 구매 2배", "첫 결제 한정 패키지"</td><td>무료·보너스 + 손실 회피</td></tr>
+          <tr><td>남은 시간 타이머, "1회 한정 구매"</td><td>손실 프레임, 희소성</td></tr>
+          <tr><td>월정액·시즌패스 "하루 ○○원"</td><td>쪼개기</td></tr>
+          <tr><td>소·중·대 패키지 중 '중'만 애매하게 비효율</td><td>미끼 효과</td></tr>
+          <tr><td>9,900원 / 49,000원 / 99,000원 가격대</td><td>끝자리 가격</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="ethics">
+    <h2><span class="n">06</span>프레이밍과 속임수는 다르다</h2>
+    <p class="lead">프레이밍은 같은 사실을 더 매력적으로 보여주는 것입니다. 사실 자체를 속이면 마케팅이 아니라 기만입니다.</p>
+    <div class="tbl">
+      <table>
+        <thead><tr><th>유형</th><th>내용</th></tr></thead>
+        <tbody>
+          <tr><td><b>가짜 정가</b></td><td>한 번도 판 적 없는 가격을 정가로 적고 할인하는 척하기 → 허위·과장 광고 문제</td></tr>
+          <tr><td><b>다크 패턴</b></td><td>숨겨진 자동 결제, 해지하기 어려운 구조, 결제 마지막에 추가 요금 노출 → 2025년부터 전자상거래법으로 일부 유형 규제</td></tr>
+          <tr><td><b>확률형 아이템</b></td><td>국내 게임은 2024년 3월부터 확률 정보 공개가 법적 의무</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note warn">좋은 가격 설계는 유저가 나중에 돌아봐도 <strong>"잘 샀다"</strong>고 느끼게 만듭니다. 속았다고 느낀 유저는 다시 결제하지 않고, 그 경험을 커뮤니티에 퍼뜨립니다.</div>
+  </section>
+
+  <section id="activity">
+    <h2><span class="n">07</span>실습 활동</h2>
+    <p class="lead">눌러서 활동 내용을 확인하세요.</p>
+    <details open>
+      <summary>활동 1. 상점 해부하기 (개인, 15분)</summary>
+      <p>자주 하는 모바일 게임의 상점 화면을 캡처하고, 8가지 기법 중 무엇이 쓰였는지 최소 3개 찾아 표시하기.</p>
+    </details>
+    <details>
+      <summary>활동 2. 같은 가격, 세 가지 프레임 (팀, 20분)</summary>
+      <p>"30,000원짜리 패키지를 22,000원에 판매"라는 조건으로 ① % 프레임 ② 금액 프레임 ③ 더 주기 프레임 문구를 각각 만들기. 팀별로 발표하고 가장 사고 싶은 문구에 투표하기.</p>
+    </details>
+    <details>
+      <summary>활동 3. 토론 (전체, 10분)</summary>
+      <p>"카운트다운 타이머는 정당한 마케팅인가, 다크 패턴인가?" — 기준을 어디에 둘지 이야기해 보기.</p>
+    </details>
+  </section>
+
+  <section>
+    <h2><span class="n">08</span>핵심 정리</h2>
+    <ol class="sum">
+      <li>사람은 가격을 <b>기준점과 비교</b>해서 판단한다.</li>
+      <li>할인은 가격보다 <b>기준점(프레임)을 바꾸는 기술</b>이다.</li>
+      <li>대표 기법: 앵커 가격 · %/금액 선택 · 쪼개기 · 끝자리 가격 · 미끼 · 무료 · 손실 프레임 · 더 주기</li>
+      <li>게임 상점은 이 기법들의 집합체다.</li>
+      <li>프레이밍은 <b>사실을 보여주는 방식</b>을 바꾸는 것이지, <b>사실을 바꾸는 것이 아니다.</b></li>
+    </ol>
+  </section>
+
+  <footer>가격 프레이밍 마케팅 · 수업 자료</footer>
+</div>
+
+<script>
+  (function(){
+    var root = document.documentElement;
+    try{ var saved = localStorage.getItem('theme'); if(saved) root.setAttribute('data-theme', saved); }catch(e){}
+    document.getElementById('themeToggle').addEventListener('click', function(){
+      var cur = root.getAttribute('data-theme') ||
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      var next = cur === 'dark' ? 'light' : 'dark';
+      root.setAttribute('data-theme', next);
+      try{ localStorage.setItem('theme', next); }catch(e){}
+    });
+
+    var orig = document.getElementById('orig'), sale = document.getElementById('sale');
+    var fmt = function(n){ return Math.round(n).toLocaleString('ko-KR'); };
+    function update(){
+      var o = parseFloat(orig.value) || 0, s = parseFloat(sale.value) || 0;
+      var fPct = document.getElementById('fPct'), fWon = document.getElementById('fWon');
+      fPct.classList.remove('best'); fWon.classList.remove('best');
+      if(o <= 0 || s < 0 || s >= o){
+        ['vPct','vWon','vMore','vDay'].forEach(function(id){ document.getElementById(id).textContent = '—'; });
+        return;
+      }
+      var off = o - s, pct = off / o * 100;
+      document.getElementById('vPct').textContent = Math.round(pct) + '% 할인';
+      document.getElementById('vWon').textContent = fmt(off) + '원 할인';
+      document.getElementById('vMore').textContent = Math.round((o / s - 1) * 100) + '% 더 드려요';
+      document.getElementById('vDay').textContent = '하루 약 ' + fmt(s / 365) + '원';
+      // 100의 법칙을 원화로 옮긴 경험칙: 약 10만 원 미만은 %, 이상은 금액
+      (o < 100000 ? fPct : fWon).classList.add('best');
+    }
+    orig.addEventListener('input', update); sale.addEventListener('input', update);
+    update();
+  })();
+</script>
+</body>
+</html>
