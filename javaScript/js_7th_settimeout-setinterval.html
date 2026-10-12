@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>setTimeout와 setInterval</title>
+<meta name="description" content="자바스크립트 setTimeout과 setInterval의 문법과 차이를 실제 동작하는 예제로 설명하는 강의자료.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #f6f3ee;
+    --surface: #ffffff;
+    --text: #22231f;
+    --text-muted: #5b574f;
+    --border: #ddd6c9;
+    --accent: #8a3418;        /* 짙은 테라코타. 타이머/시계 느낌의 따뜻한 색 한 가지만 사용 */
+    --accent-soft: #f1e3d8;
+    --code-bg: #20241f;
+    --code-text: #e9e4da;
+    --ok: #3f6b3a;
+  }
+  *{ box-sizing: border-box; }
+  html{ -webkit-text-size-adjust: 100%; }
+  body{
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    line-height: 1.7;
+    font-size: 16px;
+  }
+  h1, h2, h3{
+    font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  a{ color: var(--accent); }
+  a:focus-visible, button:focus-visible, summary:focus-visible{
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+  code, pre{ font-family: 'IBM Plex Mono', monospace; }
+
+  header.top{
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    padding: 18px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+  header.top .title{
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+  header.top .title small{
+    display: block;
+    font-family: 'Noto Sans KR', sans-serif;
+    font-weight: 400;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  header.top nav ul{
+    list-style: none;
+    display: flex;
+    gap: 18px;
+    margin: 0;
+    padding: 0;
+    flex-wrap: wrap;
+    font-size: 0.9rem;
+  }
+  header.top nav a{
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+  }
+  header.top nav a:hover{ border-bottom-color: var(--accent); }
+
+  main{
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+  section{ padding-top: 56px; }
+  section > h2{
+    font-size: 1.5rem;
+    margin-bottom: 4px;
+  }
+  section > p.lead{
+    color: var(--text-muted);
+    margin-top: 2px;
+    margin-bottom: 24px;
+    max-width: 640px;
+  }
+
+  .callout{
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    padding: 14px 18px;
+    border-radius: 0 6px 6px 0;
+    margin: 18px 0;
+    font-size: 0.95rem;
+  }
+  .callout strong{ color: var(--accent); }
+
+  pre.code{
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 16px 18px;
+    border-radius: 6px;
+    overflow-x: auto;
+    font-size: 0.85rem;
+    line-height: 1.6;
+    margin: 12px 0;
+  }
+  .kw{ color: #e2a37a; }
+  .cm{ color: #8a9a86; }
+
+  .split{
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+  @media (max-width: 720px){
+    .split{ grid-template-columns: 1fr; }
+  }
+
+  .panel{
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: 6px;
+    padding: 18px 20px;
+  }
+  .panel h3{
+    margin: 0 0 10px;
+    font-size: 1rem;
+  }
+  .panel .note{
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+  }
+
+  button{
+    font-family: 'Noto Sans KR', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    border: 1px solid var(--text);
+    background: var(--text);
+    color: var(--bg);
+    padding: 9px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  button.secondary{
+    background: transparent;
+    color: var(--text);
+  }
+  button:disabled{
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  button + button{ margin-left: 8px; }
+
+  .readout{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.6rem;
+    margin: 10px 0;
+  }
+  .readout .unit{
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    margin-left: 4px;
+  }
+
+  table{
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.92rem;
+  }
+  caption{
+    text-align: left;
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+  }
+  th, td{
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th{
+    background: var(--accent-soft);
+    font-weight: 700;
+    width: 18%;
+  }
+
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="title">setTimeout &amp; setInterval
+    <small>자바스크립트 타이머 함수 · 2학기 수업자료</small>
+  </div>
+  <nav aria-label="섹션 이동">
+    <ul>
+      <li><a href="#settimeout">setTimeout</a></li>
+      <li><a href="#setinterval">setInterval</a></li>
+      <li><a href="#compare">비교</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+
+  <section id="intro">
+    <h2>왜 타이머 함수가 필요한가</h2>
+    <p class="lead">정해진 시간이 지난 뒤, 또는 일정한 간격마다 코드를 실행해야 하는 상황에서 사용한다.</p>
+    <p>예를 들어 알림창을 띄우고 3초 뒤 자동으로 닫거나, 화면 왼쪽 위에 있는 시계를 1초마다 갱신하거나, 스크롤 이벤트가 너무 자주 발생하는 걸 막기 위해 마지막 입력 후 300ms를 기다렸다가 검색을 실행하는 경우가 있다. 이런 "지금이 아니라 나중에, 또는 반복해서" 실행하는 일을 <code>setTimeout</code>과 <code>setInterval</code>이 담당한다.</p>
+    <div class="callout">
+      <strong>핵심:</strong> 자바스크립트는 한 번에 한 가지 코드만 실행한다(싱글 스레드). <code>setTimeout(fn, 1000)</code>은 "1000ms 뒤에 fn을 실행해 달라"는 예약이지, "정확히 1000ms 뒤에 실행"을 보장하는 명령이 아니다. 그 시점에 다른 코드가 실행 중이면 그 코드가 끝날 때까지 기다린다.
+    </div>
+  </section>
+
+  <section id="settimeout">
+    <h2>setTimeout — 한 번만, 지정한 시간 뒤에</h2>
+    <p class="lead">지정한 시간(ms)이 지나면 콜백을 딱 한 번 실행한다. 아직 실행되지 않았다면 <code>clearTimeout</code>으로 취소할 수 있다.</p>
+    <div class="split">
+      <div>
+        <pre class="code"><span class="cm">// 3초(3000ms) 뒤에 한 번 실행</span>
+<span class="kw">const</span> timerId = setTimeout(<span class="kw">function</span> () {
+  message.textContent = <span class="kw">"3초가 지났습니다"</span>;
+}, 3000);
+
+<span class="cm">// 아직 실행 전이라면 취소 가능</span>
+clearTimeout(timerId);</pre>
+        <p>반환값 <code>timerId</code>는 숫자다. 이 값을 변수에 저장해두지 않으면 나중에 취소할 방법이 없다는 점이 가장 흔한 실수다.</p>
+      </div>
+      <div class="panel">
+        <h3>실행해보기</h3>
+        <p id="stMessage" class="readout" aria-live="polite">대기 중</p>
+        <p class="note">남은 시간: <span id="stCountdown">3.0</span>초</p>
+        <button id="stStart" type="button">3초 후 문구 바꾸기</button>
+        <button id="stCancel" type="button" class="secondary" disabled>취소</button>
+        <p class="note">시작을 누르고 바로 취소를 누르면 콜백이 아예 실행되지 않는 것을 확인할 수 있다.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="setinterval">
+    <h2>setInterval — 지정한 간격마다, 멈출 때까지 반복</h2>
+    <p class="lead">같은 콜백을 지정한 간격(ms)마다 계속 실행한다. 직접 <code>clearInterval</code>을 호출하지 않으면 페이지가 닫힐 때까지 멈추지 않는다.</p>
+    <div class="panel">
+      <h3>1초마다 틱 — 메인 스레드가 바쁘면 어떻게 되는가</h3>
+      <p class="readout"><span id="siTickCount">0</span><span class="unit">번째 틱</span></p>
+      <p class="note">직전 틱과의 실제 간격: <span id="siGapDisplay">-</span> (요청한 간격은 1000ms)</p>
+      <button id="siBlockBtn" type="button">1.2초 동안 멈추는 작업 실행</button>
+      <p class="note" id="siHint">버튼을 누르면 <code>while</code> 반복문으로 메인 스레드를 1.2초간 붙잡아 둔다. 그동안 예약된 틱이 바로 실행되지 못하고 기다렸다가, 작업이 끝난 직후 간격이 1000ms보다 훨씬 크게 찍히는 걸 볼 수 있다.</p>
+    </div>
+    <pre class="code"><span class="cm">// 1초마다 반복 실행, id를 저장해 두어야 나중에 멈출 수 있다</span>
+<span class="kw">const</span> intervalId = setInterval(<span class="kw">function</span> () {
+  tickCount++;
+}, 1000);
+
+<span class="cm">// 반복을 멈춤</span>
+clearInterval(intervalId);</pre>
+    <p>위 데모의 "멈추는 작업"은 <code>while (Date.now() - start &lt; 1200) {}</code> 형태의 빈 반복문이다. 실제 코드에서는 큰 배열 정렬, 동기적인 이미지 처리처럼 시간이 걸리는 연산이 이 역할을 한다.</p>
+  </section>
+
+  <section id="compare">
+    <h2>두 함수 비교</h2>
+    <table>
+      <caption>setTimeout과 setInterval의 차이</caption>
+      <thead>
+        <tr><th scope="col">항목</th><th scope="col">setTimeout</th><th scope="col">setInterval</th></tr>
+      </thead>
+      <tbody>
+        <tr><th scope="row">실행 횟수</th><td>한 번</td><td>멈출 때까지 반복</td></tr>
+        <tr><th scope="row">멈추는 함수</th><td>clearTimeout(id)</td><td>clearInterval(id)</td></tr>
+        <tr><th scope="row">간격 보장</th><td>지정한 시간 "이후"에 실행 (더 늦을 수 있음)</td><td>매 간격이 밀릴 수 있고, 밀린 시간이 누적될 수 있음</td></tr>
+        <tr><th scope="row">반복이 필요할 때 대안</th><td>콜백 안에서 다시 setTimeout 호출(재귀적 호출) — 작업이 끝난 뒤를 기준으로 다음 간격을 잡아 더 안정적</td><td>직접 사용 — 간단하지만 위 "간격 보장" 문제가 있음</td></tr>
+        <tr><th scope="row">대표 용도</th><td>알림 자동 닫기, 디바운스(입력 지연 처리)</td><td>실시간 시계, 슬라이드 자동 전환, 폴링(주기적 서버 확인)</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+
+</main>
+
+<script>
+  // ---- setTimeout 데모 ----
+  (function () {
+    var message = document.getElementById('stMessage');
+    var countdownEl = document.getElementById('stCountdown');
+    var startBtn = document.getElementById('stStart');
+    var cancelBtn = document.getElementById('stCancel');
+    var timeoutId = null;
+    var tickId = null;
+
+    function reset() {
+      message.textContent = '대기 중';
+      countdownEl.textContent = '3.0';
+      startBtn.disabled = false;
+      cancelBtn.disabled = true;
+      timeoutId = null;
+      tickId = null;
+    }
+
+    startBtn.addEventListener('click', function () {
+      startBtn.disabled = true;
+      cancelBtn.disabled = false;
+      message.textContent = '대기 중';
+      var remaining = 3.0;
+      countdownEl.textContent = remaining.toFixed(1);
+
+      tickId = setInterval(function () {
+        remaining = Math.max(0, remaining - 0.1);
+        countdownEl.textContent = remaining.toFixed(1);
+      }, 100);
+
+      timeoutId = setTimeout(function () {
+        clearInterval(tickId);
+        message.textContent = '3초가 지났습니다';
+        countdownEl.textContent = '0.0';
+        startBtn.disabled = false;
+        cancelBtn.disabled = true;
+        timeoutId = null;
+        tickId = null;
+      }, 3000);
+    });
+
+    cancelBtn.addEventListener('click', function () {
+      if (timeoutId !== null) clearTimeout(timeoutId);
+      if (tickId !== null) clearInterval(tickId);
+      message.textContent = '취소됨 (콜백이 실행되지 않음)';
+      startBtn.disabled = false;
+      cancelBtn.disabled = true;
+      timeoutId = null;
+      tickId = null;
+    });
+  })();
+
+  // ---- setInterval 틱 / 블로킹 데모 ----
+  (function () {
+    var tickCountEl = document.getElementById('siTickCount');
+    var gapEl = document.getElementById('siGapDisplay');
+    var blockBtn = document.getElementById('siBlockBtn');
+    var tickCount = 0;
+    var lastTick = performance.now();
+
+    setInterval(function () {
+      tickCount++;
+      var now = performance.now();
+      var gap = now - lastTick;
+      lastTick = now;
+      tickCountEl.textContent = tickCount;
+      gapEl.textContent = Math.round(gap) + 'ms';
+    }, 1000);
+
+    blockBtn.addEventListener('click', function () {
+      blockBtn.disabled = true;
+      blockBtn.textContent = '실행 중... (메인 스레드 멈춤)';
+      // 화면에 "멈춤" 표시를 먼저 그리게 한 뒤, 다음 프레임에서 실제로 블로킹한다
+      requestAnimationFrame(function () {
+        setTimeout(function () {
+          var start = Date.now();
+          while (Date.now() - start < 1200) {
+            // 의도적으로 메인 스레드를 1.2초 동안 붙잡아 둔다
+          }
+          blockBtn.disabled = false;
+          blockBtn.textContent = '1.2초 동안 멈추는 작업 실행';
+        }, 0);
+      });
+    });
+  })();
+</script>
+
+</body>
+</html>
