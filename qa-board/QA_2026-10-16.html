@@ -3,11 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
-</head>
-<body>
 <title>게임 QA 공고 보드</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -19,6 +15,8 @@
   --ok:#1d7a4f; --ok-soft:#e2f2e9; --warn:#b4231b; --warn-soft:#fbe6e4;
   --font-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
   --font-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#12171c; --surface:#1a2128; --ink:#e6ebf0; --mute:#97a3af; --line:#2b343d;
@@ -29,7 +27,7 @@
   --accent:#78b4e0; --accent-soft:#1d3142;
   --ok:#6fcf9c; --ok-soft:#173226; --warn:#f08a80; --warn-soft:#3a1d1b; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.6}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.6}
 .wrap{max-width:860px;margin:0 auto;padding-block:40px 64px;
   padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 header{display:grid;gap:6px}
@@ -70,12 +68,13 @@ footer a{color:var(--accent)}
   .tags{justify-content:flex-start}
 }
 </style>
-
+</head>
+<body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">GAMEJOB · QA·테스터 · 2026-10-16 조회</div>
+    <div class="eyebrow">GAMEJOB + ALBAMON · QA·테스터 · 2026-10-16 조회</div>
     <h1>게임 QA 공고 보드</h1>
-    <p class="lede">최근 7일(10/09~10/16)에 새로 올라온 QA 공고와, 조금 지났지만 신입도 지원할 수 있는 공고를 모았습니다.</p>
+    <p class="lede">게임잡에 최근 7일(10/10~10/16) 새로 올라온 QA 공고, 조금 지났지만 신입도 지원할 수 있는 공고, 알바몬의 게임 QA·테스터 공고를 모았습니다.</p>
   </header>
 
   <div class="stats" id="stats"></div>
@@ -86,33 +85,457 @@ footer a{color:var(--accent)}
     <button class="chip" id="f-urgent" data-filter="urgent" aria-pressed="false">마감 7일 이내</button>
   </div>
 
-  <h2 id="h-new">새로 올라온 공고 · 10/09~10/16</h2>
+  <h2>새로 올라온 공고 · 10/10~10/16</h2>
   <ul class="list" id="list-new"></ul>
 
-  <h2 id="h-old">아직 열려 있는 신입 지원 가능 공고 · 10/07~10/08</h2>
+  <h2>아직 열려 있는 신입 지원 가능 공고 · 10/02~10/09</h2>
   <ul class="list" id="list-old"></ul>
+
+  <h2>알바몬 · 게임 QA·테스터 (급여 · 근무 기간)</h2>
+  <ul class="list" id="list-albamon"></ul>
 
   <footer>
     <span>목록 화면 정보만 정리했습니다. 자격요건, 우대사항, 급여는 공고 제목을 눌러 게임잡에서 확인하세요.</span>
     <span>"채용시"는 사람을 뽑으면 마감, "상시"는 계속 모집입니다. 둘 다 예고 없이 닫힐 수 있습니다.</span>
-    <span>출처: <a href="https://www.gamejob.co.kr/Recruit/joblist?menucode=duty" target="_blank" rel="noopener">게임잡 직종별 채용정보 › 게임운영·QA › QA·테스터</a></span>
+    <span>알바몬 공고에는 경력 조건 항목이 없습니다. "신입 가능"은 제목에 신입·초보·경력무관이 있을 때만 붙습니다.</span>
+    <span>출처: <a href="https://www.gamejob.co.kr/Recruit/joblist?menucode=duty" target="_blank" rel="noopener">게임잡 직종별 채용정보 › 게임운영·QA › QA·테스터</a>, <a href="https://www.albamon.com/total-search?keyword=%EA%B2%8C%EC%9E%84QA" target="_blank" rel="noopener">알바몬 통합검색 (게임QA, 게임테스터)</a></span>
   </footer>
 </div>
 
 <script>
 const JOBS = [
-  {id:285938, co:"㈜쿡앱스(CookApps)", title:"[쿡앱스] 모바일게임 QA (계약직)", career:"경력 1년↑", entry:false, loc:"경기 성남시", type:"계약직", deadline:null, dlText:"채용시", reg:"10/16", group:"new"},
-  {id:285935, co:"㈜그린맨파워", title:"[상암] 유명중견 게임사 모바일 MMORPG 게임 QA", career:"신입", entry:true, loc:"서울 마포구", type:"파견직", deadline:"2026-10-20", dlText:"~10/20", reg:"10/15", group:"new"},
-  {id:285869, co:"게임듀오", title:"[경력] 모바일 게임 QA", career:"경력 1년↑", entry:false, loc:"경기 성남시", type:"정규직", deadline:null, dlText:"상시", reg:"10/14", group:"new"},
-  {id:285807, co:"(주)무브인터렉티브", title:"[무브인터렉티브] QA팀 신입 채용", career:"신입 · 고졸↑", entry:true, loc:"경기 파주시", type:"정규직", deadline:null, dlText:"상시", reg:"10/13", group:"new"},
-  {id:285836, co:"㈜이엑스투게임즈", title:"[Ex2게임즈] QA", career:"경력 1년↑", entry:false, loc:"서울 강남구", type:"계약직", deadline:null, dlText:"채용시", reg:"10/13", group:"new"},
-  {id:285749, co:"스마일게이트", title:"[LOST ARK Mobile] 개발QA 담당 (계약직)", career:"경력무관", entry:true, loc:"경기 성남시", type:"계약직", deadline:null, dlText:"채용시", reg:"10/12", group:"new"},
-  {id:285750, co:"스마일게이트", title:"[LOST ARK Mobile] 개발QA 담당 모집", career:"경력 1년↑", entry:false, loc:"경기 성남시", type:"정규직", deadline:null, dlText:"채용시", reg:"10/12", group:"new"},
-  {id:285823, co:"기어세컨드", title:"[기어세컨드] 모바일 게임 QA", career:"경력 3년↑", entry:false, loc:"서울 성동구", type:"계약직", deadline:null, dlText:"채용시", reg:"10/12", group:"new"},
-  {id:285751, co:"스마일게이트", title:"[LOST ARK Mobile] FQA 담당", career:"경력 3년↑", entry:false, loc:"경기 성남시", type:"정규직", deadline:null, dlText:"채용시", reg:"10/12", group:"new"},
-  {id:285646, co:"㈜스튜디오비사이드", title:"[프로젝트 A] QA 담당자", career:"경력무관", entry:true, loc:"경기 성남시", type:"정규직, 계약직", deadline:null, dlText:"채용시", reg:"10/08", group:"old"},
-  {id:285604, co:"㈜위메이드", title:"게임 QA(계약직)", career:"경력무관", entry:true, loc:"경기 성남시", type:"계약직", deadline:"2026-10-20", dlText:"~10/20", reg:"10/07", group:"old"},
-  {id:285587, co:"주식회사 컴투스", title:"[컴투스] 런처(PC 클라이언트) QA (계약직)", career:"경력무관", entry:true, loc:"서울 금천구", type:"계약직", deadline:null, dlText:"상시", reg:"10/07", group:"old"}
+ {
+  "id": 285989,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285989",
+  "co": "휴머니아",
+  "title": "[마포상암/성과급지급] 글로벌게임사 게임QA테스터 채용",
+  "career": "경력무관",
+  "entry": true,
+  "loc": "서울 마포구",
+  "type": "파견직",
+  "deadline": "2026-10-21",
+  "dlText": "~10/21",
+  "reg": "10/16",
+  "group": "new",
+  "isNew": true,
+  "source": "gamejob"
+ },
+ {
+  "id": 285938,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285938",
+  "co": "㈜쿡앱스(CookApps)",
+  "title": "[쿡앱스] 모바일게임 QA (계약직)",
+  "career": "경력1년↑",
+  "entry": false,
+  "loc": "경기 성남시",
+  "type": "계약직",
+  "deadline": null,
+  "dlText": "채용시",
+  "reg": "10/16",
+  "group": "new",
+  "isNew": true,
+  "source": "gamejob"
+ },
+ {
+  "id": 285935,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285935",
+  "co": "㈜그린맨파워",
+  "title": "[상암] 유명중견 게임사 모바일 MMORPG 게임 QA",
+  "career": "신입",
+  "entry": true,
+  "loc": "서울 마포구",
+  "type": "파견직",
+  "deadline": "2026-10-20",
+  "dlText": "~10/20",
+  "reg": "10/15",
+  "group": "new",
+  "isNew": true,
+  "source": "gamejob"
+ },
+ {
+  "id": 285869,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285869",
+  "co": "게임듀오",
+  "title": "[경력] 모바일 게임 QA",
+  "career": "경력1년↑",
+  "entry": false,
+  "loc": "경기 성남시",
+  "type": "정규직",
+  "deadline": null,
+  "dlText": "상시",
+  "reg": "10/13",
+  "group": "new",
+  "isNew": true,
+  "source": "gamejob"
+ },
+ {
+  "id": 285807,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285807",
+  "co": "(주)무브인터렉티브",
+  "title": "[무브인터렉티브] QA팀 신입 채용",
+  "career": "신입",
+  "entry": true,
+  "loc": "경기 파주시",
+  "type": "정규직",
+  "deadline": null,
+  "dlText": "상시",
+  "reg": "10/13",
+  "group": "new",
+  "isNew": true,
+  "source": "gamejob"
+ },
+ {
+  "id": 285836,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285836",
+  "co": "㈜이엑스투게임즈",
+  "title": "[Ex2게임즈] QA",
+  "career": "경력1년↑",
+  "entry": false,
+  "loc": "서울 강남구",
+  "type": "계약직",
+  "deadline": null,
+  "dlText": "채용시",
+  "reg": "10/12",
+  "group": "new",
+  "isNew": true,
+  "source": "gamejob"
+ },
+ {
+  "id": 285823,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285823",
+  "co": "기어세컨드",
+  "title": "[기어세컨드] 모바일 게임 QA",
+  "career": "경력3년↑",
+  "entry": false,
+  "loc": "서울 성동구",
+  "type": "계약직",
+  "deadline": null,
+  "dlText": "채용시",
+  "reg": "10/12",
+  "group": "new",
+  "isNew": true,
+  "source": "gamejob"
+ },
+ {
+  "id": 285751,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285751",
+  "co": "스마일게이트",
+  "title": "[LOST ARK Mobile] FQA 담당",
+  "career": "경력3년↑",
+  "entry": false,
+  "loc": "경기 성남시",
+  "type": "정규직",
+  "deadline": null,
+  "dlText": "채용시",
+  "reg": "10/12",
+  "group": "new",
+  "isNew": true,
+  "source": "gamejob"
+ },
+ {
+  "id": 285750,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285750",
+  "co": "스마일게이트",
+  "title": "[LOST ARK Mobile] 개발QA 담당 모집",
+  "career": "경력1년↑",
+  "entry": false,
+  "loc": "경기 성남시",
+  "type": "정규직",
+  "deadline": null,
+  "dlText": "채용시",
+  "reg": "10/12",
+  "group": "new",
+  "isNew": true,
+  "source": "gamejob"
+ },
+ {
+  "id": 285749,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285749",
+  "co": "스마일게이트",
+  "title": "[LOST ARK Mobile] 개발QA 담당 (계약직)",
+  "career": "경력무관",
+  "entry": true,
+  "loc": "경기 성남시",
+  "type": "계약직",
+  "deadline": null,
+  "dlText": "채용시",
+  "reg": "10/12",
+  "group": "new",
+  "isNew": true,
+  "source": "gamejob"
+ },
+ {
+  "id": 285646,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285646",
+  "co": "㈜스튜디오비사이드",
+  "title": "[프로젝트 A] QA 담당자",
+  "career": "경력무관",
+  "entry": true,
+  "loc": "경기 성남시",
+  "type": "정규직, 계약직",
+  "deadline": null,
+  "dlText": "채용시",
+  "reg": "10/08",
+  "group": "old",
+  "isNew": false,
+  "source": "gamejob"
+ },
+ {
+  "id": 285636,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285636",
+  "co": "NC",
+  "title": "[NC][단기계약직][AION2] 게임 현지화 영어 번역 / 검수 (English Linguist & LQA)",
+  "career": "신입",
+  "entry": true,
+  "loc": "경기 성남시",
+  "type": "계약직",
+  "deadline": "2026-10-31",
+  "dlText": "~10/31",
+  "reg": "10/08",
+  "group": "old",
+  "isNew": false,
+  "source": "gamejob"
+ },
+ {
+  "id": 285634,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285634",
+  "co": "NC",
+  "title": "[NC][단기계약직][AION2] 게임 현지화 독일어 번역 / 검수 (Deutsch Linguist und LQA)",
+  "career": "신입",
+  "entry": true,
+  "loc": "경기 성남시",
+  "type": "계약직",
+  "deadline": "2026-10-31",
+  "dlText": "~10/31",
+  "reg": "10/08",
+  "group": "old",
+  "isNew": false,
+  "source": "gamejob"
+ },
+ {
+  "id": 285604,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285604",
+  "co": "㈜위메이드",
+  "title": "게임 QA(계약직)",
+  "career": "경력무관",
+  "entry": true,
+  "loc": "경기 성남시",
+  "type": "계약직",
+  "deadline": "2026-11-04",
+  "dlText": "~11/04",
+  "reg": "10/07",
+  "group": "old",
+  "isNew": false,
+  "source": "gamejob"
+ },
+ {
+  "id": 285592,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285592",
+  "co": "코리아인",
+  "title": "[성남/유명기업] 게임QA 채용",
+  "career": "경력무관",
+  "entry": true,
+  "loc": "경기, 서울",
+  "type": "정규직, 파견직",
+  "deadline": "2026-10-24",
+  "dlText": "~10/24",
+  "reg": "10/07",
+  "group": "old",
+  "isNew": false,
+  "source": "gamejob"
+ },
+ {
+  "id": 285587,
+  "url": "https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=285587",
+  "co": "주식회사 컴투스",
+  "title": "[컴투스] 런처(PC 클라이언트) QA (계약직)",
+  "career": "경력무관",
+  "entry": true,
+  "loc": "서울 금천구",
+  "type": "계약직",
+  "deadline": null,
+  "dlText": "상시",
+  "reg": "10/07",
+  "group": "old",
+  "isNew": false,
+  "source": "gamejob"
+ },
+ {
+  "id": 119747725,
+  "url": "https://www.albamon.com/jobs/detail/119747725",
+  "co": "MMORPG/QA/테스터/게임",
+  "title": "국내 유명 게임사 모바일 MMORPG 게임QA",
+  "career": "월급 2,290,200원",
+  "entry": false,
+  "loc": "서울 마포구",
+  "type": "1년이상",
+  "deadline": "2026-10-21",
+  "dlText": "~10/21",
+  "reg": "10/16",
+  "group": "albamon",
+  "isNew": true,
+  "source": "albamon"
+ },
+ {
+  "id": 119742846,
+  "url": "https://www.albamon.com/jobs/detail/119742846",
+  "co": "글로벌게임사",
+  "title": "[마포상암/성과급지급] 글로벌게임사 게임QA 직원 채용",
+  "career": "월급 2,290,200원",
+  "entry": false,
+  "loc": "서울 전체",
+  "type": "1년이상",
+  "deadline": "2026-10-21",
+  "dlText": "~10/21",
+  "reg": "10/16",
+  "group": "albamon",
+  "isNew": true,
+  "source": "albamon"
+ },
+ {
+  "id": 119737880,
+  "url": "https://www.albamon.com/jobs/detail/119737880",
+  "co": "리드커리어㈜",
+  "title": "[게임운영대행사 / 큐로드] 디바이스 성능 측정 QA 채용",
+  "career": "연봉 27,000,000원",
+  "entry": false,
+  "loc": "서울 영등포구",
+  "type": "6개월~1년",
+  "deadline": "2026-11-03",
+  "dlText": "~11/03",
+  "reg": "10/16",
+  "group": "albamon",
+  "isNew": true,
+  "source": "albamon"
+ },
+ {
+  "id": 119632042,
+  "url": "https://www.albamon.com/jobs/detail/119632042",
+  "co": "카카오계열/판교/ 플랫폼 QA 테스터",
+  "title": "[판교인근/카카오계열사 QA전문사] 게임 QA 대규모 추가채용",
+  "career": "월급 2,208,340원",
+  "entry": false,
+  "loc": "경기 성남시 분당구",
+  "type": "1년이상",
+  "deadline": "2026-10-23",
+  "dlText": "~10/23",
+  "reg": "10/16",
+  "group": "albamon",
+  "isNew": true,
+  "source": "albamon"
+ },
+ {
+  "id": 119432505,
+  "url": "https://www.albamon.com/jobs/detail/119432505",
+  "co": "유명게임사/라그나로크 경험자 우대/테스터",
+  "title": "[마포 상암역 /유명 중견 게임사/ 신입환영]모바일 게임 QA 대규모채용",
+  "career": "월급 2,290,200원",
+  "entry": true,
+  "loc": "서울 마포구",
+  "type": "1년이상",
+  "deadline": "2026-10-16",
+  "dlText": "~10/16",
+  "reg": "10/16",
+  "group": "albamon",
+  "isNew": true,
+  "source": "albamon"
+ },
+ {
+  "id": 502063258,
+  "url": "https://www.albamon.com/jobs/detail/502063258",
+  "co": "㈜휴머니아",
+  "title": "[마포상암/성과급지급] 글로벌게임사 게임QA 직원 채용",
+  "career": "월급 2,290,000원",
+  "entry": false,
+  "loc": "서울 마포구",
+  "type": "1년이상",
+  "deadline": "2026-10-21",
+  "dlText": "~10/21",
+  "reg": "10/14",
+  "group": "albamon",
+  "isNew": true,
+  "source": "albamon"
+ },
+ {
+  "id": 502063023,
+  "url": "https://www.albamon.com/jobs/detail/502063023",
+  "co": "큐로드",
+  "title": "[11월출근 / 게임 ] 큐로드 게임 QA담당자 채용",
+  "career": "연봉 27,000,000원",
+  "entry": false,
+  "loc": "서울 영등포구",
+  "type": "6개월~1년",
+  "deadline": null,
+  "dlText": "상시",
+  "reg": "10/14",
+  "group": "albamon",
+  "isNew": true,
+  "source": "albamon"
+ },
+ {
+  "id": 502062240,
+  "url": "https://www.albamon.com/jobs/detail/502062240",
+  "co": "㈜큐로드",
+  "title": "[전남광주] 게임 LQA 담당자 채용 (영어)",
+  "career": "연봉 27,000,000원",
+  "entry": false,
+  "loc": "전남광주 동구",
+  "type": "1년이상",
+  "deadline": "2026-11-11",
+  "dlText": "~11/11",
+  "reg": "10/12",
+  "group": "albamon",
+  "isNew": true,
+  "source": "albamon"
+ },
+ {
+  "id": 502062236,
+  "url": "https://www.albamon.com/jobs/detail/502062236",
+  "co": "㈜큐로드",
+  "title": "[전남광주] 게임 QA 담당자 채용",
+  "career": "연봉 27,000,000원",
+  "entry": false,
+  "loc": "전남광주 동구",
+  "type": "1년이상",
+  "deadline": "2026-11-11",
+  "dlText": "~11/11",
+  "reg": "10/12",
+  "group": "albamon",
+  "isNew": true,
+  "source": "albamon"
+ },
+ {
+  "id": 119692934,
+  "url": "https://www.albamon.com/jobs/detail/119692934",
+  "co": "㈜조이시티",
+  "title": "[조이시티] 프리스타일 풋볼2게임테스터 모집 (5일 근무)",
+  "career": "시급 14,000원",
+  "entry": false,
+  "loc": "경기 성남시 분당구 수내동",
+  "type": "1주일~1개월",
+  "deadline": "2026-11-02",
+  "dlText": "~11/02",
+  "reg": "10/12",
+  "group": "albamon",
+  "isNew": true,
+  "source": "albamon"
+ },
+ {
+  "id": 119499284,
+  "url": "https://www.albamon.com/jobs/detail/119499284",
+  "co": "큐로드",
+  "title": "[게임QA / 모바일게임 ] 큐로드 게임 QA담당자 채용",
+  "career": "월급 2,250,000원",
+  "entry": false,
+  "loc": "서울 강남구 삼성동",
+  "type": "3개월~6개월",
+  "deadline": null,
+  "dlText": "상시",
+  "reg": "10/04",
+  "group": "albamon",
+  "isNew": false,
+  "source": "albamon"
+ }
 ];
 
 const today = new Date(); today.setHours(0,0,0,0);
@@ -127,15 +550,15 @@ function card(j){
   else if (j.left === 0) dd = "오늘 마감";
   else if (j.left !== null) dd = "D-" + j.left + " · " + j.dlText;
   const tags = [];
-  if (j.group === "new") tags.push('<span class="tag new">NEW</span>');
+  if (j.isNew) tags.push('<span class="tag new">NEW</span>');
   if (j.entry) tags.push('<span class="tag ok">신입 가능</span>');
   if (j.urgent || j.closed) tags.push('<span class="tag warn">' + (j.closed ? "마감" : "마감 임박") + '</span>');
   return '<li class="job">' +
     '<div class="co">' + esc(j.co) + '</div>' +
-    '<a class="title" href="https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=' + j.id + '" target="_blank" rel="noopener">' + esc(j.title) + '</a>' +
+    '<a class="title" href="' + esc(j.url) + '" target="_blank" rel="noopener">' + esc(j.title) + '</a>' +
     '<div class="meta"><span>' + esc(j.career) + '</span><span>' + esc(j.loc) + '</span><span>' + esc(j.type) + '</span></div>' +
-    '<div class="side"><span class="dday' + (j.urgent || j.closed ? ' urgent' : '') + '">' + dd + '</span>' +
-    '<div class="tags">' + tags.join("") + '</div><span class="reg">' + j.reg + ' 등록</span></div>' +
+    '<div class="side"><span class="dday' + (j.urgent || j.closed ? ' urgent' : '') + '">' + esc(dd) + '</span>' +
+    '<div class="tags">' + tags.join("") + '</div><span class="reg">' + esc(j.reg) + ' 등록</span></div>' +
   '</li>';
 }
 
@@ -144,7 +567,7 @@ try { const saved = localStorage.getItem("qa-filter"); if (["all","entry","urgen
 
 function render(){
   const pass = j => filter === "all" || (filter === "entry" && j.entry) || (filter === "urgent" && j.urgent);
-  [["new","list-new","h-old"],["old","list-old",null]].forEach(([g,id]) => {
+  [["new","list-new"],["old","list-old"],["albamon","list-albamon"]].forEach(([g,id]) => {
     const items = JOBS.filter(j => j.group === g && pass(j));
     document.getElementById(id).innerHTML = items.length ? items.map(card).join("") :
       '<li class="empty">이 조건에 맞는 공고가 없습니다.</li>';
@@ -153,9 +576,10 @@ function render(){
   const fresh = JOBS.filter(j => j.group === "new");
   const nearest = JOBS.filter(j => j.left !== null && j.left >= 0).sort((a,b) => a.left - b.left)[0];
   document.getElementById("stats").innerHTML =
-    '<div class="stat"><b>' + fresh.length + '</b><span>새 QA 공고</span></div>' +
+    '<div class="stat"><b>' + fresh.length + '</b><span>게임잡 새 공고</span></div>' +
+    '<div class="stat"><b>' + JOBS.filter(j => j.group === "albamon").length + '</b><span>알바몬 공고</span></div>' +
     '<div class="stat"><b>' + JOBS.filter(j => j.entry).length + '</b><span>신입 지원 가능</span></div>' +
-    (nearest ? '<div class="stat"><b>' + (nearest.left === 0 ? "오늘" : "D-" + nearest.left) + '</b><span>가장 빠른 마감 (' + nearest.dlText.replace("~","") + ')</span></div>' : '');
+    (nearest ? '<div class="stat"><b>' + (nearest.left === 0 ? "오늘" : "D-" + nearest.left) + '</b><span>가장 빠른 마감 (' + esc(nearest.dlText.replace("~","")) + ')</span></div>' : '');
 }
 
 document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
@@ -165,6 +589,5 @@ document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () =
 }));
 render();
 </script>
-
 </body>
 </html>
