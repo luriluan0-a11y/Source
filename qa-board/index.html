@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}</style>
+</head>
+<body>
+<title>게임 QA 공고 보드</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: 버그 트래커처럼 한 줄 요약 → 필터 칩 → 티켓형 공고 목록 */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --ink:#18212b; --mute:#5c6875; --line:#d9dfe5;
+  --accent:#1f5f8b; --accent-soft:#e3eef6;
+  --ok:#1d7a4f; --ok-soft:#e2f2e9; --warn:#b4231b; --warn-soft:#fbe6e4;
+  --font-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12171c; --surface:#1a2128; --ink:#e6ebf0; --mute:#97a3af; --line:#2b343d;
+  --accent:#78b4e0; --accent-soft:#1d3142;
+  --ok:#6fcf9c; --ok-soft:#173226; --warn:#f08a80; --warn-soft:#3a1d1b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#12171c; --surface:#1a2128; --ink:#e6ebf0; --mute:#97a3af; --line:#2b343d;
+  --accent:#78b4e0; --accent-soft:#1d3142;
+  --ok:#6fcf9c; --ok-soft:#173226; --warn:#f08a80; --warn-soft:#3a1d1b; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-body);font-size:15px;line-height:1.6}
+.wrap{max-width:860px;margin:0 auto;padding-block:40px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{display:grid;gap:6px}
+.eyebrow{font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;color:var(--mute)}
+h1{margin:0;font-size:28px;line-height:1.25;text-wrap:balance}
+.lede{margin:0;color:var(--mute)}
+.stats{display:flex;flex-wrap:wrap;gap:8px 20px;margin:20px 0 0;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.stat{display:flex;align-items:baseline;gap:6px}
+.stat b{font-family:var(--font-mono);font-size:20px;font-variant-numeric:tabular-nums}
+.stat span{color:var(--mute);font-size:13px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;margin:28px 0 14px}
+.chip{font:inherit;font-size:14px;padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.chip:focus-visible,.title:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h2{font-size:13px;letter-spacing:.06em;color:var(--mute);margin:28px 0 10px;font-weight:500}
+.list{display:grid;gap:10px;list-style:none;margin:0;padding:0}
+.job{display:grid;grid-template-columns:1fr auto;gap:4px 16px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:6px}
+.job>*{min-width:0}
+.co{font-size:13px;color:var(--mute)}
+.title{color:var(--ink);font-weight:700;font-size:16px;text-decoration:none;line-height:1.4}
+.title:hover{color:var(--accent);text-decoration:underline}
+.meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--mute)}
+.side{grid-row:1 / span 3;grid-column:2;display:flex;flex-direction:column;align-items:flex-end;gap:6px;text-align:right}
+.dday{font-family:var(--font-mono);font-size:14px;font-variant-numeric:tabular-nums;color:var(--mute)}
+.dday.urgent{color:var(--warn);font-weight:500}
+.tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end}
+.tag{font-size:12px;padding:1px 8px;border-radius:4px;white-space:nowrap}
+.tag.ok{background:var(--ok-soft);color:var(--ok)}
+.tag.warn{background:var(--warn-soft);color:var(--warn)}
+.tag.new{background:var(--accent-soft);color:var(--accent)}
+.reg{font-family:var(--font-mono);font-size:12px;color:var(--mute)}
+.empty{padding:20px;text-align:center;color:var(--mute);background:var(--surface);border:1px dashed var(--line);border-radius:6px}
+footer{margin-top:36px;font-size:13px;color:var(--mute);display:grid;gap:4px}
+footer a{color:var(--accent)}
+@media (max-width:560px){
+  .job{grid-template-columns:1fr}
+  .side{grid-row:auto;grid-column:1;flex-direction:row;align-items:center;justify-content:space-between;text-align:left;padding-top:6px;border-top:1px solid var(--line);margin-top:6px}
+  .tags{justify-content:flex-start}
+}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">GAMEJOB · QA·테스터 · 2026-10-16 조회</div>
+    <h1>게임 QA 공고 보드</h1>
+    <p class="lede">최근 7일(10/09~10/16)에 새로 올라온 QA 공고와, 조금 지났지만 신입도 지원할 수 있는 공고를 모았습니다.</p>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="filters" role="group" aria-label="공고 필터">
+    <button class="chip" id="f-all" data-filter="all" aria-pressed="true">전체</button>
+    <button class="chip" id="f-entry" data-filter="entry" aria-pressed="false">신입 지원 가능</button>
+    <button class="chip" id="f-urgent" data-filter="urgent" aria-pressed="false">마감 7일 이내</button>
+  </div>
+
+  <h2 id="h-new">새로 올라온 공고 · 10/09~10/16</h2>
+  <ul class="list" id="list-new"></ul>
+
+  <h2 id="h-old">아직 열려 있는 신입 지원 가능 공고 · 10/07~10/08</h2>
+  <ul class="list" id="list-old"></ul>
+
+  <footer>
+    <span>목록 화면 정보만 정리했습니다. 자격요건, 우대사항, 급여는 공고 제목을 눌러 게임잡에서 확인하세요.</span>
+    <span>"채용시"는 사람을 뽑으면 마감, "상시"는 계속 모집입니다. 둘 다 예고 없이 닫힐 수 있습니다.</span>
+    <span>출처: <a href="https://www.gamejob.co.kr/Recruit/joblist?menucode=duty" target="_blank" rel="noopener">게임잡 직종별 채용정보 › 게임운영·QA › QA·테스터</a></span>
+  </footer>
+</div>
+
+<script>
+const JOBS = [
+  {id:285938, co:"㈜쿡앱스(CookApps)", title:"[쿡앱스] 모바일게임 QA (계약직)", career:"경력 1년↑", entry:false, loc:"경기 성남시", type:"계약직", deadline:null, dlText:"채용시", reg:"10/16", group:"new"},
+  {id:285935, co:"㈜그린맨파워", title:"[상암] 유명중견 게임사 모바일 MMORPG 게임 QA", career:"신입", entry:true, loc:"서울 마포구", type:"파견직", deadline:"2026-10-20", dlText:"~10/20", reg:"10/15", group:"new"},
+  {id:285869, co:"게임듀오", title:"[경력] 모바일 게임 QA", career:"경력 1년↑", entry:false, loc:"경기 성남시", type:"정규직", deadline:null, dlText:"상시", reg:"10/14", group:"new"},
+  {id:285807, co:"(주)무브인터렉티브", title:"[무브인터렉티브] QA팀 신입 채용", career:"신입 · 고졸↑", entry:true, loc:"경기 파주시", type:"정규직", deadline:null, dlText:"상시", reg:"10/13", group:"new"},
+  {id:285836, co:"㈜이엑스투게임즈", title:"[Ex2게임즈] QA", career:"경력 1년↑", entry:false, loc:"서울 강남구", type:"계약직", deadline:null, dlText:"채용시", reg:"10/13", group:"new"},
+  {id:285749, co:"스마일게이트", title:"[LOST ARK Mobile] 개발QA 담당 (계약직)", career:"경력무관", entry:true, loc:"경기 성남시", type:"계약직", deadline:null, dlText:"채용시", reg:"10/12", group:"new"},
+  {id:285750, co:"스마일게이트", title:"[LOST ARK Mobile] 개발QA 담당 모집", career:"경력 1년↑", entry:false, loc:"경기 성남시", type:"정규직", deadline:null, dlText:"채용시", reg:"10/12", group:"new"},
+  {id:285823, co:"기어세컨드", title:"[기어세컨드] 모바일 게임 QA", career:"경력 3년↑", entry:false, loc:"서울 성동구", type:"계약직", deadline:null, dlText:"채용시", reg:"10/12", group:"new"},
+  {id:285751, co:"스마일게이트", title:"[LOST ARK Mobile] FQA 담당", career:"경력 3년↑", entry:false, loc:"경기 성남시", type:"정규직", deadline:null, dlText:"채용시", reg:"10/12", group:"new"},
+  {id:285646, co:"㈜스튜디오비사이드", title:"[프로젝트 A] QA 담당자", career:"경력무관", entry:true, loc:"경기 성남시", type:"정규직, 계약직", deadline:null, dlText:"채용시", reg:"10/08", group:"old"},
+  {id:285604, co:"㈜위메이드", title:"게임 QA(계약직)", career:"경력무관", entry:true, loc:"경기 성남시", type:"계약직", deadline:"2026-10-20", dlText:"~10/20", reg:"10/07", group:"old"},
+  {id:285587, co:"주식회사 컴투스", title:"[컴투스] 런처(PC 클라이언트) QA (계약직)", career:"경력무관", entry:true, loc:"서울 금천구", type:"계약직", deadline:null, dlText:"상시", reg:"10/07", group:"old"}
+];
+
+const today = new Date(); today.setHours(0,0,0,0);
+function daysLeft(d){ if(!d) return null; const t=new Date(d+"T00:00:00"); return Math.round((t-today)/86400000); }
+JOBS.forEach(j => { j.left = daysLeft(j.deadline); j.urgent = j.left !== null && j.left >= 0 && j.left <= 7; j.closed = j.left !== null && j.left < 0; });
+
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+function card(j){
+  let dd = j.dlText;
+  if (j.closed) dd = "마감됨";
+  else if (j.left === 0) dd = "오늘 마감";
+  else if (j.left !== null) dd = "D-" + j.left + " · " + j.dlText;
+  const tags = [];
+  if (j.group === "new") tags.push('<span class="tag new">NEW</span>');
+  if (j.entry) tags.push('<span class="tag ok">신입 가능</span>');
+  if (j.urgent || j.closed) tags.push('<span class="tag warn">' + (j.closed ? "마감" : "마감 임박") + '</span>');
+  return '<li class="job">' +
+    '<div class="co">' + esc(j.co) + '</div>' +
+    '<a class="title" href="https://www.gamejob.co.kr/Recruit/GI_Read/View?GI_No=' + j.id + '" target="_blank" rel="noopener">' + esc(j.title) + '</a>' +
+    '<div class="meta"><span>' + esc(j.career) + '</span><span>' + esc(j.loc) + '</span><span>' + esc(j.type) + '</span></div>' +
+    '<div class="side"><span class="dday' + (j.urgent || j.closed ? ' urgent' : '') + '">' + dd + '</span>' +
+    '<div class="tags">' + tags.join("") + '</div><span class="reg">' + j.reg + ' 등록</span></div>' +
+  '</li>';
+}
+
+let filter = "all";
+try { const saved = localStorage.getItem("qa-filter"); if (["all","entry","urgent"].includes(saved)) filter = saved; } catch(e) {}
+
+function render(){
+  const pass = j => filter === "all" || (filter === "entry" && j.entry) || (filter === "urgent" && j.urgent);
+  [["new","list-new","h-old"],["old","list-old",null]].forEach(([g,id]) => {
+    const items = JOBS.filter(j => j.group === g && pass(j));
+    document.getElementById(id).innerHTML = items.length ? items.map(card).join("") :
+      '<li class="empty">이 조건에 맞는 공고가 없습니다.</li>';
+  });
+  document.querySelectorAll(".chip").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.filter === filter)));
+  const fresh = JOBS.filter(j => j.group === "new");
+  const nearest = JOBS.filter(j => j.left !== null && j.left >= 0).sort((a,b) => a.left - b.left)[0];
+  document.getElementById("stats").innerHTML =
+    '<div class="stat"><b>' + fresh.length + '</b><span>새 QA 공고</span></div>' +
+    '<div class="stat"><b>' + JOBS.filter(j => j.entry).length + '</b><span>신입 지원 가능</span></div>' +
+    (nearest ? '<div class="stat"><b>' + (nearest.left === 0 ? "오늘" : "D-" + nearest.left) + '</b><span>가장 빠른 마감 (' + nearest.dlText.replace("~","") + ')</span></div>' : '');
+}
+
+document.querySelectorAll(".chip").forEach(b => b.addEventListener("click", () => {
+  filter = b.dataset.filter;
+  try { localStorage.setItem("qa-filter", filter); } catch(e) {}
+  render();
+}));
+render();
+</script>
+
+</body>
+</html>
