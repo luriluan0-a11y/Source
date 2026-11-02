@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>마우스 이벤트 | 자바스크립트 수업 자료</title>
+    <meta name="description" content="click부터 mouseenter까지 마우스 이벤트 10가지의 발생 순서, 이벤트 객체, 드래그 구현을 직접 눌러 보며 배우는 자바스크립트 수업 자료입니다.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* 브랜드색은 "이벤트가 일어난 순간"을 표시하는 신호색 하나만 쓰고, 나머지는 종이와 먹 계열 중성색으로 둔다. */
+        :root {
+            --signal: #b93a1b;
+            --signal-soft: #f6ddd4;
+            --ink: #1f1f1c;
+            --muted: #5c5a54;
+            --line: #d9d5cb;
+            --paper: #f7f5f0;
+            --white: #ffffff;
+            --font-title: "Noto Serif KR", Batang, serif;
+            --font-body: "Noto Sans KR", "Malgun Gothic", sans-serif;
+            --font-code: D2Coding, Consolas, "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-body);
+            font-size: 17px;
+            line-height: 1.75;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        a {
+            color: var(--signal);
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--signal);
+            outline-offset: 2px;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 16px;
+            top: -60px;
+            padding: 8px 12px;
+            background-color: var(--ink);
+            color: var(--white);
+        }
+
+        .skip-link:focus {
+            top: 8px;
+        }
+
+        /* 머리말 */
+        .page-header {
+            border-bottom: 1px solid var(--ink);
+        }
+
+        .page-header-inner {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 300px;
+            gap: 40px;
+            align-items: end;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 56px 32px 40px;
+        }
+
+        .kicker {
+            margin: 0 0 8px;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        h1, h2 {
+            font-family: var(--font-title);
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-size: clamp(40px, 7vw, 76px);
+        }
+
+        .lead {
+            max-width: 34em;
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .needs {
+            margin: 16px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .pointer-now {
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+            padding: 16px;
+        }
+
+        .pointer-now p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .pointer-values {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            margin: 8px 0;
+            font-family: var(--font-code);
+        }
+
+        .pointer-values div {
+            font-size: 15px;
+        }
+
+        .pointer-values strong {
+            display: block;
+            color: var(--signal);
+            font-size: 38px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        /* 전체 틀 */
+        .layout {
+            display: grid;
+            grid-template-columns: 170px minmax(0, 1fr);
+            gap: 48px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .toc {
+            position: sticky;
+            top: 0;
+            align-self: start;
+            padding: 32px 0;
+        }
+
+        .toc h2 {
+            margin: 0 0 8px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .toc ol {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .toc a {
+            display: block;
+            padding: 6px 0;
+            color: var(--ink);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            color: var(--signal);
+            text-decoration: underline;
+        }
+
+        main {
+            min-width: 0;
+        }
+
+        main > section {
+            padding: 48px 0;
+            border-bottom: 1px solid var(--line);
+            scroll-margin-top: 8px;
+        }
+
+        main > section:last-child {
+            border-bottom: 0;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            font-size: 32px;
+        }
+
+        h2 .num {
+            margin-right: 10px;
+            color: var(--signal);
+        }
+
+        h3 {
+            margin: 32px 0 8px;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        p {
+            margin: 0 0 16px;
+        }
+
+        code {
+            font-family: var(--font-code);
+            font-size: 0.94em;
+        }
+
+        p code, li code, td code, summary code {
+            padding: 1px 4px;
+            border-radius: 4px;
+            background-color: #ebe7dd;
+        }
+
+        pre {
+            margin: 0;
+            padding: 16px;
+            overflow-x: auto;
+            border-radius: 6px;
+            background-color: var(--ink);
+            color: #f7f5f0;
+            font-family: var(--font-code);
+            font-size: 15px;
+            line-height: 1.6;
+            word-break: normal;
+        }
+
+        pre code {
+            font-size: inherit;
+        }
+
+        /* 실습 공통 */
+        .split {
+            display: grid;
+            grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .demo-label {
+            margin: 0 0 8px;
+            color: var(--signal);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .hint {
+            margin: 8px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .hint + pre {
+            margin-top: 8px;
+        }
+
+        .hint + p {
+            margin-top: 16px;
+        }
+
+        pre + .hint {
+            margin: 12px 0;
+        }
+
+        button {
+            min-height: 40px;
+            padding: 6px 14px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+            color: var(--ink);
+            font: inherit;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #ebe7dd;
+        }
+
+        button.primary {
+            border-color: var(--signal);
+            background-color: var(--signal);
+            color: var(--white);
+        }
+
+        button.primary:hover {
+            background-color: #9c2f14;
+        }
+
+        .stage {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+            min-height: 150px;
+            padding: 16px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        details {
+            margin-top: 16px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        summary {
+            padding: 10px 14px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .code-box {
+            position: relative;
+            padding: 0 8px 8px;
+        }
+
+        .copy {
+            position: absolute;
+            top: 8px;
+            right: 16px;
+            min-height: 32px;
+            padding: 2px 10px;
+            font-size: 14px;
+        }
+
+        /* 표 */
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        th, td {
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        tbody tr:last-child th, tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        thead th {
+            background-color: #ebe7dd;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        td.name, td.count {
+            white-space: nowrap;
+        }
+
+        td.count {
+            font-family: var(--font-code);
+            text-align: right;
+        }
+
+        tr.fired td {
+            background-color: var(--signal-soft);
+        }
+
+        /* 2. 이벤트 패드 */
+        .pad-layout {
+            display: grid;
+            grid-template-columns: 210px minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .pad-side {
+            position: sticky;
+            top: 16px;
+        }
+
+        #eventPad {
+            padding: 34px 18px;
+            border: 2px solid var(--signal);
+            border-radius: 6px;
+            background-color: var(--white);
+            text-align: center;
+            user-select: none;
+        }
+
+        #eventPad span {
+            display: block;
+            padding: 22px 6px;
+            background-color: #ebe7dd;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* 3. 순서 */
+        .flow {
+            margin: 0 0 16px;
+            padding: 12px 16px;
+            border-left: 3px solid var(--signal);
+            background-color: var(--white);
+            font-family: var(--font-code);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        .flow b {
+            display: block;
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .order-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        #orderTarget {
+            min-width: 180px;
+            min-height: 56px;
+        }
+
+        #orderLog {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-content: flex-start;
+            min-height: 112px;
+            margin: 0;
+            padding: 12px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+            list-style: none;
+            font-family: var(--font-code);
+            font-size: 14px;
+        }
+
+        #orderLog li {
+            padding: 2px 8px;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+        }
+
+        #orderLog li.key {
+            border-color: var(--signal);
+            background-color: var(--signal-soft);
+        }
+
+        #orderLog li.empty {
+            border: 0;
+            padding: 0;
+            color: var(--muted);
+            font-family: var(--font-body);
+        }
+
+        /* 4. 이벤트 객체 */
+        #coordBox {
+            min-height: 240px;
+            padding: 60px 40px;
+            border: 2px solid var(--signal);
+            border-radius: 6px;
+            background-color: var(--white);
+            user-select: none;
+        }
+
+        #coordChild {
+            padding: 24px 12px;
+            background-color: #ebe7dd;
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .readout {
+            margin: 0;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+            font-size: 15px;
+        }
+
+        .readout div {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 6px 12px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .readout div:last-child {
+            border-bottom: 0;
+        }
+
+        .readout dt {
+            font-family: var(--font-code);
+        }
+
+        .readout dd {
+            margin: 0;
+            color: var(--signal);
+            font-family: var(--font-code);
+            font-weight: 700;
+            text-align: right;
+        }
+
+        /* 5. 비교 */
+        #parent {
+            padding: 44px;
+            border-radius: 6px;
+            background-color: var(--line);
+        }
+
+        #child {
+            display: block;
+            padding: 14px;
+            background-color: var(--ink);
+            color: var(--white);
+            text-align: center;
+            font-size: 15px;
+        }
+
+        .counters {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin: 8px 0;
+        }
+
+        .counters div {
+            padding: 8px 12px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+            font-family: var(--font-code);
+            font-size: 14px;
+        }
+
+        .counters strong {
+            display: block;
+            color: var(--signal);
+            font-size: 32px;
+            line-height: 1.2;
+        }
+
+        /* 6. 활용 예제 */
+        .example {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px dashed var(--line);
+        }
+
+        .example:first-of-type {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: 0;
+        }
+
+        .example h3 {
+            margin-top: 0;
+        }
+
+        #rainbowBar {
+            height: 110px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--ink);
+        }
+
+        #dragArena {
+            position: relative;
+            height: 280px;
+            overflow: hidden;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        #dragBox {
+            position: absolute;
+            left: 40px;
+            top: 40px;
+            width: 90px;
+            height: 90px;
+            border-radius: 4px;
+            background-color: var(--signal);
+            cursor: move;
+        }
+
+        .steps {
+            margin: 0 0 16px;
+            padding-left: 22px;
+        }
+
+        /* 7. 실수 */
+        .mistake {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 8px 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .mistake p {
+            grid-column: 1 / -1;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .mistake pre {
+            padding: 10px 12px;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .mistake .wrong {
+            background-color: var(--white);
+            border: 1px solid var(--signal);
+            color: var(--ink);
+        }
+
+        .tag {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .mistake .tag-wrong {
+            color: var(--signal);
+            font-weight: 700;
+        }
+
+        .notes {
+            margin: 24px 0 0;
+            padding-left: 22px;
+        }
+
+        .notes li {
+            margin-bottom: 8px;
+        }
+
+        /* 8. 연습 문제 */
+        .practice {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: practice;
+        }
+
+        .practice li {
+            display: grid;
+            grid-template-columns: 56px minmax(0, 1fr);
+            padding: 16px 0;
+            border-top: 1px solid var(--line);
+            counter-increment: practice;
+        }
+
+        .practice li::before {
+            content: counter(practice);
+            color: var(--signal);
+            font-family: var(--font-title);
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .practice h3 {
+            margin: 0 0 4px;
+            font-size: 18px;
+        }
+
+        .practice p {
+            margin: 0;
+        }
+
+        .practice .tools {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        /* 꼬리말 */
+        footer {
+            border-top: 1px solid var(--ink);
+            font-size: 15px;
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 8px 32px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 24px 32px;
+            color: var(--muted);
+        }
+
+        .footer-inner p {
+            margin: 0;
+        }
+
+        @media (max-width: 900px) {
+            .page-header-inner {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 24px;
+                padding: 32px 16px 24px;
+            }
+
+            .layout {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 0;
+                padding: 0 16px;
+            }
+
+            .toc {
+                position: static;
+                padding: 16px 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .toc ol {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0 16px;
+            }
+
+            .footer-inner {
+                padding: 24px 16px;
+            }
+        }
+
+        @media (max-width: 720px) {
+            body {
+                font-size: 16px;
+            }
+
+            main > section {
+                padding: 36px 0;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+
+            .split, .pad-layout, .mistake {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .pad-side {
+                position: static;
+            }
+
+            #parent {
+                padding: 28px;
+            }
+
+            #coordBox {
+                padding: 40px 20px;
+            }
+
+            .practice li {
+                grid-template-columns: 44px minmax(0, 1fr);
+            }
+        }
+    </style>
+</head>
+<body id="top">
+    <a class="skip-link" href="#content">본문으로 건너뛰기</a>
+
+    <header class="page-header">
+        <div class="page-header-inner">
+            <div>
+                <p class="kicker">자바스크립트 수업 자료 · 07 마우스 이벤트</p>
+                <h1>마우스 이벤트</h1>
+                <p class="lead">사용자가 마우스로 한 행동(누르기, 움직이기, 올리기)에 맞춰 함수를 실행하는 방법을 배운다.</p>
+                <p class="needs">미리 알아야 할 것: <code>getElementById</code>, <code>addEventListener</code>, <code>style</code> 속성 바꾸기</p>
+            </div>
+            <div class="pointer-now">
+                <p>지금 포인터 위치</p>
+                <div class="pointer-values">
+                    <div>clientX<strong id="nowX">-</strong></div>
+                    <div>clientY<strong id="nowY">-</strong></div>
+                </div>
+                <p>이 숫자도 <code>mousemove</code> 이벤트로 바뀐다. 실습은 마우스가 있는 컴퓨터에서 해 보자.</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <nav class="toc" aria-labelledby="tocTitle">
+            <h2 id="tocTitle">차례</h2>
+            <ol>
+                <li><a href="#basic">1. 기본 형태</a></li>
+                <li><a href="#types">2. 이벤트 종류</a></li>
+                <li><a href="#order">3. 일어나는 순서</a></li>
+                <li><a href="#object">4. 이벤트 객체</a></li>
+                <li><a href="#compare">5. over와 enter</a></li>
+                <li><a href="#examples">6. 활용 예제</a></li>
+                <li><a href="#mistakes">7. 자주 하는 실수</a></li>
+                <li><a href="#practice">8. 연습 문제</a></li>
+            </ol>
+        </nav>
+
+        <main id="content">
+            <section id="basic" aria-labelledby="basicTitle">
+                <h2 id="basicTitle"><span class="num">1</span>기본 형태</h2>
+                <div class="split">
+                    <div>
+                        <pre><code>요소.addEventListener('이벤트이름', function () {
+    // 이벤트가 일어날 때 실행할 코드
+});</code></pre>
+                        <p class="hint">아래 코드는 "버튼을 클릭하면 영역의 배경을 노란색으로 바꿔라"라는 뜻이다.</p>
+                        <pre><code>let btn = document.getElementById('btn');
+let stage = document.getElementById('stage');
+
+btn.addEventListener('click', function () {
+    stage.style.backgroundColor = 'yellow';
+});</code></pre>
+                    </div>
+                    <div>
+                        <p class="demo-label">직접 해 보기</p>
+                        <div class="stage" id="stage">
+                            <button class="primary" id="btn" type="button">클릭</button>
+                            <button id="stageReset" type="button">되돌리기</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="types" aria-labelledby="typesTitle">
+                <h2 id="typesTitle"><span class="num">2</span>마우스 이벤트 종류</h2>
+                <p>빨간 테두리 상자 위에서 마우스를 움직이고, 누르고, 더블클릭해 보자. 일어난 이벤트의 줄이 칠해지고 횟수가 올라간다.</p>
+                <div class="pad-layout">
+                    <div class="pad-side">
+                        <p class="demo-label">이벤트 시험 상자</p>
+                        <div id="eventPad"><span>회색 부분은<br>자식 요소</span></div>
+                        <p class="hint">이 상자에서는 오른쪽 클릭 메뉴가 뜨지 않게 막아 두었다.</p>
+                        <button id="padReset" type="button">횟수 지우기</button>
+                    </div>
+                    <div class="table-wrap" tabindex="0" role="region" aria-label="마우스 이벤트 종류 표">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">이벤트</th>
+                                    <th scope="col">언제 일어나는가</th>
+                                    <th scope="col">자주 쓰는 곳</th>
+                                    <th scope="col">횟수</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventRows">
+                                <tr data-event="click"><td class="name"><code>click</code></td><td>왼쪽 버튼을 눌렀다 뗐을 때</td><td>버튼, 메뉴</td><td class="count">0</td></tr>
+                                <tr data-event="dblclick"><td class="name"><code>dblclick</code></td><td>빠르게 두 번 클릭했을 때</td><td>글 수정 모드로 전환</td><td class="count">0</td></tr>
+                                <tr data-event="mousedown"><td class="name"><code>mousedown</code></td><td>버튼을 누르는 순간</td><td>드래그 시작</td><td class="count">0</td></tr>
+                                <tr data-event="mouseup"><td class="name"><code>mouseup</code></td><td>버튼을 떼는 순간</td><td>드래그 끝</td><td class="count">0</td></tr>
+                                <tr data-event="mousemove"><td class="name"><code>mousemove</code></td><td>요소 위에서 포인터가 움직일 때마다</td><td>좌표 표시, 따라다니는 효과</td><td class="count">0</td></tr>
+                                <tr data-event="mouseover"><td class="name"><code>mouseover</code></td><td>포인터가 요소나 그 자식 위로 들어올 때</td><td>색 바꾸기</td><td class="count">0</td></tr>
+                                <tr data-event="mouseout"><td class="name"><code>mouseout</code></td><td>포인터가 요소나 그 자식에서 나갈 때</td><td>색 되돌리기</td><td class="count">0</td></tr>
+                                <tr data-event="mouseenter"><td class="name"><code>mouseenter</code></td><td>포인터가 요소 영역 안으로 들어올 때 (자식 사이 이동은 무시)</td><td>드롭다운 메뉴 열기</td><td class="count">0</td></tr>
+                                <tr data-event="mouseleave"><td class="name"><code>mouseleave</code></td><td>포인터가 요소 영역 밖으로 나갈 때 (자식 사이 이동은 무시)</td><td>드롭다운 메뉴 닫기</td><td class="count">0</td></tr>
+                                <tr data-event="contextmenu"><td class="name"><code>contextmenu</code></td><td>오른쪽 버튼으로 메뉴를 열 때</td><td>나만의 메뉴 만들기</td><td class="count">0</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section id="order" aria-labelledby="orderTitle">
+                <h2 id="orderTitle"><span class="num">3</span>이벤트가 일어나는 순서</h2>
+                <p>한 번의 동작에도 이벤트는 여러 개 일어난다.</p>
+                <div class="flow"><b>클릭 한 번</b>mousedown → mouseup → click</div>
+                <div class="flow"><b>더블클릭</b>mousedown → mouseup → click → mousedown → mouseup → click → dblclick</div>
+                <div class="flow"><b>요소 위를 지나갈 때</b>mouseover → mouseenter → mousemove(여러 번) → mouseout → mouseleave</div>
+                <p><code>click</code>이 먼저 두 번 일어난 뒤 <code>dblclick</code>이 일어난다. 그래서 한 요소에 <code>click</code>과 <code>dblclick</code>을 함께 걸면, 더블클릭할 때 <code>click</code> 함수도 두 번 실행된다.</p>
+
+                <p class="demo-label">직접 해 보기</p>
+                <div class="order-tools">
+                    <button class="primary" id="orderTarget" type="button">여기를 눌러 보세요</button>
+                    <button id="orderClear" type="button">기록 지우기</button>
+                </div>
+                <ol id="orderLog" aria-label="일어난 이벤트 기록"></ol>
+                <p class="hint">연속으로 일어난 <code>mousemove</code>는 한 칸에 횟수로 묶어 보여 준다.</p>
+
+                <details>
+                    <summary>콘솔에서 확인하는 전체 코드</summary>
+                    <div class="code-box">
+                        <button class="copy" type="button">복사</button>
+                        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;이벤트 순서 확인&lt;/title&gt;
+    &lt;script&gt;
+        window.onload = function () {
+            let btn = document.getElementById('btn');
+            let names = ['mousedown', 'mouseup', 'click', 'dblclick'];
+
+            for (let i = 0; i &lt; names.length; i++) {
+                btn.addEventListener(names[i], function () {
+                    console.log(names[i]);
+                });
+            }
+        }
+    &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;button id="btn"&gt;클릭해 보세요&lt;/button&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                </details>
+                <p class="hint">실행한 뒤 개발자 도구(F12)의 Console 탭을 본다.</p>
+            </section>
+
+            <section id="object" aria-labelledby="objectTitle">
+                <h2 id="objectTitle"><span class="num">4</span>이벤트 객체: 어디를 어떻게 눌렀는지 알아내기</h2>
+                <p>함수에 매개변수를 하나 적으면 브라우저가 이벤트 정보를 담아서 넘겨준다. 이름은 보통 <code>e</code> 또는 <code>event</code>로 쓴다.</p>
+                <pre><code>box.addEventListener('click', function (e) {
+    console.log(e.clientX, e.clientY);
+});</code></pre>
+
+                <h3>직접 확인하기</h3>
+                <div class="split">
+                    <div>
+                        <div id="coordBox"><div id="coordChild">자식 요소</div></div>
+                        <p class="hint">회색 자식 요소 위로 옮기면 <code>offsetX</code>의 기준과 <code>target</code>이 바뀐다. 페이지를 스크롤한 뒤에는 <code>clientY</code>와 <code>pageY</code>를 비교해 보자. Shift나 Ctrl을 누른 채 움직여도 된다.</p>
+                    </div>
+                    <dl class="readout">
+                        <div><dt>e.clientX, Y</dt><dd id="outClient">-</dd></div>
+                        <div><dt>e.pageX, Y</dt><dd id="outPage">-</dd></div>
+                        <div><dt>e.offsetX, Y</dt><dd id="outOffset">-</dd></div>
+                        <div><dt>e.button</dt><dd id="outButton">-</dd></div>
+                        <div><dt>e.target</dt><dd id="outTarget">-</dd></div>
+                        <div><dt>e.currentTarget</dt><dd id="outCurrent">-</dd></div>
+                        <div><dt>e.shiftKey</dt><dd id="outShift">-</dd></div>
+                        <div><dt>e.ctrlKey</dt><dd id="outCtrl">-</dd></div>
+                        <div><dt>e.altKey</dt><dd id="outAlt">-</dd></div>
+                    </dl>
+                </div>
+
+                <h3>좌표</h3>
+                <div class="table-wrap" tabindex="0" role="region" aria-label="좌표 속성 표">
+                    <table>
+                        <thead>
+                            <tr><th scope="col">속성</th><th scope="col">기준</th><th scope="col">설명</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="name"><code>e.clientX</code>, <code>e.clientY</code></td><td>브라우저 화면</td><td>스크롤해도 화면 왼쪽 위가 (0, 0)</td></tr>
+                            <tr><td class="name"><code>e.pageX</code>, <code>e.pageY</code></td><td>문서 전체</td><td>스크롤한 만큼 값이 커진다</td></tr>
+                            <tr><td class="name"><code>e.offsetX</code>, <code>e.offsetY</code></td><td>이벤트가 일어난 요소</td><td>그 요소의 왼쪽 위가 (0, 0)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>그 밖에 자주 쓰는 정보</h3>
+                <div class="table-wrap" tabindex="0" role="region" aria-label="이벤트 객체 속성 표">
+                    <table>
+                        <thead>
+                            <tr><th scope="col">속성</th><th scope="col">값</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="name"><code>e.button</code></td><td>누른 버튼. <code>0</code> 왼쪽, <code>1</code> 가운데(휠), <code>2</code> 오른쪽</td></tr>
+                            <tr><td class="name"><code>e.target</code></td><td>실제로 이벤트가 일어난 요소</td></tr>
+                            <tr><td class="name"><code>e.currentTarget</code></td><td>이벤트를 걸어 둔 요소</td></tr>
+                            <tr><td class="name"><code>e.shiftKey</code>, <code>e.ctrlKey</code>, <code>e.altKey</code></td><td>해당 키를 함께 눌렀으면 <code>true</code></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="hint"><code>e.button</code>은 <code>mousedown</code>, <code>mouseup</code>에서 사용한다. <code>click</code>은 왼쪽 버튼에서만 일어나므로 버튼을 구분할 필요가 없다.</p>
+
+                <h3>브라우저 기본 동작 막기: <code>e.preventDefault()</code></h3>
+                <p>오른쪽 클릭 메뉴처럼 브라우저가 원래 하던 동작을 막는다.</p>
+                <pre><code>box.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    box.innerHTML = '오른쪽 클릭!';
+});</code></pre>
+            </section>
+
+            <section id="compare" aria-labelledby="compareTitle">
+                <h2 id="compareTitle"><span class="num">5</span>mouseover와 mouseenter의 차이</h2>
+                <p>자식 요소가 없으면 두 이벤트는 똑같이 보인다. 차이는 <strong>자식 요소가 있을 때</strong> 드러난다.</p>
+                <div class="split">
+                    <div>
+                        <div class="table-wrap" tabindex="0" role="region" aria-label="mouseover와 mouseenter 비교 표">
+                            <table>
+                                <thead>
+                                    <tr><th scope="col">구분</th><th scope="col"><code>mouseover</code> / <code>mouseout</code></th><th scope="col"><code>mouseenter</code> / <code>mouseleave</code></th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>자식 요소로 옮겨 갈 때</td><td>다시 일어난다</td><td>일어나지 않는다</td></tr>
+                                    <tr><td>쓰면 좋은 경우</td><td>어느 자식 위에 있는지 알아야 할 때</td><td>영역에 들어오고 나간 것만 알면 될 때</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="hint">포인터를 <strong>바깥 → 회색 상자 → 검은 자식 요소 → 회색 상자</strong> 순서로 옮기면 <code>mouseover</code>는 3번, <code>mouseenter</code>는 1번 센다.</p>
+                    </div>
+                    <div>
+                        <p class="demo-label">직접 해 보기</p>
+                        <div id="parent"><span id="child">자식 요소</span></div>
+                        <div class="counters">
+                            <div><strong id="overText">0</strong>mouseover</div>
+                            <div><strong id="enterText">0</strong>mouseenter</div>
+                        </div>
+                        <button id="compareReset" type="button">다시 세기</button>
+                    </div>
+                </div>
+                <details>
+                    <summary>비교 예제 전체 코드</summary>
+                    <div class="code-box">
+                        <button class="copy" type="button">복사</button>
+                        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;mouseover와 mouseenter 비교&lt;/title&gt;
+    &lt;style&gt;
+        #parent {
+            background-color: lightgray;
+            width: 300px;
+            padding: 40px;
+        }
+        #child {
+            background-color: skyblue;
+        }
+    &lt;/style&gt;
+    &lt;script&gt;
+        window.onload = function () {
+            let parent = document.getElementById('parent');
+            let overText = document.getElementById('overText');
+            let enterText = document.getElementById('enterText');
+            let overCount = 0;
+            let enterCount = 0;
+
+            parent.addEventListener('mouseover', function () {
+                overCount = overCount + 1;
+                overText.innerHTML = overCount;
+            });
+
+            parent.addEventListener('mouseenter', function () {
+                enterCount = enterCount + 1;
+                enterText.innerHTML = enterCount;
+            });
+        }
+    &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="parent"&gt;
+        &lt;span id="child"&gt;자식 요소&lt;/span&gt;
+    &lt;/div&gt;
+    &lt;p&gt;mouseover: &lt;span id="overText"&gt;0&lt;/span&gt;번&lt;/p&gt;
+    &lt;p&gt;mouseenter: &lt;span id="enterText"&gt;0&lt;/span&gt;번&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                </details>
+            </section>
+
+            <section id="examples" aria-labelledby="examplesTitle">
+                <h2 id="examplesTitle"><span class="num">6</span>활용 예제</h2>
+
+                <article class="example">
+                    <h3>예제 1. 마우스를 올리는 동안만 실행하기</h3>
+                    <p><code>mouseover</code>에서 타이머를 시작하고 <code>mouseout</code>에서 멈춘다. 전체 코드는 <a href="../06.timer/mouseover-rainbow.html">mouseover-rainbow.html</a>에 있다.</p>
+                    <div class="split">
+                        <pre><code>title.addEventListener('mouseover', function () {
+    timer = setInterval(function () {
+        // 0.3초마다 배경색 바꾸기
+    }, 300);
+});
+
+title.addEventListener('mouseout', function () {
+    clearInterval(timer);
+});</code></pre>
+                        <div>
+                            <div id="rainbowBar"></div>
+                            <p class="hint">위 띠에 마우스를 올려 보자. 빼면 그 색에서 멈춘다.</p>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="example">
+                    <h3>예제 2. 마우스 좌표 표시하기</h3>
+                    <p><code>document</code>에 이벤트를 걸면 화면 어디에서 움직여도 함수가 실행된다. 이 페이지 맨 위의 "지금 포인터 위치"도 같은 방법으로 만들었다.</p>
+                    <div class="code-box" style="padding: 0;">
+                        <button class="copy" type="button">복사</button>
+                        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;마우스 좌표&lt;/title&gt;
+    &lt;script&gt;
+        window.onload = function () {
+            let result = document.getElementById('result');
+
+            document.addEventListener('mousemove', function (e) {
+                result.innerHTML = 'X: ' + e.clientX + ', Y: ' + e.clientY;
+            });
+        }
+    &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;p id="result"&gt;마우스를 움직여 보세요.&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                </article>
+
+                <article class="example">
+                    <h3>예제 3. 상자 드래그하기</h3>
+                    <p>세 이벤트가 역할을 나눈다.</p>
+                    <ol class="steps">
+                        <li><code>mousedown</code>: 드래그를 시작한다. 상자 안에서 어디를 잡았는지 기억한다.</li>
+                        <li><code>mousemove</code>: 드래그 중이면 상자를 포인터 위치로 옮긴다.</li>
+                        <li><code>mouseup</code>: 드래그를 끝낸다.</li>
+                    </ol>
+                    <p class="demo-label">직접 해 보기</p>
+                    <div id="dragArena"><div id="dragBox"></div></div>
+                    <p class="hint">이 실습의 상자는 테두리 밖으로 나가지 않게 제한해 두었다. 아래 전체 코드에는 제한이 없고, 연습 문제 4번에서 직접 넣어 본다.</p>
+                    <p><strong><code>mousemove</code>와 <code>mouseup</code>을 <code>document</code>에 건 이유:</strong> 포인터를 빠르게 움직이면 상자 밖으로 벗어날 수 있다. <code>box</code>에 걸면 그 순간 이벤트를 받지 못해 상자가 멈추고, 상자 밖에서 버튼을 떼면 드래그가 끝나지 않는다.</p>
+                    <p><strong><code>gapX</code>, <code>gapY</code>가 필요한 이유:</strong> 이 값을 빼지 않으면 상자의 왼쪽 위 모서리가 포인터 위치로 순간 이동한다.</p>
+                    <details>
+                        <summary>드래그 예제 전체 코드</summary>
+                        <div class="code-box">
+                            <button class="copy" type="button">복사</button>
+                            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;상자 드래그&lt;/title&gt;
+    &lt;style&gt;
+        #box {
+            position: absolute;
+            left: 50px;
+            top: 50px;
+            width: 100px;
+            height: 100px;
+            background-color: tomato;
+            cursor: move;
+        }
+    &lt;/style&gt;
+    &lt;script&gt;
+        window.onload = function () {
+            let box = document.getElementById('box');
+            let dragging = false;
+            let gapX = 0;
+            let gapY = 0;
+
+            box.addEventListener('mousedown', function (e) {
+                e.preventDefault(); // 드래그 중 글자가 선택되지 않게 한다
+                dragging = true;
+                gapX = e.clientX - box.offsetLeft;
+                gapY = e.clientY - box.offsetTop;
+            });
+
+            document.addEventListener('mousemove', function (e) {
+                if(dragging == true){
+                    box.style.left = (e.clientX - gapX) + 'px';
+                    box.style.top = (e.clientY - gapY) + 'px';
+                }
+            });
+
+            document.addEventListener('mouseup', function () {
+                dragging = false;
+            });
+        }
+    &lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div id="box"&gt;&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                        </div>
+                    </details>
+                </article>
+            </section>
+
+            <section id="mistakes" aria-labelledby="mistakesTitle">
+                <h2 id="mistakesTitle"><span class="num">7</span>자주 하는 실수</h2>
+
+                <div class="mistake">
+                    <p><code>addEventListener</code>에는 <code>on</code>을 붙이지 않는다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>btn.addEventListener('onclick', fn)</code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>btn.addEventListener('click', fn)</code></pre></div>
+                </div>
+                <div class="mistake">
+                    <p><code>()</code>를 붙이면 클릭하기 전에 바로 실행된다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>btn.addEventListener('click', fn())</code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>btn.addEventListener('click', fn)</code></pre></div>
+                </div>
+                <div class="mistake">
+                    <p>매개변수 <code>e</code>를 적지 않으면 이벤트 정보를 쓸 수 없다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>function () { console.log(e.clientX); }</code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>function (e) { console.log(e.clientX); }</code></pre></div>
+                </div>
+                <div class="mistake">
+                    <p>단위 <code>px</code>가 없으면 적용되지 않는다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>box.style.left = e.clientX;</code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>box.style.left = e.clientX + 'px';</code></pre></div>
+                </div>
+                <div class="mistake">
+                    <p><code>&lt;head&gt;</code>의 스크립트에서 바로 찾으면 요소가 만들어지기 전이라 <code>null</code>이 된다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>let btn = document.getElementById('btn');</code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>window.onload = function () {
+    let btn = document.getElementById('btn');
+}</code></pre></div>
+                </div>
+
+                <ul class="notes">
+                    <li><strong>터치 화면에는 "올리기"가 없다.</strong> 스마트폰에서는 <code>mouseover</code>에만 의존한 기능을 제대로 쓸 수 없으므로, 중요한 기능은 <code>click</code>으로도 쓸 수 있게 만든다.</li>
+                    <li><strong>클릭할 대상은 가능하면 <code>&lt;button&gt;</code>으로 만든다.</strong> <code>&lt;button&gt;</code>은 키보드(Tab으로 이동, Enter나 Space로 실행)로도 <code>click</code>이 일어나지만, <code>&lt;div&gt;</code>는 그렇지 않다.</li>
+                </ul>
+            </section>
+
+            <section id="practice" aria-labelledby="practiceTitle">
+                <h2 id="practiceTitle"><span class="num">8</span>연습 문제</h2>
+                <ol class="practice">
+                    <li>
+                        <div>
+                            <h3>더블클릭 숨기기</h3>
+                            <p>상자를 더블클릭하면 사라지게 만들어 보자.</p>
+                            <p class="tools">사용할 것: <code>dblclick</code>, <code>style.display</code></p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h3>버튼 구분하기</h3>
+                            <p>상자를 왼쪽 버튼으로 누르면 빨간색, 오른쪽 버튼으로 누르면 파란색으로 바꿔 보자. 오른쪽 클릭 메뉴는 뜨지 않게 한다.</p>
+                            <p class="tools">사용할 것: <code>mousedown</code>, <code>e.button</code>, <code>contextmenu</code>, <code>e.preventDefault()</code></p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h3>따라다니는 원</h3>
+                            <p>원이 마우스 포인터를 따라다니게 만들어 보자. 포인터가 원의 정중앙에 오도록 한다.</p>
+                            <p class="tools">사용할 것: <code>mousemove</code>, <code>e.clientX</code>, <code>position: fixed</code></p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h3>드래그 제한하기</h3>
+                            <p>예제 3의 상자가 화면 왼쪽과 위쪽 밖으로 나가지 않게 고쳐 보자.</p>
+                            <p class="tools">사용할 것: <code>if</code></p>
+                        </div>
+                    </li>
+                </ol>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <div class="footer-inner">
+            <p>&copy; 2026 자바스크립트 수업 자료 · 업데이트 2026-11-02</p>
+            <p>연락처: TODO: 담당 교수 이메일</p>
+            <p><a href="마우스이벤트.md">마크다운 원본</a> · <a href="#top">맨 위로</a></p>
+        </div>
+    </footer>
+
+    <script>
+        window.onload = function () {
+            // 머리말: 지금 포인터 위치
+            let nowX = document.getElementById('nowX');
+            let nowY = document.getElementById('nowY');
+
+            document.addEventListener('mousemove', function (e) {
+                nowX.innerHTML = e.clientX;
+                nowY.innerHTML = e.clientY;
+            });
+
+            // 1. 기본 형태
+            let btn = document.getElementById('btn');
+            let stage = document.getElementById('stage');
+
+            btn.addEventListener('click', function () {
+                stage.style.backgroundColor = 'yellow';
+            });
+
+            document.getElementById('stageReset').addEventListener('click', function () {
+                stage.style.backgroundColor = '';
+            });
+
+            // 2. 이벤트 시험 상자
+            let eventPad = document.getElementById('eventPad');
+            let rows = document.querySelectorAll('#eventRows tr');
+
+            function watchRow(row) {
+                let countCell = row.querySelector('.count');
+                let count = 0;
+                let timer = null;
+
+                eventPad.addEventListener(row.dataset.event, function (e) {
+                    if(row.dataset.event == 'contextmenu'){
+                        e.preventDefault();
+                    }
+                    count = count + 1;
+                    countCell.innerHTML = count;
+                    row.classList.add('fired');
+                    clearTimeout(timer);
+                    timer = setTimeout(function () {
+                        row.classList.remove('fired');
+                    }, 500);
+                });
+
+                document.getElementById('padReset').addEventListener('click', function () {
+                    count = 0;
+                    countCell.innerHTML = count;
+                });
+            }
+
+            for (let i = 0; i < rows.length; i++) {
+                watchRow(rows[i]);
+            }
+
+            // 3. 일어나는 순서
+            let orderTarget = document.getElementById('orderTarget');
+            let orderLog = document.getElementById('orderLog');
+            let orderNames = ['mouseover', 'mouseenter', 'mousemove', 'mousedown', 'mouseup', 'click', 'dblclick', 'mouseout', 'mouseleave'];
+            let moveCount = 0;
+
+            function showEmptyLog() {
+                orderLog.innerHTML = '<li class="empty">아직 기록이 없다. 위 버튼에 마우스를 올리고 클릭해 보자.</li>';
+                moveCount = 0;
+            }
+
+            function addOrderLog(name) {
+                let last = orderLog.lastElementChild;
+
+                if(last.classList.contains('empty')){
+                    last.remove();
+                    last = null;
+                }
+
+                if(name == 'mousemove' && last != null && last.dataset.name == 'mousemove'){
+                    moveCount = moveCount + 1;
+                    last.innerHTML = 'mousemove ×' + moveCount;
+                    return;
+                }
+
+                let item = document.createElement('li');
+                item.dataset.name = name;
+                item.innerHTML = name;
+                moveCount = 1;
+                if(name == 'click' || name == 'dblclick'){
+                    item.classList.add('key');
+                }
+                orderLog.appendChild(item);
+
+                if(orderLog.children.length > 40){
+                    orderLog.firstElementChild.remove();
+                }
+            }
+
+            for (let i = 0; i < orderNames.length; i++) {
+                orderTarget.addEventListener(orderNames[i], function () {
+                    addOrderLog(orderNames[i]);
+                });
+            }
+
+            document.getElementById('orderClear').addEventListener('click', showEmptyLog);
+            showEmptyLog();
+
+            // 4. 이벤트 객체
+            let coordBox = document.getElementById('coordBox');
+
+            function targetName(element) {
+                return '#' + element.id;
+            }
+
+            function showCoords(e) {
+                document.getElementById('outClient').innerHTML = e.clientX + ', ' + e.clientY;
+                document.getElementById('outPage').innerHTML = e.pageX + ', ' + e.pageY;
+                document.getElementById('outOffset').innerHTML = e.offsetX + ', ' + e.offsetY;
+                document.getElementById('outTarget').innerHTML = targetName(e.target);
+                document.getElementById('outCurrent').innerHTML = targetName(e.currentTarget);
+                document.getElementById('outShift').innerHTML = e.shiftKey;
+                document.getElementById('outCtrl').innerHTML = e.ctrlKey;
+                document.getElementById('outAlt').innerHTML = e.altKey;
+            }
+
+            coordBox.addEventListener('mousemove', showCoords);
+
+            coordBox.addEventListener('mousedown', function (e) {
+                let buttonNames = ['왼쪽', '가운데', '오른쪽'];
+
+                showCoords(e);
+                document.getElementById('outButton').innerHTML = e.button + ' (' + buttonNames[e.button] + ')';
+            });
+
+            coordBox.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+            });
+
+            // 5. mouseover와 mouseenter
+            let parent = document.getElementById('parent');
+            let overText = document.getElementById('overText');
+            let enterText = document.getElementById('enterText');
+            let overCount = 0;
+            let enterCount = 0;
+
+            parent.addEventListener('mouseover', function () {
+                overCount = overCount + 1;
+                overText.innerHTML = overCount;
+            });
+
+            parent.addEventListener('mouseenter', function () {
+                enterCount = enterCount + 1;
+                enterText.innerHTML = enterCount;
+            });
+
+            document.getElementById('compareReset').addEventListener('click', function () {
+                overCount = 0;
+                enterCount = 0;
+                overText.innerHTML = overCount;
+                enterText.innerHTML = enterCount;
+            });
+
+            // 6-1. 올리는 동안만 실행
+            let rainbowBar = document.getElementById('rainbowBar');
+            let colors = ['red', 'orange', 'yellow', 'green', 'blue', 'purple'];
+            let colorIndex = 0;
+            let rainbowTimer = null;
+
+            rainbowBar.addEventListener('mouseover', function () {
+                rainbowTimer = setInterval(function () {
+                    rainbowBar.style.backgroundColor = colors[colorIndex];
+                    colorIndex = colorIndex + 1;
+                    if(colorIndex >= colors.length){
+                        colorIndex = 0;
+                    }
+                }, 300);
+            });
+
+            rainbowBar.addEventListener('mouseout', function () {
+                clearInterval(rainbowTimer);
+            });
+
+            // 6-3. 드래그
+            let dragArena = document.getElementById('dragArena');
+            let dragBox = document.getElementById('dragBox');
+            let dragging = false;
+            let gapX = 0;
+            let gapY = 0;
+
+            dragBox.addEventListener('mousedown', function (e) {
+                e.preventDefault(); // 드래그 중 글자가 선택되지 않게 한다
+                dragging = true;
+                gapX = e.clientX - dragBox.offsetLeft;
+                gapY = e.clientY - dragBox.offsetTop;
+            });
+
+            document.addEventListener('mousemove', function (e) {
+                if(dragging == true){
+                    let maxX = dragArena.clientWidth - dragBox.offsetWidth;
+                    let maxY = dragArena.clientHeight - dragBox.offsetHeight;
+                    let x = Math.min(Math.max(e.clientX - gapX, 0), maxX);
+                    let y = Math.min(Math.max(e.clientY - gapY, 0), maxY);
+
+                    dragBox.style.left = x + 'px';
+                    dragBox.style.top = y + 'px';
+                }
+            });
+
+            document.addEventListener('mouseup', function () {
+                dragging = false;
+            });
+
+            // 코드 복사
+            function copyCode(button) {
+                let text = button.parentElement.querySelector('pre').textContent;
+
+                function done() {
+                    button.innerHTML = '복사됨';
+                    setTimeout(function () {
+                        button.innerHTML = '복사';
+                    }, 1500);
+                }
+
+                function fallback() {
+                    let area = document.createElement('textarea');
+                    area.value = text;
+                    document.body.appendChild(area);
+                    area.select();
+                    document.execCommand('copy');
+                    area.remove();
+                    button.focus();
+                    done();
+                }
+
+                if(navigator.clipboard){
+                    navigator.clipboard.writeText(text).then(done, fallback);
+                }else{
+                    fallback();
+                }
+            }
+
+            let copyButtons = document.querySelectorAll('.copy');
+
+            for (let i = 0; i < copyButtons.length; i++) {
+                copyButtons[i].addEventListener('click', function () {
+                    copyCode(copyButtons[i]);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
