@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>도깨비의 세계 분석 방향</title>
+<style>
+  :root {
+    --navy: #1a3a5c;
+    --blue: #2e6da4;
+    --orange: #c98a12;
+    --orange-soft: #fbf3e2;
+    --text: #22303d;
+    --muted: #5d6b78;
+    --line: #dde3ea;
+    --bg: #f6f8fa;
+    --card: #ffffff;
+    --blue-soft: #eaf1f8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    line-height: 1.7;
+    word-break: keep-all;
+  }
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 48px 16px 40px;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+  header .wrap { padding: 0; }
+  header p.kicker { margin: 0 0 8px; color: #f0c66b; font-weight: 700; letter-spacing: .04em; font-size: .9rem; }
+  header h1 { margin: 0 0 12px; font-size: clamp(1.6rem, 4vw, 2.3rem); line-height: 1.3; }
+  header p.sub { margin: 0; color: #d3dde8; }
+  nav.toc {
+    background: var(--card);
+    border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 5;
+  }
+  nav.toc ul { list-style: none; margin: 0 auto; padding: 10px 16px; display: flex; gap: 6px 18px; flex-wrap: wrap; max-width: 960px; }
+  nav.toc a { color: var(--blue); text-decoration: none; font-size: .92rem; font-weight: 600; }
+  nav.toc a:hover { text-decoration: underline; }
+  main { padding: 32px 0 64px; }
+  section { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 28px 24px; margin-bottom: 24px; }
+  h2 { margin: 0 0 16px; color: var(--navy); font-size: 1.4rem; display: flex; align-items: center; gap: 10px; }
+  h2 .num { background: var(--navy); color: #fff; border-radius: 50%; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+  h3 { color: var(--blue); font-size: 1.08rem; margin: 26px 0 10px; }
+  p, li { margin: 0 0 8px; }
+  ul, ol { padding-left: 1.3em; margin: 0 0 12px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; margin-top: 8px; }
+  .card { border: 1px solid var(--line); border-top: 4px solid var(--blue); border-radius: 10px; padding: 18px; background: #fff; }
+  .card:nth-child(3n+2) { border-top-color: var(--navy); }
+  .card:nth-child(3n) { border-top-color: var(--orange); }
+  .card h4 { margin: 0 0 8px; color: var(--navy); font-size: 1.02rem; }
+  .card p { color: var(--muted); font-size: .95rem; }
+  .card .q { color: var(--text); font-weight: 600; }
+  .table-wrap { overflow-x: auto; margin: 8px 0 14px; }
+  table { width: 100%; border-collapse: collapse; font-size: .94rem; min-width: 520px; }
+  caption { caption-side: top; text-align: left; font-weight: 700; color: var(--muted); font-size: .88rem; padding-bottom: 6px; }
+  th, td { border: 1px solid var(--line); padding: 9px 11px; text-align: left; vertical-align: top; }
+  th { background: var(--blue-soft); color: var(--navy); font-weight: 700; }
+  .judge th:first-child { background: #e8f2ec; color: #2f5d43; }
+  .judge th:last-child { background: #f7ece9; color: #84463a; }
+  .note { background: var(--orange-soft); border-left: 4px solid var(--orange); padding: 12px 16px; border-radius: 6px; margin: 12px 0; font-size: .95rem; }
+  .hypo { counter-reset: h; list-style: none; padding: 0; }
+  .hypo li { counter-increment: h; position: relative; padding: 14px 16px 14px 56px; border: 1px solid var(--line); border-radius: 10px; margin-bottom: 10px; }
+  .hypo li::before { content: counter(h); position: absolute; left: 16px; top: 14px; width: 28px; height: 28px; border-radius: 50%; background: var(--orange); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .flow { font-weight: 700; color: var(--navy); }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+  .step { background: var(--bg); border-radius: 10px; padding: 16px; border: 1px solid var(--line); }
+  .step b { display: block; color: var(--blue); margin-bottom: 4px; }
+  .step span { display: block; color: var(--muted); font-size: .9rem; margin-top: 6px; }
+  footer { color: var(--muted); font-size: .88rem; text-align: center; padding: 0 16px 40px; }
+  @media (max-width: 600px) {
+    section { padding: 22px 16px; }
+    header { padding: 36px 16px 30px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <p class="kicker">GAME ANALYSIS PLAN</p>
+    <h1>《도깨비의 세계》 분석 방향</h1>
+    <p class="sub">직업 없는 스킬 조합 · 문파와 커뮤니티 · 재화 부족과 과금, 세 가지 질문으로 초반 이후를 본다</p>
+  </div>
+</header>
+
+<nav class="toc" aria-label="목차">
+  <ul>
+    <li><a href="#q">핵심 질문</a></li>
+    <li><a href="#a1">① 스킬 조합</a></li>
+    <li><a href="#a2">② 문파·커뮤니티</a></li>
+    <li><a href="#a3">③ 재화와 과금</a></li>
+    <li><a href="#link">세 축의 연결</a></li>
+    <li><a href="#steps">진행 순서</a></li>
+  </ul>
+</nav>
+
+<main class="wrap">
+
+<section id="q">
+  <h2>핵심 질문 3가지</h2>
+  <div class="cards">
+    <div class="card">
+      <h4>① 직업 없는 스킬 조합</h4>
+      <p class="q">직업이 없으면 직업별 특징도 없다. 게임은 이 빈자리를 어떻게 채우는가?</p>
+      <p>이 게임의 가장 큰 차별점이자 가장 큰 위험 요소다.</p>
+    </div>
+    <div class="card">
+      <h4>② 문파·커뮤니티</h4>
+      <p class="q">문파 중심의 협동·경쟁이 실제로 커뮤니티를 활성화하는가?</p>
+      <p>MMORPG의 장기 플레이는 사람 사이의 관계가 붙잡는다.</p>
+    </div>
+    <div class="card">
+      <h4>③ 재화 부족과 과금</h4>
+      <p class="q">만렙 이후 재화 부족을 어떻게 과금으로 연결하는가?</p>
+      <p>성장 정체 구간이 곧 매출 구간이다. 이탈과 결제가 갈리는 지점이다.</p>
+    </div>
+  </div>
+  <div class="note">기존 분석(이지항, 1시간 플레이 + 기사 기준)은 세 질문 모두 <b>초반 이후</b>에 닿지 못했다. 이번 분석은 <b>만렙 전후와 장기 운영</b>을 본다.</div>
+</section>
+
+<section id="a1">
+  <h2><span class="num">1</span>직업 없는 스킬 조합: 직업의 빈자리를 어떻게 채우는가</h2>
+
+  <h3>문제 정의</h3>
+  <div class="table-wrap">
+    <table>
+      <caption>표 1. 직업이 하던 역할과 직업이 없을 때 생길 수 있는 문제</caption>
+      <thead><tr><th>직업이 하던 역할</th><th>직업이 없을 때 생길 수 있는 문제</th></tr></thead>
+      <tbody>
+        <tr><td>캐릭터 정체성 ("나는 궁수다")</td><td>내 캐릭터를 설명할 말이 없다</td></tr>
+        <tr><td>파티 역할 분담 (탱커·딜러·힐러)</td><td>파티를 짤 기준이 없거나, 모두 같은 딜러가 된다</td></tr>
+        <tr><td>성장 방향 안내</td><td>무엇을 키워야 할지 몰라 헤맨다</td></tr>
+        <tr><td>다양성 보장 (직업마다 플레이가 다름)</td><td>강한 조합 하나로 쏠리면 모든 캐릭터가 같아진다</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>확인할 것</h3>
+  <ol>
+    <li><b>스타일이 사실상 직업 역할을 하는가?</b> 12개 스타일(근거리·원거리·유틸)이 탱커·딜러·지원으로 나뉘는가, 모두 딜러인가?</li>
+    <li><b>정체성을 무엇으로 대신하는가?</b> 필살기 연출, 칭호, 외형(꾸미기), 스타일 숙련도 표시 등</li>
+    <li><b>파티·문파 콘텐츠가 역할을 요구하는가?</b> 보스·문파전에서 특정 역할이 없으면 막히는가?</li>
+    <li><b>빌드를 바꾸는 비용은 얼마인가?</b> 계열별 강화 재화 분리, 상시 초기화 없음이 "자유로운 조합"과 충돌하는지</li>
+    <li><b>실제로 빌드가 쏠리는가?</b> 커뮤니티 추천 빌드·티어표가 몇 개 조합에 몰려 있는가</li>
+  </ol>
+
+  <h3>조사 방법</h3>
+  <ul>
+    <li><b>직접 플레이</b>: 근거리·원거리·유틸 스타일을 1개 이상씩 같은 구간에서 써 보고 체감 차이 기록</li>
+    <li><b>커뮤니티 빌드 수집</b>: 공식 커뮤니티·유튜브 공략의 추천 조합을 모아 상위 조합 비중 계산</li>
+    <li><b>콘텐츠별 비교</b>: 사냥 / 보스 / 문파전에서 추천 조합이 달라지는지 확인</li>
+  </ul>
+
+  <h3>판단 기준</h3>
+  <div class="table-wrap">
+    <table class="judge">
+      <caption>표 2. 직업 없는 구조를 잘 풀었는지 판단하는 신호</caption>
+      <thead><tr><th>잘 풀었다는 신호</th><th>못 풀었다는 신호</th></tr></thead>
+      <tbody>
+        <tr><td>콘텐츠마다 추천 조합이 다르다</td><td>모든 콘텐츠에서 같은 조합이 추천된다</td></tr>
+        <tr><td>파티에서 서로 다른 역할이 필요하다</td><td>파티 구성 기준이 전투력뿐이다</td></tr>
+        <tr><td>빌드 변경 비용이 시도할 만한 수준이다</td><td>한 번 정하면 바꾸기 어려워 "정답 빌드"만 따라간다</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="a2">
+  <h2><span class="num">2</span>문파·커뮤니티: 장기 플레이를 받쳐 주는가</h2>
+
+  <h3>확인할 것</h3>
+  <ol>
+    <li><b>문파 가입 유도</b>: 언제, 어떻게 안내하는가? 신규 유저가 문파를 찾기 쉬운가?</li>
+    <li><b>문파가 필요한 이유</b>: 문파에서만 얻는 보상·도술은? 문파 없이도 성장에 지장이 없는가?</li>
+    <li><b>소통 도구</b>: 문파 채팅, 게시판, 출석, 공동 목표 같은 장치가 있는가?</li>
+    <li><b>분신 자동 참여의 영향</b>: 소속감을 유지시키는가, 직접 만나 플레이할 이유를 줄이는가?</li>
+    <li><b>경쟁 구조</b>: 신기 쟁탈전·차원 점령전이 상위 문파만의 콘텐츠인가, 중소 문파도 참여 동기가 있는가?</li>
+    <li><b>게임 밖 커뮤니티</b>: 공식 커뮤니티, 디스코드, 유튜브 공략 채널이 얼마나 활발한가?</li>
+  </ol>
+
+  <h3>조사 방법</h3>
+  <div class="table-wrap">
+    <table>
+      <caption>표 3. 커뮤니티 활성화 측정 데이터와 수집 주기</caption>
+      <thead><tr><th>데이터</th><th>수집 방법</th><th>주기</th></tr></thead>
+      <tbody>
+        <tr><td>문파 모집글 수</td><td>게임 내 모집 게시판, 공식 커뮤니티 모집 게시판</td><td>주 1회</td></tr>
+        <tr><td>공식 커뮤니티 게시글 수·주요 주제</td><td>공식 커뮤니티 게시판</td><td>주 1회</td></tr>
+        <tr><td>앱 리뷰 키워드</td><td>구글 플레이·앱스토어 최신 리뷰의 "문파", "길드", "혼자" 등 언급</td><td>주 1회</td></tr>
+        <tr><td>문파 내 활동</td><td>가입한 문파의 접속 인원, 채팅 빈도</td><td>플레이할 때마다</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="note">커뮤니티 활성화는 한 번 보고 판단할 수 없다. <b>최소 2~4주</b> 같은 기준으로 기록해 추세를 본다.</div>
+
+  <h3>판단 기준</h3>
+  <div class="table-wrap">
+    <table class="judge">
+      <caption>표 4. 커뮤니티 활성화와 침체를 가르는 신호</caption>
+      <thead><tr><th>활성화 신호</th><th>침체 신호</th></tr></thead>
+      <tbody>
+        <tr><td>모집글·게시글이 유지되거나 늘어난다</td><td>출시 직후 이후 계속 줄어든다</td></tr>
+        <tr><td>문파 활동 이야기(공략, 문파전 후기)가 많다</td><td>불만·접는다는 글 비중이 커진다</td></tr>
+        <tr><td>중소 문파도 참여할 콘텐츠가 있다</td><td>상위 문파만 보상을 독점한다</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="a3">
+  <h2><span class="num">3</span>재화 부족과 과금: 정체 구간을 어떻게 매출로 연결하는가</h2>
+
+  <h3>확인할 것</h3>
+  <ol>
+    <li><b>만렙 이후 필요한 재화</b>: 엽전, 요혼석, 영웅 등급 이후 제작 재료 등 무엇이 얼마나 필요한가?</li>
+    <li><b>무과금 수급량</b>: 하루에 플레이로 얻는 양은 얼마인가?</li>
+    <li><b>부족분의 판매 방식</b>: 상점·패키지로 파는가? 가격은 얼마인가?</li>
+    <li><b>노출 시점</b>: 만렙 도달 직후, 강화 직후처럼 재화가 부족한 순간에 상품이 뜨는가?</li>
+    <li><b>거래소 구조</b>: 플레이 재화("금전")로 돌아가는 거래소는 유료 재화와 어떻게 연결되는가?</li>
+    <li><b>운영 조정</b>: 재화 수급량 상향 뒤 판매 상품이나 성장 속도가 어떻게 바뀌었는가?</li>
+    <li><b>"낮은 과금 압박" 평가와 맞는가?</b> 능력치 없는 꾸미기와 성장 재화 판매가 어떻게 공존하는가?</li>
+  </ol>
+
+  <h3>조사 방법: 재화별 무과금 vs 과금 비교</h3>
+  <div class="table-wrap">
+    <table>
+      <caption>표 5. 재화별 비교표 양식 (플레이하며 직접 측정한 값만 채운다)</caption>
+      <thead><tr><th>재화</th><th>용도</th><th>1단계 성장 필요량</th><th>하루 무과금 획득량</th><th>무과금 소요일</th><th>판매 상품·가격</th><th>과금 시 단축 일수</th></tr></thead>
+      <tbody>
+        <tr><td>(예: 요혼석)</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <ul>
+    <li>패키지 상품은 운빨존많겜 과금 정리와 같은 형식(상품명·가격·구성·구매 제한·홍보 문구)으로 따로 기록한다.</li>
+    <li>모바일인덱스 순위 기록에서 매출 순위 변화와 업데이트·이벤트 시점을 겹쳐 본다.</li>
+  </ul>
+
+  <h3>판단 기준</h3>
+  <div class="table-wrap">
+    <table class="judge">
+      <caption>표 6. 정체 구간과 과금 연결 정도를 판단하는 신호</caption>
+      <thead><tr><th>정체 구간을 과금으로 연결하는 신호</th><th>과금 압박이 낮다는 신호</th></tr></thead>
+      <tbody>
+        <tr><td>무과금 소요일이 길고, 과금하면 크게 줄어든다</td><td>무과금으로도 감당할 만한 기간이다</td></tr>
+        <tr><td>재화 부족 순간에 맞춰 상품이 노출된다</td><td>상품 노출이 성장 흐름과 따로 논다</td></tr>
+        <tr><td>문파전 보상이 전투력 차이로 갈린다</td><td>경쟁 결과가 협동·전략에 더 좌우된다</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section id="link">
+  <h2>세 축의 연결 (가설)</h2>
+  <p>아래는 확인 전 가설이다. 조사 결과로 맞는지 판정한다.</p>
+  <ol class="hypo">
+    <li><span class="flow">빌드 쏠림 → 재빌드 비용 → 과금</span><br>강한 조합으로 쏠리면 빌드를 바꾸고 싶어진다. 계열별 재화가 나뉘어 있으면 다시 키우는 비용이 과금 수요가 된다.</li>
+    <li><span class="flow">문파 경쟁 → 성장 압박 → 과금</span><br>문파전에서 이기려면 전투력이 필요하다. 정체 구간에서 전투력을 올릴 방법이 과금뿐이라면 경쟁이 결제를 이끈다.</li>
+    <li><span class="flow">문파 소속감 → 이탈 방지</span><br>정체 구간에서 결제하지 않는 유저를 붙잡는 것은 문파 관계일 수 있다. 커뮤니티가 약하면 정체 구간이 곧 이탈 구간이 된다.</li>
+  </ol>
+</section>
+
+<section id="steps">
+  <h2>진행 순서</h2>
+  <div class="steps">
+    <div class="step"><b>1단계</b>만렙(50)까지 플레이, 스타일 3개 이상 체험, 문파 가입<span>산출물: 플레이 기록, 스타일 비교표</span></div>
+    <div class="step"><b>2단계</b>만렙 이후 재화 수급량·필요량 측정, 상점·패키지 기록<span>산출물: 재화 비교표, 과금 상품 정리</span></div>
+    <div class="step"><b>3단계</b>2~4주 동안 커뮤니티·리뷰·순위 주간 기록<span>산출물: 주간 기록표</span></div>
+    <div class="step"><b>4단계</b>세 축의 결과로 가설 판정, 개선 제안 작성<span>산출물: 분석 보고서</span></div>
+  </div>
+
+  <h3>작성할 때 지킬 것</h3>
+  <ul>
+    <li>표·이미지 설명, 페이지 번호, 한 글자 줄바꿈 점검, 개요체로 쓰기</li>
+    <li>직접 확인한 사실, 기사·회사 발표 내용, 내 추론을 구분한다. 기사·발표 내용에는 출처를 단다.</li>
+    <li>결론은 "그래서 무엇을 고쳐야 하는가"까지 간다. 개선 제안에는 근거 데이터를 붙인다.</li>
+  </ul>
+</section>
+
+</main>
+<footer>기초 자료: 《도깨비의 세계》 재미요소 분석</footer>
+</body>
+</html>
