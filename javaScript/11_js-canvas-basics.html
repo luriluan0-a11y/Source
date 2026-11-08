@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JavaScript 캔버스 기초</title>
+<style>
+  :root {
+    --navy: #1a3a5c;
+    --blue: #2e6da4;
+    --orange: #f0a500;
+    --bg: #f5f7fa;
+    --card: #ffffff;
+    --text: #2b2f36;
+    --muted: #5f6b7a;
+    --line: #dde3ea;
+    --code-bg: #1f2a37;
+    --code-text: #e6ebf1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Pretendard", "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  header {
+    background: var(--navy);
+    color: #fff;
+    padding: 40px 24px 32px;
+  }
+  header .wrap { max-width: 960px; margin: 0 auto; }
+  header h1 { margin: 0 0 8px; font-size: 2rem; }
+  header p { margin: 0; color: #c9d6e3; }
+  nav {
+    position: sticky; top: 0; z-index: 10;
+    background: #fff; border-bottom: 1px solid var(--line);
+  }
+  nav .wrap {
+    max-width: 960px; margin: 0 auto; padding: 10px 24px;
+    display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.92rem;
+  }
+  nav a { color: var(--blue); text-decoration: none; }
+  nav a:hover { text-decoration: underline; }
+  main { max-width: 960px; margin: 0 auto; padding: 24px; }
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+  }
+  h2 {
+    margin-top: 0; color: var(--navy);
+    border-left: 5px solid var(--orange); padding-left: 12px;
+  }
+  h3 { color: var(--blue); margin-bottom: 6px; }
+  code {
+    background: #eef2f7; padding: 1px 6px; border-radius: 4px;
+    font-family: Consolas, "D2Coding", monospace; font-size: 0.92em;
+  }
+  pre {
+    background: var(--code-bg); color: var(--code-text);
+    padding: 14px 16px; border-radius: 8px; overflow-x: auto;
+    font-family: Consolas, "D2Coding", monospace; font-size: 0.9rem;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 0.95rem; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #eef2f7; color: var(--navy); }
+  .tip {
+    background: #fff8e6; border-left: 4px solid var(--orange);
+    padding: 10px 14px; border-radius: 6px; margin: 12px 0;
+  }
+  .note {
+    background: #eef4fb; border-left: 4px solid var(--blue);
+    padding: 10px 14px; border-radius: 6px; margin: 12px 0;
+  }
+  /* 실습 상자 */
+  .lab {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    margin: 14px 0 4px;
+  }
+  @media (max-width: 760px) { .lab { grid-template-columns: 1fr; } }
+  .lab textarea {
+    width: 100%; min-height: 260px; resize: vertical;
+    background: var(--code-bg); color: var(--code-text);
+    border: none; border-radius: 8px; padding: 12px 14px;
+    font-family: Consolas, "D2Coding", monospace; font-size: 0.88rem; line-height: 1.55;
+    tab-size: 2;
+  }
+  .lab .stage {
+    display: flex; flex-direction: column; align-items: flex-start; gap: 8px;
+  }
+  .lab canvas {
+    background: #fff; border: 1px solid #b8c4d2; border-radius: 6px;
+    max-width: 100%;
+  }
+  .btns { display: flex; gap: 8px; }
+  button {
+    border: none; border-radius: 6px; padding: 7px 16px; cursor: pointer;
+    font-family: inherit; font-size: 0.92rem; font-weight: 600;
+  }
+  .run { background: var(--blue); color: #fff; }
+  .run:hover { background: var(--navy); }
+  .reset { background: #e4e9ef; color: var(--navy); }
+  .reset:hover { background: #d3dbe4; }
+  .error { color: #a33a3a; font-size: 0.88rem; font-family: Consolas, monospace; white-space: pre-wrap; }
+  .coord { font-size: 0.88rem; color: var(--muted); }
+  ol li, ul li { margin-bottom: 4px; }
+  footer { text-align: center; color: var(--muted); font-size: 0.85rem; padding: 10px 0 40px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>JavaScript 캔버스(Canvas) 기초</h1>
+    <p>코드로 그림을 그리는 방법을 하나씩 배워 봅니다. 모든 예제는 코드를 고친 뒤 <b>실행</b> 버튼을 눌러 바로 확인할 수 있습니다.</p>
+  </div>
+</header>
+
+<nav>
+  <div class="wrap">
+    <a href="#s1">1. 캔버스란?</a>
+    <a href="#s2">2. 좌표</a>
+    <a href="#s3">3. 사각형</a>
+    <a href="#s4">4. 선과 경로</a>
+    <a href="#s5">5. 원</a>
+    <a href="#s6">6. 글자</a>
+    <a href="#s7">7. 애니메이션</a>
+    <a href="#s8">8. 마우스</a>
+    <a href="#s9">9. 자주 하는 실수</a>
+    <a href="#s10">10. 연습 문제</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- 1 -->
+<section id="s1">
+  <h2>1. 캔버스란?</h2>
+  <p><code>&lt;canvas&gt;</code>는 웹 페이지 안에 놓는 <b>빈 도화지</b>입니다. HTML은 도화지만 만들어 주고, 실제 그림은 JavaScript가 그립니다.</p>
+  <h3>기본 구조</h3>
+<pre>&lt;canvas id="myCanvas" width="400" height="250"&gt;&lt;/canvas&gt;
+
+&lt;script&gt;
+  const canvas = document.getElementById("myCanvas"); // 1. 도화지를 찾는다
+  const ctx = canvas.getContext("2d");                 // 2. 붓(그리기 도구)을 꺼낸다
+  ctx.fillRect(20, 20, 100, 60);                        // 3. 그린다
+&lt;/script&gt;</pre>
+  <table>
+    <tr><th>이름</th><th>뜻</th></tr>
+    <tr><td><code>canvas</code></td><td>도화지. 크기(<code>width</code>, <code>height</code>)를 가진다</td></tr>
+    <tr><td><code>ctx</code> (context)</td><td>붓과 물감 세트. 색, 선 굵기, 그리기 명령이 모두 여기에 있다</td></tr>
+    <tr><td><code>getContext("2d")</code></td><td>2D 그림용 도구를 꺼내는 명령</td></tr>
+  </table>
+  <div class="tip"><b>기억하기:</b> 캔버스 크기는 CSS가 아니라 <code>width</code>, <code>height</code> 속성으로 정합니다. CSS로만 크기를 바꾸면 그림이 늘어나 흐릿해집니다.</div>
+  <p>아래 실습 상자의 왼쪽 코드를 바꾸고 <b>실행</b>을 눌러 보세요. 코드 안에서는 <code>canvas</code>와 <code>ctx</code>를 이미 쓸 수 있게 준비해 두었습니다.</p>
+  <div class="lab" data-w="400" data-h="220">
+<textarea spellcheck="false">// 사각형 하나 그리기
+ctx.fillStyle = "#2e6da4";   // 채울 색
+ctx.fillRect(20, 20, 150, 90); // x, y, 너비, 높이
+
+ctx.fillStyle = "#f0a500";
+ctx.fillRect(200, 80, 120, 120);</textarea>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="s2">
+  <h2>2. 캔버스의 좌표</h2>
+  <p>캔버스의 좌표는 수학 시간의 좌표와 조금 다릅니다.</p>
+  <ul>
+    <li>원점 <code>(0, 0)</code>은 <b>왼쪽 위</b> 모서리입니다.</li>
+    <li><code>x</code>는 오른쪽으로 갈수록 커집니다.</li>
+    <li><code>y</code>는 <b>아래로</b> 갈수록 커집니다. (수학과 반대)</li>
+    <li>단위는 픽셀(px)입니다.</li>
+  </ul>
+  <p>아래 캔버스 위에서 마우스를 움직여 좌표를 확인해 보세요.</p>
+  <div class="lab" data-w="400" data-h="250" data-coord="true">
+<textarea spellcheck="false">// 50px 간격 격자 그리기
+ctx.strokeStyle = "#dde3ea";
+for (let x = 0; x <= canvas.width; x += 50) {
+  ctx.beginPath();
+  ctx.moveTo(x, 0);
+  ctx.lineTo(x, canvas.height);
+  ctx.stroke();
+}
+for (let y = 0; y <= canvas.height; y += 50) {
+  ctx.beginPath();
+  ctx.moveTo(0, y);
+  ctx.lineTo(canvas.width, y);
+  ctx.stroke();
+}
+
+// 원점 표시
+ctx.fillStyle = "#1a3a5c";
+ctx.font = "14px sans-serif";
+ctx.fillText("(0, 0)", 4, 16);
+
+// (200, 150) 위치에 점 찍기
+ctx.fillStyle = "#f0a500";
+ctx.fillRect(196, 146, 8, 8);
+ctx.fillText("(200, 150)", 210, 155);</textarea>
+  </div>
+</section>
+
+<!-- 3 -->
+<section id="s3">
+  <h2>3. 사각형 그리기</h2>
+  <p>사각형은 명령 하나로 바로 그릴 수 있는 유일한 도형입니다.</p>
+  <table>
+    <tr><th>명령</th><th>하는 일</th></tr>
+    <tr><td><code>fillRect(x, y, w, h)</code></td><td>속이 채워진 사각형</td></tr>
+    <tr><td><code>strokeRect(x, y, w, h)</code></td><td>테두리만 있는 사각형</td></tr>
+    <tr><td><code>clearRect(x, y, w, h)</code></td><td>그 영역을 지운다 (투명하게)</td></tr>
+  </table>
+  <table>
+    <tr><th>속성</th><th>뜻</th><th>예</th></tr>
+    <tr><td><code>fillStyle</code></td><td>채우기 색</td><td><code>"red"</code>, <code>"#2e6da4"</code>, <code>"rgb(46,109,164)"</code></td></tr>
+    <tr><td><code>strokeStyle</code></td><td>선 색</td><td><code>"#1a3a5c"</code></td></tr>
+    <tr><td><code>lineWidth</code></td><td>선 굵기(px)</td><td><code>4</code></td></tr>
+  </table>
+  <div class="note">색을 먼저 정하고 그 다음에 그립니다. 붓에 물감을 먼저 묻히는 것과 같습니다. 한 번 정한 색은 바꾸기 전까지 계속 쓰입니다.</div>
+  <div class="lab" data-w="400" data-h="220">
+<textarea spellcheck="false">ctx.fillStyle = "#2e6da4";
+ctx.fillRect(20, 20, 120, 80);      // 채운 사각형
+
+ctx.strokeStyle = "#1a3a5c";
+ctx.lineWidth = 5;
+ctx.strokeRect(170, 20, 120, 80);   // 테두리 사각형
+
+ctx.fillStyle = "#f0a500";
+ctx.fillRect(20, 120, 300, 80);
+ctx.clearRect(60, 140, 60, 40);     // 가운데를 지우기</textarea>
+  </div>
+</section>
+
+<!-- 4 -->
+<section id="s4">
+  <h2>4. 선과 경로(Path)</h2>
+  <p>사각형이 아닌 도형은 <b>경로</b>로 그립니다. 연필을 종이에 대고 움직이는 순서를 말로 적는다고 생각하면 됩니다.</p>
+  <ol>
+    <li><code>beginPath()</code> : 새 그림을 시작한다 (이전 경로와 분리)</li>
+    <li><code>moveTo(x, y)</code> : 연필을 들어서 이 점으로 옮긴다</li>
+    <li><code>lineTo(x, y)</code> : 지금 점에서 이 점까지 선을 긋는다</li>
+    <li><code>closePath()</code> : 시작점으로 돌아가 도형을 닫는다 (선택)</li>
+    <li><code>stroke()</code> 또는 <code>fill()</code> : 실제로 화면에 그린다</li>
+  </ol>
+  <div class="tip"><b>중요:</b> <code>lineTo</code>까지만 쓰면 화면에 아무것도 안 보입니다. 마지막에 <code>stroke()</code>나 <code>fill()</code>을 꼭 불러야 합니다.</div>
+  <div class="lab" data-w="400" data-h="240">
+<textarea spellcheck="false">// 지그재그 선
+ctx.beginPath();
+ctx.moveTo(20, 60);
+ctx.lineTo(80, 20);
+ctx.lineTo(140, 60);
+ctx.lineTo(200, 20);
+ctx.strokeStyle = "#1a3a5c";
+ctx.lineWidth = 3;
+ctx.stroke();
+
+// 삼각형 (채우기)
+ctx.beginPath();
+ctx.moveTo(260, 200);
+ctx.lineTo(320, 90);
+ctx.lineTo(380, 200);
+ctx.closePath();
+ctx.fillStyle = "#f0a500";
+ctx.fill();
+
+// 집 모양: 지붕 + 몸통
+ctx.beginPath();
+ctx.moveTo(40, 130);
+ctx.lineTo(100, 90);
+ctx.lineTo(160, 130);
+ctx.closePath();
+ctx.fillStyle = "#2e6da4";
+ctx.fill();
+ctx.fillStyle = "#c9d6e3";
+ctx.fillRect(55, 130, 90, 80);</textarea>
+  </div>
+</section>
+
+<!-- 5 -->
+<section id="s5">
+  <h2>5. 원 그리기</h2>
+  <p>원은 <code>arc()</code>로 그립니다.</p>
+<pre>ctx.arc(x, y, 반지름, 시작각, 끝각);</pre>
+  <ul>
+    <li><code>x, y</code>는 원의 <b>중심</b>입니다. (사각형은 왼쪽 위 모서리였던 것과 다릅니다)</li>
+    <li>각도는 도(°)가 아니라 <b>라디안</b>을 씁니다. 한 바퀴(360°)는 <code>Math.PI * 2</code>입니다.</li>
+    <li>각도 0은 원의 <b>오른쪽(3시 방향)</b>이고, 시계 방향으로 커집니다.</li>
+  </ul>
+  <table>
+    <tr><th>도(°)</th><th>90°</th><th>180°</th><th>270°</th><th>360°</th></tr>
+    <tr><th>라디안</th><td><code>Math.PI / 2</code></td><td><code>Math.PI</code></td><td><code>Math.PI * 1.5</code></td><td><code>Math.PI * 2</code></td></tr>
+  </table>
+  <div class="lab" data-w="400" data-h="220">
+<textarea spellcheck="false">// 꽉 찬 원
+ctx.beginPath();
+ctx.arc(80, 110, 50, 0, Math.PI * 2);
+ctx.fillStyle = "#2e6da4";
+ctx.fill();
+
+// 테두리만 있는 원
+ctx.beginPath();
+ctx.arc(200, 110, 50, 0, Math.PI * 2);
+ctx.strokeStyle = "#1a3a5c";
+ctx.lineWidth = 4;
+ctx.stroke();
+
+// 반원 (0 ~ 180도)
+ctx.beginPath();
+ctx.arc(320, 90, 50, 0, Math.PI);
+ctx.fillStyle = "#f0a500";
+ctx.fill();</textarea>
+  </div>
+</section>
+
+<!-- 6 -->
+<section id="s6">
+  <h2>6. 글자 쓰기</h2>
+  <table>
+    <tr><th>명령·속성</th><th>하는 일</th></tr>
+    <tr><td><code>font</code></td><td>글꼴과 크기. CSS와 같은 형식 (<code>"bold 24px sans-serif"</code>)</td></tr>
+    <tr><td><code>fillText(글자, x, y)</code></td><td>채운 글자</td></tr>
+    <tr><td><code>strokeText(글자, x, y)</code></td><td>테두리 글자</td></tr>
+    <tr><td><code>textAlign</code></td><td><code>"left"</code>, <code>"center"</code>, <code>"right"</code> : x 기준을 어디로 둘지</td></tr>
+  </table>
+  <div class="note">글자의 <code>y</code>는 글자 위쪽이 아니라 <b>밑줄(기준선)</b> 위치입니다. y를 0으로 두면 글자가 위로 잘려 보이지 않습니다.</div>
+  <div class="lab" data-w="400" data-h="200">
+<textarea spellcheck="false">ctx.font = "bold 28px sans-serif";
+ctx.fillStyle = "#1a3a5c";
+ctx.fillText("안녕하세요, 캔버스!", 20, 50);
+
+ctx.font = "36px sans-serif";
+ctx.strokeStyle = "#2e6da4";
+ctx.lineWidth = 1.5;
+ctx.strokeText("Canvas", 20, 110);
+
+// 가운데 정렬: x를 캔버스 가운데로
+ctx.textAlign = "center";
+ctx.font = "20px sans-serif";
+ctx.fillStyle = "#f0a500";
+ctx.fillText("가운데 정렬", canvas.width / 2, 170);</textarea>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="s7">
+  <h2>7. 애니메이션</h2>
+  <p>캔버스 그림은 한 번 그리면 움직이지 않습니다. 움직이는 것처럼 보이게 하려면 <b>"지우고 → 조금 옮겨서 → 다시 그리기"</b>를 아주 빠르게 반복합니다. 만화책 넘기기와 같은 원리입니다.</p>
+<pre>function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height); // 1. 전부 지운다
+  x = x + 2;                                        // 2. 위치를 바꾼다
+  ctx.fillRect(x, 50, 40, 40);                      // 3. 다시 그린다
+  requestAnimationFrame(draw);                      // 4. 다음 화면에서 또 부른다
+}
+draw();</pre>
+  <ul>
+    <li><code>requestAnimationFrame(함수)</code>는 브라우저가 다음 화면을 그릴 때(보통 1초에 60번) 함수를 불러 줍니다.</li>
+    <li><code>setInterval</code>보다 부드럽고, 탭을 안 보고 있을 때는 알아서 쉬어서 효율적입니다.</li>
+  </ul>
+  <p>아래는 벽에 닿으면 튕기는 공입니다. <code>dx</code>, <code>dy</code>(속도)나 <code>r</code>(반지름)을 바꿔 보세요.</p>
+  <div class="lab" data-w="400" data-h="240">
+<textarea spellcheck="false">let x = 60, y = 60;   // 공 위치
+let dx = 3, dy = 2;   // 한 번에 움직이는 거리(속도)
+const r = 20;         // 반지름
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.fillStyle = "#2e6da4";
+  ctx.fill();
+
+  // 벽에 닿으면 방향을 반대로
+  if (x + r > canvas.width || x - r < 0) dx = -dx;
+  if (y + r > canvas.height || y - r < 0) dy = -dy;
+
+  x += dx;
+  y += dy;
+  requestAnimationFrame(draw);
+}
+draw();</textarea>
+  </div>
+  <div class="tip"><code>clearRect</code> 줄을 지우고 실행해 보세요. 이전 그림이 지워지지 않아 공이 지나간 자국이 남습니다. 애니메이션에서 "지우기"가 왜 필요한지 알 수 있습니다.</div>
+</section>
+
+<!-- 8 -->
+<section id="s8">
+  <h2>8. 마우스로 그리기</h2>
+  <p>캔버스에 이벤트를 붙이면 사용자의 클릭·움직임에 반응하는 그림을 만들 수 있습니다.</p>
+<pre>canvas.addEventListener("click", (e) => {
+  const rect = canvas.getBoundingClientRect(); // 캔버스가 화면 어디에 있는지
+  const x = e.clientX - rect.left;             // 화면 좌표 → 캔버스 좌표
+  const y = e.clientY - rect.top;
+});</pre>
+  <div class="note"><code>e.clientX</code>는 <b>브라우저 화면 기준</b> 좌표입니다. 캔버스 안의 좌표로 바꾸려면 캔버스의 위치(<code>rect.left</code>, <code>rect.top</code>)를 빼야 합니다.</div>
+  <p>아래 캔버스를 <b>클릭</b>하면 원이 찍히고, <b>마우스를 누른 채 끌면</b> 선이 그려집니다.</p>
+  <div class="lab" data-w="400" data-h="260">
+<textarea spellcheck="false">function getPos(e) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+}
+
+let drawing = false;
+
+canvas.addEventListener("mousedown", (e) => {
+  drawing = true;
+  const p = getPos(e);
+  ctx.beginPath();
+  ctx.moveTo(p.x, p.y);
+});
+
+canvas.addEventListener("mousemove", (e) => {
+  if (!drawing) return;
+  const p = getPos(e);
+  ctx.lineTo(p.x, p.y);
+  ctx.strokeStyle = "#1a3a5c";
+  ctx.lineWidth = 3;
+  ctx.lineCap = "round";
+  ctx.stroke();
+});
+
+canvas.addEventListener("mouseup", () => drawing = false);
+canvas.addEventListener("mouseleave", () => drawing = false);
+
+// 클릭한 곳에 주황색 점
+canvas.addEventListener("click", (e) => {
+  const p = getPos(e);
+  ctx.beginPath();
+  ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+  ctx.fillStyle = "#f0a500";
+  ctx.fill();
+});
+
+ctx.font = "14px sans-serif";
+ctx.fillStyle = "#5f6b7a";
+ctx.fillText("여기를 클릭하거나 끌어 보세요", 10, 20);</textarea>
+  </div>
+</section>
+
+<!-- 9 -->
+<section id="s9">
+  <h2>9. 자주 하는 실수</h2>
+  <table>
+    <tr><th>증상</th><th>원인</th><th>해결</th></tr>
+    <tr>
+      <td>아무것도 안 보인다</td>
+      <td><code>lineTo</code>, <code>arc</code>만 쓰고 <code>stroke()</code>/<code>fill()</code>을 안 불렀다</td>
+      <td>경로 끝에 <code>stroke()</code> 또는 <code>fill()</code> 추가</td>
+    </tr>
+    <tr>
+      <td>도형끼리 선으로 이어진다 / 색이 같이 바뀐다</td>
+      <td>새 도형을 그릴 때 <code>beginPath()</code>를 빼먹었다</td>
+      <td>도형마다 <code>beginPath()</code>로 시작</td>
+    </tr>
+    <tr>
+      <td><code>Cannot read properties of null (reading 'getContext')</code></td>
+      <td>HTML에 캔버스가 만들어지기 전에 스크립트가 실행됐다, 또는 id 오타</td>
+      <td><code>&lt;script&gt;</code>를 <code>&lt;/body&gt;</code> 바로 앞에 두고 id 확인</td>
+    </tr>
+    <tr>
+      <td>그림이 흐릿하고 늘어나 보인다</td>
+      <td>CSS로만 캔버스 크기를 바꿨다</td>
+      <td><code>width</code>, <code>height</code> 속성으로 크기 지정</td>
+    </tr>
+    <tr>
+      <td>원이 조금만 그려진다</td>
+      <td>각도를 도(360)로 썼다</td>
+      <td>라디안 사용: <code>Math.PI * 2</code></td>
+    </tr>
+    <tr>
+      <td>애니메이션에 잔상이 남는다</td>
+      <td>매 장면마다 지우지 않았다</td>
+      <td>그리기 전에 <code>clearRect(0, 0, canvas.width, canvas.height)</code></td>
+    </tr>
+    <tr>
+      <td>클릭한 곳과 그려진 곳이 어긋난다</td>
+      <td><code>e.clientX</code>를 그대로 썼다</td>
+      <td><code>getBoundingClientRect()</code>로 캔버스 위치를 뺀다</td>
+    </tr>
+  </table>
+</section>
+
+<!-- 10 -->
+<section id="s10">
+  <h2>10. 연습 문제</h2>
+  <p>아래 빈 캔버스에서 직접 풀어 보세요. 막히면 위의 예제를 참고합니다.</p>
+  <ol>
+    <li><b>신호등:</b> 세로로 긴 남색 사각형 안에 빨강·노랑·초록 원 3개를 그린다.</li>
+    <li><b>별 대신 오각형:</b> <code>moveTo</code>와 <code>lineTo</code>로 오각형을 그리고 주황색으로 채운다.</li>
+    <li><b>이름표:</b> 사각형 테두리 안에 자기 이름을 가운데 정렬로 쓴다.</li>
+    <li><b>움직이는 글자:</b> 글자가 왼쪽에서 오른쪽으로 움직이다가 끝에 닿으면 다시 왼쪽에서 나오게 한다.</li>
+    <li><b>도전:</b> 클릭할 때마다 원의 색이 무작위로 바뀌게 한다. (힌트: <code>`hsl(${Math.random() * 360}, 50%, 50%)`</code>)</li>
+  </ol>
+  <div class="lab" data-w="400" data-h="260">
+<textarea spellcheck="false">// 여기에 코드를 작성하고 [실행]을 누르세요.
+// 1번 문제 시작 예시
+ctx.fillStyle = "#1a3a5c";
+ctx.fillRect(160, 20, 80, 220);
+</textarea>
+  </div>
+</section>
+
+</main>
+
+<footer>JavaScript 캔버스 기초 · 수업 자료</footer>
+
+<script>
+  // 실습 상자: 왼쪽 코드를 실행해 오른쪽 캔버스에 그린다.
+  document.querySelectorAll(".lab").forEach((lab) => {
+    const textarea = lab.querySelector("textarea");
+    const original = textarea.value;
+    const w = Number(lab.dataset.w), h = Number(lab.dataset.h);
+
+    const stage = document.createElement("div");
+    stage.className = "stage";
+    let canvas = document.createElement("canvas");
+    canvas.width = w; canvas.height = h;
+    const btns = document.createElement("div");
+    btns.className = "btns";
+    const runBtn = document.createElement("button");
+    runBtn.className = "run"; runBtn.textContent = "▶ 실행";
+    const resetBtn = document.createElement("button");
+    resetBtn.className = "reset"; resetBtn.textContent = "처음 코드로";
+    btns.append(runBtn, resetBtn);
+    const coord = document.createElement("div");
+    coord.className = "coord";
+    const err = document.createElement("div");
+    err.className = "error";
+    stage.append(canvas, btns);
+    if (lab.dataset.coord) stage.append(coord);
+    stage.append(err);
+    lab.append(stage);
+
+    let token = 0; // 다시 실행하면 이전 애니메이션을 멈추기 위한 번호
+
+    function run() {
+      token++;
+      const myToken = token;
+      // 이벤트 리스너를 없애려고 캔버스를 새것으로 바꾼다
+      const fresh = canvas.cloneNode(false);
+      canvas.replaceWith(fresh);
+      canvas = fresh;
+      if (lab.dataset.coord) {
+        canvas.addEventListener("mousemove", (e) => {
+          const r = canvas.getBoundingClientRect();
+          coord.textContent = `마우스 좌표: x = ${Math.round(e.clientX - r.left)}, y = ${Math.round(e.clientY - r.top)}`;
+        });
+        coord.textContent = "캔버스 위에서 마우스를 움직여 보세요";
+      }
+      const ctx = canvas.getContext("2d");
+      const raf = (fn) => window.requestAnimationFrame((t) => { if (myToken === token) fn(t); });
+      err.textContent = "";
+      try {
+        new Function("canvas", "ctx", "requestAnimationFrame", textarea.value)(canvas, ctx, raf);
+      } catch (e) {
+        err.textContent = "오류: " + e.message;
+      }
+    }
+
+    runBtn.addEventListener("click", run);
+    resetBtn.addEventListener("click", () => { textarea.value = original; run(); });
+    // Tab 키로 들여쓰기
+    textarea.addEventListener("keydown", (e) => {
+      if (e.key === "Tab") {
+        e.preventDefault();
+        const s = textarea.selectionStart;
+        textarea.setRangeText("  ", s, textarea.selectionEnd, "end");
+      }
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) { e.preventDefault(); run(); }
+    });
+    run();
+  });
+</script>
+</body>
+</html>
