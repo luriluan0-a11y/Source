@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캔버스에 이미지 그리기 | 자바스크립트 수업 자료</title>
+    <meta name="description" content="new Image()로 사진을 불러와 drawImage()로 캔버스에 그리는 방법을 위치·크기·잘라내기 실습, 슬라이드쇼, 마우스 따라다니기 예제로 배우는 수업 자료입니다.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* 07 마우스 이벤트 자료와 같은 색 체계: 신호색 하나(실습에서 바뀌는 값) + 종이·먹 계열 중성색 */
+        :root {
+            --signal: #b93a1b;
+            --signal-soft: #f6ddd4;
+            --ink: #1f1f1c;
+            --muted: #5c5a54;
+            --line: #d9d5cb;
+            --paper: #f7f5f0;
+            --chip: #ebe7dd;
+            --white: #ffffff;
+            --font-title: "Noto Serif KR", Batang, serif;
+            --font-body: "Noto Sans KR", "Malgun Gothic", sans-serif;
+            --font-code: D2Coding, Consolas, "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-body);
+            font-size: 17px;
+            line-height: 1.75;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        a {
+            color: var(--signal);
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--signal);
+            outline-offset: 2px;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 16px;
+            top: -60px;
+            padding: 8px 12px;
+            background-color: var(--ink);
+            color: var(--white);
+        }
+
+        .skip-link:focus {
+            top: 8px;
+        }
+
+        /* 머리말 */
+        .page-header {
+            border-bottom: 1px solid var(--ink);
+        }
+
+        .page-header-inner {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+            gap: 40px;
+            align-items: end;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 56px 32px 40px;
+        }
+
+        .kicker {
+            margin: 0 0 8px;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        h1, h2 {
+            font-family: var(--font-title);
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-size: clamp(38px, 6.4vw, 70px);
+        }
+
+        .lead {
+            max-width: 32em;
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .needs {
+            margin: 16px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .signature {
+            margin: 0;
+            padding: 18px 20px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        .signature p {
+            margin: 0 0 6px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .signature code {
+            display: block;
+            font-size: 20px;
+            white-space: nowrap;
+            line-height: 1.4;
+        }
+
+        .signature code b {
+            color: var(--signal);
+        }
+
+        /* 전체 틀 */
+        .layout {
+            display: grid;
+            grid-template-columns: 170px minmax(0, 1fr);
+            gap: 48px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .toc {
+            position: sticky;
+            top: 0;
+            align-self: start;
+            padding: 32px 0;
+        }
+
+        .toc h2 {
+            margin: 0 0 8px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .toc ol {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .toc a {
+            display: block;
+            padding: 6px 0;
+            color: var(--ink);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            color: var(--signal);
+            text-decoration: underline;
+        }
+
+        main {
+            min-width: 0;
+        }
+
+        main > section {
+            padding: 48px 0;
+            border-bottom: 1px solid var(--line);
+            scroll-margin-top: 8px;
+        }
+
+        main > section:last-child {
+            border-bottom: 0;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            font-size: 32px;
+        }
+
+        h2 .num {
+            margin-right: 10px;
+            color: var(--signal);
+        }
+
+        h3 {
+            margin: 32px 0 8px;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        p {
+            margin: 0 0 16px;
+        }
+
+        code {
+            font-family: var(--font-code);
+            font-size: 0.94em;
+        }
+
+        p code, li code, td code, label code, summary code, h3 code {
+            padding: 1px 4px;
+            border-radius: 4px;
+            background-color: var(--chip);
+        }
+
+        pre {
+            margin: 0 0 16px;
+            padding: 16px;
+            overflow-x: auto;
+            border-radius: 6px;
+            background-color: var(--ink);
+            color: #f7f5f0;
+            font-family: var(--font-code);
+            font-size: 15px;
+            line-height: 1.6;
+            word-break: normal;
+        }
+
+        pre code {
+            font-size: inherit;
+        }
+
+        pre .mark {
+            color: #ffb59e;
+            font-weight: 700;
+        }
+
+        .hint {
+            margin: 8px 0 16px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .demo-label {
+            margin: 0 0 8px;
+            color: var(--signal);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            background-color: aliceblue;
+        }
+
+        button {
+            min-height: 40px;
+            padding: 6px 14px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+            color: var(--ink);
+            font: inherit;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--chip);
+        }
+
+        button.primary {
+            border-color: var(--signal);
+            background-color: var(--signal);
+            color: var(--white);
+        }
+
+        button.primary:hover {
+            background-color: #9c2f14;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            align-items: center;
+            margin: 12px 0;
+            font-size: 15px;
+        }
+
+        .live-code {
+            margin: 12px 0 0;
+            padding: 12px 14px;
+            border-left: 3px solid var(--signal);
+            background-color: var(--white);
+            color: var(--ink);
+            font-size: 15px;
+        }
+
+        /* 1. 세 단계 */
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 0;
+            margin: 0 0 24px;
+            padding: 0;
+            list-style: none;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+            counter-reset: step;
+        }
+
+        .steps li {
+            padding: 16px 18px;
+            border-right: 1px solid var(--line);
+            counter-increment: step;
+        }
+
+        .steps li:last-child {
+            border-right: 0;
+        }
+
+        .steps li::before {
+            content: counter(step);
+            display: block;
+            color: var(--signal);
+            font-family: var(--font-title);
+            font-size: 30px;
+            font-weight: 700;
+            line-height: 1.2;
+        }
+
+        .steps strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .steps code {
+            font-size: 14px;
+        }
+
+        .steps p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* 2. 타임라인 */
+        .timeline {
+            margin: 0 0 16px;
+            padding: 0;
+            list-style: none;
+            border-left: 2px solid var(--ink);
+        }
+
+        .timeline li {
+            position: relative;
+            padding: 6px 0 14px 22px;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        .timeline li::before {
+            content: "";
+            position: absolute;
+            left: -7px;
+            top: 13px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--paper);
+            border: 2px solid var(--ink);
+        }
+
+        .timeline li.late::before {
+            background-color: var(--signal);
+            border-color: var(--signal);
+        }
+
+        .timeline small {
+            display: block;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* 3. drawImage 세 가지 */
+        .forms {
+            display: grid;
+            gap: 0;
+            margin: 0 0 8px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        .forms > div {
+            display: grid;
+            grid-template-columns: 90px minmax(0, 1fr);
+            gap: 12px;
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .forms > div:last-child {
+            border-bottom: 0;
+        }
+
+        .forms .count {
+            color: var(--signal);
+            font-weight: 700;
+            font-size: 15px;
+        }
+
+        .forms code {
+            font-size: 15px;
+        }
+
+        .forms p {
+            margin: 4px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .lab {
+            margin-top: 16px;
+            padding: 20px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        .lab h3 {
+            margin-top: 0;
+        }
+
+        .sliders {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px 20px;
+            margin: 12px 0;
+        }
+
+        .slider label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 15px;
+        }
+
+        .slider output {
+            color: var(--signal);
+            font-family: var(--font-code);
+            font-weight: 700;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--signal);
+        }
+
+        input[type="checkbox"], input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--signal);
+            vertical-align: -3px;
+        }
+
+        select, input[type="file"] {
+            font: inherit;
+            font-size: 15px;
+        }
+
+        select {
+            min-height: 40px;
+            padding: 4px 8px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        .crop-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 5fr) minmax(0, 3fr);
+            gap: 20px;
+            align-items: start;
+        }
+
+        .caption {
+            margin: 6px 0 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* 4. 비율 */
+        .formula {
+            margin: 0 0 16px;
+            padding: 14px 18px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+            font-family: var(--font-code);
+            font-size: 18px;
+        }
+
+        /* 7. 실수 */
+        .mistake {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 8px 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .mistake p {
+            grid-column: 1 / -1;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .mistake pre {
+            margin: 0;
+            padding: 10px 12px;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .mistake .wrong {
+            background-color: var(--white);
+            border: 1px solid var(--signal);
+            color: var(--ink);
+        }
+
+        .tag {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .tag-wrong {
+            color: var(--signal);
+            font-weight: 700;
+        }
+
+        /* 8. 연습 문제 */
+        .practice {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: practice;
+        }
+
+        .practice li {
+            display: grid;
+            grid-template-columns: 56px minmax(0, 1fr);
+            padding: 16px 0;
+            border-top: 1px solid var(--line);
+            counter-increment: practice;
+        }
+
+        .practice li::before {
+            content: counter(practice);
+            color: var(--signal);
+            font-family: var(--font-title);
+            font-size: 36px;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .practice h3 {
+            margin: 0 0 4px;
+            font-size: 18px;
+        }
+
+        .practice p {
+            margin: 0;
+        }
+
+        .practice .tools {
+            margin-top: 6px;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        details {
+            margin: 16px 0;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        summary {
+            padding: 10px 14px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .code-box {
+            position: relative;
+            padding: 0 8px 8px;
+        }
+
+        .code-box pre {
+            margin: 0;
+        }
+
+        .copy {
+            position: absolute;
+            top: 8px;
+            right: 16px;
+            min-height: 32px;
+            padding: 2px 10px;
+            font-size: 14px;
+        }
+
+        /* 꼬리말 */
+        footer {
+            border-top: 1px solid var(--ink);
+            font-size: 15px;
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 8px 32px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 24px 32px;
+            color: var(--muted);
+        }
+
+        .footer-inner p {
+            margin: 0;
+        }
+
+        @media (max-width: 900px) {
+            .page-header-inner {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 24px;
+                padding: 32px 16px 24px;
+            }
+
+            .layout {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 0;
+                padding: 0 16px;
+            }
+
+            .toc {
+                position: static;
+                padding: 16px 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .toc ol {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0 16px;
+            }
+
+            .footer-inner {
+                padding: 24px 16px;
+            }
+        }
+
+        @media (max-width: 720px) {
+            body {
+                font-size: 16px;
+            }
+
+            main > section {
+                padding: 36px 0;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+
+            .signature code {
+                font-size: 17px;
+            }
+
+            .split, .crop-grid, .mistake, .sliders {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .steps {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .steps li {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .steps li:last-child {
+                border-bottom: 0;
+            }
+
+            .forms > div {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 2px;
+            }
+
+            .lab {
+                padding: 14px;
+            }
+
+            .practice li {
+                grid-template-columns: 44px minmax(0, 1fr);
+            }
+        }
+    </style>
+</head>
+<body id="top">
+    <a class="skip-link" href="#content">본문으로 건너뛰기</a>
+
+    <header class="page-header">
+        <div class="page-header-inner">
+            <div>
+                <p class="kicker">자바스크립트 수업 자료 · 08 캔버스 이미지</p>
+                <h1>캔버스에 이미지 그리기</h1>
+                <p class="lead">보노보노와 폰데라이온은 <code>arc()</code>로 원을 하나씩 그렸다. 이번에는 사진 파일을 불러와 캔버스에 통째로 그리고, 자르고, 움직여 본다.</p>
+                <p class="needs">미리 알아야 할 것: <code>getContext('2d')</code>, <code>arc()</code>와 <code>fill()</code>, <code>setInterval</code>, 마우스 이벤트의 <code>e.offsetX</code></p>
+            </div>
+            <div class="signature">
+                <p>오늘 배울 함수 하나</p>
+                <code>context.<b>drawImage</b>(이미지, x, y);</code>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <nav class="toc" aria-labelledby="tocTitle">
+            <h2 id="tocTitle">차례</h2>
+            <ol>
+                <li><a href="#basic">1. 기본 세 단계</a></li>
+                <li><a href="#onload">2. 왜 onload인가</a></li>
+                <li><a href="#forms">3. drawImage 세 가지</a></li>
+                <li><a href="#ratio">4. 비율 지키기</a></li>
+                <li><a href="#layer">5. 그리는 순서</a></li>
+                <li><a href="#motion">6. 움직이기</a></li>
+                <li><a href="#mistakes">7. 자주 하는 실수</a></li>
+                <li><a href="#practice">8. 연습 문제</a></li>
+            </ol>
+        </nav>
+
+        <main id="content">
+            <section id="basic" aria-labelledby="basicTitle">
+                <h2 id="basicTitle"><span class="num">1</span>기본 세 단계</h2>
+                <ol class="steps">
+                    <li><strong>이미지 객체 만들기</strong><code>let img = new Image();</code><p>빈 그림 상자를 하나 만든다.</p></li>
+                    <li><strong>다 불러오면 할 일 정하기</strong><code>img.onload = function () {...}</code><p>사진이 도착했을 때 그리도록 미리 적어 둔다.</p></li>
+                    <li><strong>파일 경로 넣기</strong><code>img.src = 'dog/dog01.png';</code><p>이 줄에서 불러오기가 시작된다.</p></li>
+                </ol>
+
+                <div class="split">
+                    <div>
+                        <pre><code>let canvas = document.getElementById('myCanvas');
+let context = canvas.getContext('2d');
+
+let img = new Image();
+img.onload = function () {
+    <span class="mark">context.drawImage(img, 0, 0);</span>
+};
+img.src = 'dog/dog01.png';</code></pre>
+                    </div>
+                    <div>
+                        <p class="demo-label">실행 결과 (캔버스 400 × 300)</p>
+                        <canvas id="basicCanvas" width="400" height="300" role="img" aria-label="강아지 사진을 캔버스 왼쪽 위에 원래 크기로 그린 결과"></canvas>
+                        <p class="hint">사진은 500 × 250인데 캔버스는 가로가 400이라, 캔버스 밖으로 나간 오른쪽 100픽셀이 잘렸다. 크기를 맞추는 방법은 3장에서 다룬다.</p>
+                    </div>
+                </div>
+
+                <details>
+                    <summary>전체 코드 (이 파일과 같은 폴더에 저장해서 실행)</summary>
+                    <div class="code-box">
+                        <button class="copy" type="button">복사</button>
+                        <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang="ko"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;캔버스에 이미지 그리기&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h3&gt;캔버스에 이미지 그리기&lt;/h3&gt;
+    &lt;hr&gt;
+    &lt;canvas id="myCanvas" style="background-color:aliceblue"
+        width="400" height="300"&gt;&lt;/canvas&gt;
+    &lt;script&gt;
+        let canvas = document.getElementById('myCanvas');
+        let context = canvas.getContext('2d');
+
+        let img = new Image();
+        img.onload = function () {
+            context.drawImage(img, 0, 0);
+        };
+        img.src = 'dog/dog01.png';
+    &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+                    </div>
+                </details>
+                <p class="hint">경로 <code>'dog/dog01.png'</code>는 "이 HTML 파일 옆에 있는 dog 폴더 안의 dog01.png"라는 뜻이다. 이 자료 폴더(<code>08.canvasImage</code>)에는 강아지 사진 5장이 담긴 <code>dog</code> 폴더가 들어 있으니, 새 HTML 파일을 이 폴더에 저장하면 사진이 보인다.</p>
+            </section>
+
+            <section id="onload" aria-labelledby="onloadTitle">
+                <h2 id="onloadTitle"><span class="num">2</span>왜 <code>onload</code> 안에서 그려야 하나</h2>
+                <p>사진 파일은 코드보다 늦게 도착한다. 자바스크립트는 사진을 기다리지 않고 다음 줄로 넘어가기 때문에, <code>src</code>를 넣은 바로 다음 줄에서 그리면 아직 빈 상자를 그리게 된다. 오류도 나지 않고 그냥 아무것도 안 보인다.</p>
+                <div class="split">
+                    <div>
+                        <p class="demo-label">잘못된 코드에서 일어나는 일</p>
+                        <ol class="timeline">
+                            <li><code>img.src = 'dog/dog01.png';</code><small>불러오기 시작</small></li>
+                            <li><code>context.drawImage(img, 0, 0);</code><small>아직 사진이 없음. 아무것도 그려지지 않음</small></li>
+                            <li class="late">사진 도착<small>그릴 코드는 이미 지나가 버렸다</small></li>
+                        </ol>
+                    </div>
+                    <div>
+                        <p class="demo-label">onload를 쓴 코드</p>
+                        <ol class="timeline">
+                            <li><code>img.onload = function () {...}</code><small>"도착하면 이걸 해라"라고 적어 둠</small></li>
+                            <li><code>img.src = 'dog/dog01.png';</code><small>불러오기 시작</small></li>
+                            <li class="late">사진 도착 → <code>onload</code> 함수 실행<small>이때 <code>drawImage</code>가 실행되어 사진이 그려진다</small></li>
+                        </ol>
+                    </div>
+                </div>
+                <p><code>onload</code>를 <code>src</code>보다 먼저 적는 이유도 같다. 이미 한 번 불러온 사진은 아주 빨리 도착할 수 있어서, 할 일을 먼저 적어 두는 편이 안전하다.</p>
+            </section>
+
+            <section id="forms" aria-labelledby="formsTitle">
+                <h2 id="formsTitle"><span class="num">3</span><code>drawImage</code>의 세 가지 형태</h2>
+                <p>괄호 안에 숫자를 몇 개 넣느냐에 따라 하는 일이 달라진다.</p>
+                <div class="forms">
+                    <div>
+                        <span class="count">숫자 2개</span>
+                        <div><code>drawImage(img, x, y)</code><p>(x, y)에 원래 크기 그대로 그린다.</p></div>
+                    </div>
+                    <div>
+                        <span class="count">숫자 4개</span>
+                        <div><code>drawImage(img, x, y, 너비, 높이)</code><p>(x, y)에 정한 크기로 늘이거나 줄여서 그린다.</p></div>
+                    </div>
+                    <div>
+                        <span class="count">숫자 8개</span>
+                        <div><code>drawImage(img, sx, sy, sw, sh, x, y, 너비, 높이)</code><p>원본에서 (sx, sy)부터 sw × sh만큼 잘라 낸 조각을 캔버스의 (x, y)에 정한 크기로 그린다.</p></div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <label for="imageSelect">실습에 쓸 사진</label>
+                    <select id="imageSelect">
+                        <option value="0">dog01.png</option>
+                        <option value="1">dog02.png</option>
+                        <option value="2">dog03.png</option>
+                        <option value="3">dog04.png</option>
+                        <option value="4">dog05.png</option>
+                    </select>
+                    <label for="fileInput">또는 내 사진:</label>
+                    <input id="fileInput" type="file" accept="image/*">
+                </div>
+
+                <div class="lab">
+                    <h3>실습 A. 위치와 크기 (숫자 4개)</h3>
+                    <div class="split">
+                        <div>
+                            <canvas id="sizeCanvas" width="400" height="300" role="img" aria-label="위치와 크기를 바꿔 그린 사진"></canvas>
+                        </div>
+                        <div>
+                            <div class="sliders">
+                                <div class="slider"><label for="sizeX">x <output id="sizeXOut">0</output></label><input id="sizeX" type="range" min="-200" max="400" value="0"></div>
+                                <div class="slider"><label for="sizeY">y <output id="sizeYOut">0</output></label><input id="sizeY" type="range" min="-150" max="300" value="0"></div>
+                                <div class="slider"><label for="sizeW">너비 <output id="sizeWOut">200</output></label><input id="sizeW" type="range" min="10" max="600" value="200"></div>
+                                <div class="slider"><label for="sizeH">높이 <output id="sizeHOut">100</output></label><input id="sizeH" type="range" min="10" max="400" value="100"></div>
+                            </div>
+                            <div class="row">
+                                <label><input id="sizeKeep" type="checkbox" checked> 비율 유지 (높이를 자동 계산)</label>
+                            </div>
+                        </div>
+                    </div>
+                    <pre class="live-code"><code id="sizeCode">context.drawImage(img, 0, 0, 200, 100);</code></pre>
+                </div>
+
+                <div class="lab">
+                    <h3>실습 B. 잘라서 그리기 (숫자 8개)</h3>
+                    <p>왼쪽 원본에서 빨간 틀 안만 잘라서, 오른쪽 캔버스 (0, 0)에 300 × 150 크기로 그린다. 작은 조각을 크게 그리면 확대가 된다.</p>
+                    <div class="crop-grid">
+                        <div>
+                            <canvas id="sourceCanvas" width="500" height="250" role="img" aria-label="원본 사진과 잘라 낼 영역 표시"></canvas>
+                            <p class="caption">원본 (빨간 틀 = 잘라 낼 부분)</p>
+                        </div>
+                        <div>
+                            <canvas id="cropCanvas" width="300" height="150" role="img" aria-label="잘라 낸 조각을 확대해 그린 결과"></canvas>
+                            <p class="caption">결과 캔버스 300 × 150</p>
+                        </div>
+                    </div>
+                    <div class="sliders">
+                        <div class="slider"><label for="cropSx">sx (자를 곳 x) <output id="cropSxOut">180</output></label><input id="cropSx" type="range" min="0" max="490" value="180"></div>
+                        <div class="slider"><label for="cropSy">sy (자를 곳 y) <output id="cropSyOut">90</output></label><input id="cropSy" type="range" min="0" max="240" value="90"></div>
+                        <div class="slider"><label for="cropSw">sw (자를 너비) <output id="cropSwOut">180</output></label><input id="cropSw" type="range" min="10" max="500" value="180"></div>
+                        <div class="slider"><label for="cropSh">sh (자를 높이) <output id="cropShOut">90</output></label><input id="cropSh" type="range" min="10" max="250" value="90"></div>
+                    </div>
+                    <pre class="live-code"><code id="cropCode">context.drawImage(img, 180, 90, 180, 90, 0, 0, 300, 150);</code></pre>
+                    <p class="hint">앞의 네 숫자는 <strong>원본 사진</strong> 기준, 뒤의 네 숫자는 <strong>캔버스</strong> 기준이다. 이 둘을 헷갈리는 경우가 가장 많다.</p>
+                </div>
+            </section>
+
+            <section id="ratio" aria-labelledby="ratioTitle">
+                <h2 id="ratioTitle"><span class="num">4</span>비율 지키기</h2>
+                <p>너비와 높이를 아무렇게나 넣으면 사진이 납작해지거나 길쭉해진다. 너비를 정했다면 높이는 원본 비율로 계산한다. 원본 크기는 <code>img.width</code>, <code>img.height</code>에 들어 있다.</p>
+                <p class="formula">높이 = img.height * (너비 / img.width)</p>
+                <div class="split">
+                    <pre><code>img.onload = function () {
+    // 왼쪽: 200 × 200으로 억지로 맞춤
+    context.drawImage(img, 0, 0, 200, 200);
+
+    // 오른쪽: 너비 180, 높이는 계산
+    let w = 180;
+    let h = img.height * (w / img.width);
+    context.drawImage(img, 210, 0, w, h);
+};</code></pre>
+                    <div>
+                        <canvas id="ratioCanvas" width="400" height="200" role="img" aria-label="왼쪽은 정사각형으로 찌그러진 사진, 오른쪽은 비율을 지킨 사진"></canvas>
+                        <p class="hint">왼쪽은 2:1 사진을 1:1로 눌러서 강아지가 좁아졌다. 오른쪽은 500 × 250을 180 × 90으로 줄여 비율이 그대로다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="layer" aria-labelledby="layerTitle">
+                <h2 id="layerTitle"><span class="num">5</span>그리는 순서 = 쌓이는 순서</h2>
+                <p>폰데라이온에서 얼굴을 갈기보다 나중에 그려야 얼굴이 위에 보였던 것처럼, 캔버스는 <strong>나중에 그린 것이 위에 덮인다</strong>. 사진 위에 글자나 도형을 올리려면 사진을 먼저 그린다.</p>
+                <div class="split">
+                    <div>
+                        <div class="row" role="radiogroup" aria-label="그리는 순서 선택">
+                            <label><input type="radio" name="order" value="photoFirst" checked> 사진 먼저</label>
+                            <label><input type="radio" name="order" value="photoLast"> 사진 나중</label>
+                        </div>
+                        <pre><code id="orderCode"></code></pre>
+                    </div>
+                    <div>
+                        <canvas id="layerCanvas" width="400" height="200" role="img" aria-label="사진과 이름표 글자를 그린 결과"></canvas>
+                        <p class="hint" id="orderHint"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="motion" aria-labelledby="motionTitle">
+                <h2 id="motionTitle"><span class="num">6</span>사진 바꾸기와 움직이기</h2>
+                <p>캔버스의 그림은 한 번 그리면 지울 수 없는 물감과 같다. 화면을 바꾸려면 <strong>지우고(<code>clearRect</code>) → 다시 그리기</strong>를 반복한다.</p>
+
+                <h3>예제 1. 캔버스 슬라이드쇼</h3>
+                <p>강아지 사진 배경 예제에서는 <code>body</code> 배경을 바꿨다. 같은 사진 5장을 캔버스에 1초마다 번갈아 그려 본다. 사진을 미리 다 불러 두는 것이 핵심이다.</p>
+                <div class="split">
+                    <pre><code>let pics = [];
+for (let i = 0; i &lt; 5; i++) {
+    pics[i] = new Image();
+    pics[i].src = 'dog/dog0' + (i + 1) + '.png';
+}
+
+let j = 0;
+let timer = null;
+
+function nextPic() {
+    context.clearRect(0, 0, 400, 200);
+    context.drawImage(pics[j], 0, 0, 400, 200);
+    j = j + 1;
+    if(j &gt;= pics.length){
+        j = 0;
+    }
+}
+
+btn.addEventListener('click', function () {
+    if(timer == null){
+        timer = setInterval(nextPic, 1000);
+    }else{
+        clearInterval(timer);
+        timer = null;
+    }
+});</code></pre>
+                    <div>
+                        <canvas id="slideCanvas" width="400" height="200" role="img" aria-label="강아지 사진 슬라이드쇼"></canvas>
+                        <div class="row">
+                            <button class="primary" id="slideBtn" type="button">시작</button>
+                            <span id="slideInfo">dog01.png</span>
+                        </div>
+                        <p class="hint">버튼 하나로 시작과 멈춤을 번갈아 하는 방식은 06의 숫자 세기 예제와 같다.</p>
+                    </div>
+                </div>
+
+                <h3>예제 2. 마우스를 따라다니는 사진</h3>
+                <p><code>mousemove</code>가 일어날 때마다 캔버스를 지우고, 포인터 위치에 작은 사진을 다시 그린다. 포인터가 사진 한가운데 오도록 너비와 높이의 절반씩 뺀다.</p>
+                <div class="split">
+                    <pre><code>canvas.addEventListener('mousemove', function (e) {
+    <span class="mark">context.clearRect(0, 0, 400, 250);</span>
+    context.drawImage(img, e.offsetX - 50, e.offsetY - 25, 100, 50);
+});</code></pre>
+                    <div>
+                        <canvas id="followCanvas" width="400" height="250" role="img" aria-label="마우스를 따라다니는 작은 강아지 사진"></canvas>
+                        <div class="row">
+                            <label><input id="followClear" type="checkbox" checked> <code>clearRect</code> 실행하기</label>
+                            <button id="followReset" type="button">캔버스 지우기</button>
+                        </div>
+                        <p class="hint">체크를 끄고 움직여 보자. 지우지 않으면 지나간 자리가 모두 남는다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="mistakes" aria-labelledby="mistakesTitle">
+                <h2 id="mistakesTitle"><span class="num">7</span>자주 하는 실수</h2>
+
+                <div class="mistake">
+                    <p>사진이 도착하기 전에 그리면 아무것도 보이지 않는다. (2장 참고)</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>img.src = 'dog/dog01.png';
+context.drawImage(img, 0, 0);</code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>img.onload = function () {
+    context.drawImage(img, 0, 0);
+};
+img.src = 'dog/dog01.png';</code></pre></div>
+                </div>
+                <div class="mistake">
+                    <p>경로 문자열을 바로 넣을 수는 없다. <code>drawImage</code>에는 이미지 객체를 넘긴다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>context.drawImage('dog/dog01.png', 0, 0);</code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>context.drawImage(img, 0, 0);</code></pre></div>
+                </div>
+                <div class="mistake">
+                    <p><code>Image</code>는 대문자로 시작한다. 소문자로 쓰면 "image is not defined" 오류가 난다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>let img = new image();</code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>let img = new Image();</code></pre></div>
+                </div>
+                <div class="mistake">
+                    <p>경로는 HTML 파일 위치 기준이다. 한 폴더 위로 올라가려면 <code>../</code>를 붙인다. 확장자(.png, .jpg)와 대소문자도 정확히 맞춘다. 대소문자는 내 컴퓨터(Windows)에서는 달라도 열리지만, 웹 서버에 올리면 안 열리는 경우가 많다.</p>
+                    <div><span class="tag tag-wrong">HTML은 day09 폴더, 사진은 day08/image 폴더에 있을 때</span><pre class="wrong"><code>img.src = 'image/Dog01.PNG';</code></pre></div>
+                    <div><span class="tag">올바른 경로</span><pre><code>img.src = '../day08/image/dog01.png';</code></pre></div>
+                </div>
+                <div class="mistake">
+                    <p>캔버스 크기는 CSS가 아니라 <code>width</code>, <code>height</code> 속성으로 정한다. CSS로 키우면 작은 그림을 늘린 것이라 흐려진다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>&lt;canvas id="myCanvas" style="width:800px; height:600px"&gt;</code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>&lt;canvas id="myCanvas" width="800" height="600"&gt;</code></pre></div>
+                </div>
+                <p class="hint">사진이 안 보이면 F12 개발자 도구의 Console 탭을 먼저 본다. 경로가 틀렸으면 "ERR_FILE_NOT_FOUND"처럼 파일을 찾지 못했다는 메시지가 뜬다.</p>
+            </section>
+
+            <section id="practice" aria-labelledby="practiceTitle">
+                <h2 id="practiceTitle"><span class="num">8</span>연습 문제</h2>
+                <ol class="practice">
+                    <li>
+                        <div>
+                            <h3>가운데에 반 크기로</h3>
+                            <p>400 × 300 캔버스 정가운데에 dog03.png를 원래 크기의 절반(250 × 125)으로 그려 보자.</p>
+                            <p class="tools">힌트: x = (캔버스 너비 - 그림 너비) / 2</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h3>코만 크게</h3>
+                            <p>dog01.png에서 강아지 코 부분만 잘라 캔버스 가득 확대해 보자. 실습 B로 좌표를 먼저 찾아도 된다.</p>
+                            <p class="tools">사용할 것: 숫자 8개짜리 <code>drawImage</code></p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h3>사진에 이름표 달기</h3>
+                            <p>사진 아래쪽에 검은 띠를 깔고 흰 글자로 강아지 이름을 써 보자.</p>
+                            <p class="tools">사용할 것: <code>drawImage</code> → <code>fillRect</code> → <code>fillText</code> 순서</p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h3>버튼으로 넘기기</h3>
+                            <p>"이전", "다음" 버튼을 만들어 강아지 사진 5장을 한 장씩 넘겨 보자. 첫 장에서 이전을 누르면 마지막 장으로 간다.</p>
+                            <p class="tools">사용할 것: 이미지 배열, <code>click</code>, <code>clearRect</code></p>
+                        </div>
+                    </li>
+                    <li>
+                        <div>
+                            <h3>사진 도장 찍기</h3>
+                            <p>캔버스를 클릭할 때마다 클릭한 자리에 작은 강아지 사진이 찍히게 해 보자. 이번에는 지우지 않는다.</p>
+                            <p class="tools">사용할 것: <code>click</code>, <code>e.offsetX</code>, <code>e.offsetY</code></p>
+                        </div>
+                    </li>
+                </ol>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <div class="footer-inner">
+            <p>&copy; 2026 자바스크립트 수업 자료 · 업데이트 2026-11-16</p>
+            <p>연락처: TODO: 담당 교수 이메일</p>
+            <p>실습 사진: <a href="dog/dog01.png">dog 폴더</a> ·<a href="#top">맨 위로</a></p>
+        </div>
+    </footer>
+
+    <script>
+        window.onload = function () {
+            let dogPath = 'dog/';
+            let dogs = [];
+            let loadedCount = 0;
+            let loadFailed = false;
+            let current = null; // 3장 실습에 쓰는 사진
+
+            for (let i = 0; i < 5; i++) {
+                dogs[i] = new Image();
+                dogs[i].onload = function () {
+                    loadedCount = loadedCount + 1;
+                    if(loadedCount == 5){
+                        drawAll();
+                    }
+                };
+                dogs[i].onerror = function () {
+                    if(loadFailed == false){
+                        loadFailed = true;
+                        showLoadError();
+                    }
+                };
+                dogs[i].src = dogPath + 'dog0' + (i + 1) + '.png';
+            }
+
+            // 사진을 못 불러왔을 때: 모든 실습 캔버스에 이유를 적는다
+            function showLoadError() {
+                let canvases = document.querySelectorAll('main canvas');
+
+                for (let i = 0; i < canvases.length; i++) {
+                    let ctx = canvases[i].getContext('2d');
+                    ctx.clearRect(0, 0, canvases[i].width, canvases[i].height);
+                    ctx.fillStyle = '#b93a1b';
+                    ctx.font = '15px sans-serif';
+                    ctx.fillText('사진을 불러오지 못했다.', 12, 28);
+                    ctx.fillStyle = '#1f1f1c';
+                    ctx.fillText('dog 폴더(dog01~05.png)가', 12, 52);
+                    ctx.fillText('이 HTML 파일 옆에 있는지 확인하자.', 12, 76);
+                }
+            }
+
+            function drawAll() {
+                current = dogs[0];
+                drawBasic();
+                resetCropSliders();
+                drawSize();
+                drawCrop();
+                drawRatio();
+                drawLayer();
+                drawSlide();
+                drawFollow(200, 125);
+            }
+
+            // 1. 기본
+            function drawBasic() {
+                let canvas = document.getElementById('basicCanvas');
+                let context = canvas.getContext('2d');
+                context.drawImage(dogs[0], 0, 0);
+            }
+
+            // 3-A. 위치와 크기
+            let sizeX = document.getElementById('sizeX');
+            let sizeY = document.getElementById('sizeY');
+            let sizeW = document.getElementById('sizeW');
+            let sizeH = document.getElementById('sizeH');
+            let sizeKeep = document.getElementById('sizeKeep');
+
+            function drawSize() {
+                let canvas = document.getElementById('sizeCanvas');
+                let context = canvas.getContext('2d');
+                let x = Number(sizeX.value);
+                let y = Number(sizeY.value);
+                let w = Number(sizeW.value);
+                let h = Number(sizeH.value);
+                let hText = h;
+
+                if(sizeKeep.checked){
+                    h = Math.round(current.height * (w / current.width));
+                    sizeH.value = h;
+                    hText = h;
+                }
+                sizeH.disabled = sizeKeep.checked;
+
+                document.getElementById('sizeXOut').innerHTML = x;
+                document.getElementById('sizeYOut').innerHTML = y;
+                document.getElementById('sizeWOut').innerHTML = w;
+                document.getElementById('sizeHOut').innerHTML = hText;
+
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(current, x, y, w, h);
+                document.getElementById('sizeCode').innerHTML = 'context.drawImage(img, ' + x + ', ' + y + ', ' + w + ', ' + h + ');';
+            }
+
+            let sizeInputs = [sizeX, sizeY, sizeW, sizeH, sizeKeep];
+            for (let i = 0; i < sizeInputs.length; i++) {
+                sizeInputs[i].addEventListener('input', function () {
+                    if(current != null){
+                        drawSize();
+                    }
+                });
+            }
+
+            // 3-B. 잘라서 그리기
+            let cropSx = document.getElementById('cropSx');
+            let cropSy = document.getElementById('cropSy');
+            let cropSw = document.getElementById('cropSw');
+            let cropSh = document.getElementById('cropSh');
+
+            function resetCropSliders() {
+                let w = current.width;
+                let h = current.height;
+
+                cropSx.max = w - 10;
+                cropSy.max = h - 10;
+                cropSw.max = w;
+                cropSh.max = h;
+                cropSx.value = Math.round(w * 0.36);
+                cropSy.value = Math.round(h * 0.36);
+                cropSw.value = Math.round(w * 0.36);
+                cropSh.value = Math.round(h * 0.36);
+            }
+
+            function drawCrop() {
+                let source = document.getElementById('sourceCanvas');
+                let sourceContext = source.getContext('2d');
+                let result = document.getElementById('cropCanvas');
+                let resultContext = result.getContext('2d');
+                let sx = Number(cropSx.value);
+                let sy = Number(cropSy.value);
+                let sw = Math.min(Number(cropSw.value), current.width - sx);
+                let sh = Math.min(Number(cropSh.value), current.height - sy);
+
+                cropSw.value = sw;
+                cropSh.value = sh;
+                document.getElementById('cropSxOut').innerHTML = sx;
+                document.getElementById('cropSyOut').innerHTML = sy;
+                document.getElementById('cropSwOut').innerHTML = sw;
+                document.getElementById('cropShOut').innerHTML = sh;
+
+                // 원본 캔버스는 사진 비율에 맞추고 가로 500에 들어가게 줄여서 보여 준다
+                let scale = Math.min(1, 500 / current.width);
+                source.width = Math.round(current.width * scale);
+                source.height = Math.round(current.height * scale);
+                sourceContext.drawImage(current, 0, 0, source.width, source.height);
+                sourceContext.strokeStyle = '#b93a1b';
+                sourceContext.lineWidth = 3;
+                sourceContext.strokeRect(sx * scale, sy * scale, sw * scale, sh * scale);
+
+                resultContext.clearRect(0, 0, result.width, result.height);
+                resultContext.drawImage(current, sx, sy, sw, sh, 0, 0, 300, 150);
+                document.getElementById('cropCode').innerHTML = 'context.drawImage(img, ' + sx + ', ' + sy + ', ' + sw + ', ' + sh + ', 0, 0, 300, 150);';
+            }
+
+            let cropInputs = [cropSx, cropSy, cropSw, cropSh];
+            for (let i = 0; i < cropInputs.length; i++) {
+                cropInputs[i].addEventListener('input', function () {
+                    if(current != null){
+                        drawCrop();
+                    }
+                });
+            }
+
+            // 3. 사진 고르기
+            function useImage(img) {
+                current = img;
+                resetCropSliders();
+                drawSize();
+                drawCrop();
+            }
+
+            document.getElementById('imageSelect').addEventListener('change', function (e) {
+                if(loadedCount == 5){
+                    useImage(dogs[Number(e.target.value)]);
+                }
+            });
+
+            document.getElementById('fileInput').addEventListener('change', function (e) {
+                let file = e.target.files[0];
+                if(file == null){
+                    return;
+                }
+                let img = new Image();
+                img.onload = function () {
+                    useImage(img);
+                };
+                img.src = URL.createObjectURL(file);
+            });
+
+            // 4. 비율
+            function drawRatio() {
+                let canvas = document.getElementById('ratioCanvas');
+                let context = canvas.getContext('2d');
+                let img = dogs[0];
+                let w = 180;
+                let h = img.height * (w / img.width);
+
+                context.drawImage(img, 0, 0, 200, 200);
+                context.drawImage(img, 210, 0, w, h);
+            }
+
+            // 5. 그리는 순서
+            let orderCodes = {
+                photoFirst: 'context.drawImage(img, 0, 0, 400, 200);\n\ncontext.fillStyle = \'black\';\ncontext.fillRect(0, 150, 400, 50);\ncontext.fillStyle = \'white\';\ncontext.font = \'24px sans-serif\';\ncontext.fillText(\'몽이, 3살\', 20, 185);',
+                photoLast: 'context.fillStyle = \'black\';\ncontext.fillRect(0, 150, 400, 50);\ncontext.fillStyle = \'white\';\ncontext.font = \'24px sans-serif\';\ncontext.fillText(\'몽이, 3살\', 20, 185);\n\ncontext.drawImage(img, 0, 0, 400, 200);'
+            };
+            let orderHints = {
+                photoFirst: '사진을 먼저 그렸으니 검은 띠와 글자가 사진 위에 보인다.',
+                photoLast: '띠와 글자를 그린 뒤 사진이 그 위를 덮어서 이름표가 사라졌다.'
+            };
+
+            function drawLayer() {
+                let canvas = document.getElementById('layerCanvas');
+                let context = canvas.getContext('2d');
+                let order = document.querySelector('input[name="order"]:checked').value;
+
+                function label() {
+                    context.fillStyle = 'black';
+                    context.fillRect(0, 150, 400, 50);
+                    context.fillStyle = 'white';
+                    context.font = '24px sans-serif';
+                    context.fillText('몽이, 3살', 20, 185);
+                }
+
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                if(order == 'photoFirst'){
+                    context.drawImage(dogs[0], 0, 0, 400, 200);
+                    label();
+                }else{
+                    label();
+                    context.drawImage(dogs[0], 0, 0, 400, 200);
+                }
+                document.getElementById('orderCode').textContent = orderCodes[order];
+                document.getElementById('orderHint').innerHTML = orderHints[order];
+            }
+
+            let orderRadios = document.querySelectorAll('input[name="order"]');
+            for (let i = 0; i < orderRadios.length; i++) {
+                orderRadios[i].addEventListener('change', function () {
+                    if(loadedCount == 5){
+                        drawLayer();
+                    }
+                });
+            }
+            document.getElementById('orderCode').textContent = orderCodes.photoFirst;
+            document.getElementById('orderHint').innerHTML = orderHints.photoFirst;
+
+            // 6-1. 슬라이드쇼
+            let slideCanvas = document.getElementById('slideCanvas');
+            let slideContext = slideCanvas.getContext('2d');
+            let slideBtn = document.getElementById('slideBtn');
+            let slideIndex = 0;
+            let slideTimer = null;
+
+            function drawSlide() {
+                slideContext.clearRect(0, 0, 400, 200);
+                slideContext.drawImage(dogs[slideIndex], 0, 0, 400, 200);
+                document.getElementById('slideInfo').innerHTML = 'dog0' + (slideIndex + 1) + '.png';
+            }
+
+            slideBtn.addEventListener('click', function () {
+                if(loadedCount < 5){
+                    return;
+                }
+                if(slideTimer == null){
+                    slideTimer = setInterval(function () {
+                        slideIndex = slideIndex + 1;
+                        if(slideIndex >= dogs.length){
+                            slideIndex = 0;
+                        }
+                        drawSlide();
+                    }, 1000);
+                    slideBtn.innerHTML = '멈춤';
+                }else{
+                    clearInterval(slideTimer);
+                    slideTimer = null;
+                    slideBtn.innerHTML = '시작';
+                }
+            });
+
+            // 6-2. 마우스 따라다니기
+            let followCanvas = document.getElementById('followCanvas');
+            let followContext = followCanvas.getContext('2d');
+            let followClear = document.getElementById('followClear');
+
+            function drawFollow(x, y) {
+                if(followClear.checked){
+                    followContext.clearRect(0, 0, followCanvas.width, followCanvas.height);
+                }
+                followContext.drawImage(dogs[1], x - 50, y - 25, 100, 50);
+            }
+
+            followCanvas.addEventListener('mousemove', function (e) {
+                if(loadedCount < 5){
+                    return;
+                }
+                // 화면이 좁아 캔버스가 줄어 보일 때도 위치가 맞도록 비율을 곱한다
+                let x = e.offsetX * followCanvas.width / followCanvas.clientWidth;
+                let y = e.offsetY * followCanvas.height / followCanvas.clientHeight;
+                drawFollow(x, y);
+            });
+
+            document.getElementById('followReset').addEventListener('click', function () {
+                followContext.clearRect(0, 0, followCanvas.width, followCanvas.height);
+            });
+
+            // 코드 복사
+            let copyButtons = document.querySelectorAll('.copy');
+            for (let i = 0; i < copyButtons.length; i++) {
+                copyButtons[i].addEventListener('click', function () {
+                    let button = copyButtons[i];
+                    let text = button.parentElement.querySelector('pre').textContent;
+
+                    function done() {
+                        button.innerHTML = '복사됨';
+                        setTimeout(function () {
+                            button.innerHTML = '복사';
+                        }, 1500);
+                    }
+
+                    function fallback() {
+                        let area = document.createElement('textarea');
+                        area.value = text;
+                        document.body.appendChild(area);
+                        area.select();
+                        document.execCommand('copy');
+                        area.remove();
+                        button.focus();
+                        done();
+                    }
+
+                    if(navigator.clipboard){
+                        navigator.clipboard.writeText(text).then(done, fallback);
+                    }else{
+                        fallback();
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
