@@ -1,0 +1,1419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>캔버스 save()와 restore() | 자바스크립트 수업 자료</title>
+    <meta name="description" content="캔버스의 save()와 restore()가 색·선 굵기·이동·회전·clip 같은 그리기 설정을 저장하고 되돌리는 원리를 스택 실험대, 바람개비 애니메이션, 확인 문제로 배우는 자바스크립트 수업 자료입니다.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* 수업 자료 공통 색 체계: 신호색 하나(지금 적용 중인 설정) + 종이·먹 계열 중성색 */
+        :root {
+            --signal: #b93a1b;
+            --signal-soft: #f6ddd4;
+            --ink: #1f1f1c;
+            --muted: #5c5a54;
+            --line: #d9d5cb;
+            --paper: #f7f5f0;
+            --chip: #ebe7dd;
+            --white: #ffffff;
+            --safe: #2f5d50;
+            --safe-soft: #dcebe5;
+            --font-title: "Noto Serif KR", Batang, serif;
+            --font-body: "Noto Sans KR", "Malgun Gothic", sans-serif;
+            --font-code: D2Coding, Consolas, "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-body);
+            font-size: 17px;
+            line-height: 1.75;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        a {
+            color: var(--signal);
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--signal);
+            outline-offset: 2px;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 16px;
+            top: -60px;
+            padding: 8px 12px;
+            background-color: var(--ink);
+            color: var(--white);
+        }
+
+        .skip-link:focus {
+            top: 8px;
+        }
+
+        /* 머리말 */
+        .page-header {
+            border-bottom: 1px solid var(--ink);
+        }
+
+        .page-header-inner {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 400px);
+            gap: 40px;
+            align-items: end;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 56px 32px 40px;
+        }
+
+        .kicker {
+            margin: 0 0 8px;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        h1, h2 {
+            font-family: var(--font-title);
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-size: clamp(38px, 6vw, 68px);
+        }
+
+        h1 code {
+            font-family: var(--font-code);
+            font-size: 0.86em;
+        }
+
+        .lead {
+            max-width: 32em;
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .needs {
+            margin: 16px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .summary-card {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        .summary-card li {
+            display: grid;
+            grid-template-columns: 110px minmax(0, 1fr);
+            gap: 12px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--line);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .summary-card li:last-child {
+            border-bottom: 0;
+        }
+
+        .summary-card code {
+            color: var(--signal);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        /* 전체 틀 */
+        .layout {
+            display: grid;
+            grid-template-columns: 170px minmax(0, 1fr);
+            gap: 48px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .toc {
+            position: sticky;
+            top: 0;
+            align-self: start;
+            padding: 32px 0;
+        }
+
+        .toc h2 {
+            margin: 0 0 8px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .toc ol {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .toc a {
+            display: block;
+            padding: 6px 0;
+            color: var(--ink);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            color: var(--signal);
+            text-decoration: underline;
+        }
+
+        main {
+            min-width: 0;
+        }
+
+        main > section {
+            padding: 48px 0;
+            border-bottom: 1px solid var(--line);
+            scroll-margin-top: 8px;
+        }
+
+        main > section:last-child {
+            border-bottom: 0;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            font-size: 32px;
+        }
+
+        h2 .num {
+            margin-right: 10px;
+            color: var(--signal);
+        }
+
+        h3 {
+            margin: 32px 0 8px;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        p {
+            margin: 0 0 16px;
+        }
+
+        code {
+            font-family: var(--font-code);
+            font-size: 0.94em;
+        }
+
+        p code, li code, td code, th code, summary code, label code, h3 code {
+            padding: 1px 4px;
+            border-radius: 4px;
+            background-color: var(--chip);
+        }
+
+        .summary-card code {
+            padding: 0;
+            background-color: transparent;
+        }
+
+        pre {
+            margin: 0 0 16px;
+            padding: 16px;
+            overflow-x: auto;
+            border-radius: 6px;
+            background-color: var(--ink);
+            color: #f7f5f0;
+            font-family: var(--font-code);
+            font-size: 15px;
+            line-height: 1.6;
+            word-break: normal;
+        }
+
+        pre code {
+            font-size: inherit;
+        }
+
+        pre .mark {
+            color: #ffb59e;
+            font-weight: 700;
+        }
+
+        pre .out {
+            color: #b9b4a8;
+        }
+
+        .hint {
+            margin: 8px 0 16px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .demo-label {
+            margin: 0 0 8px;
+            color: var(--signal);
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        canvas {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            background-color: var(--white);
+        }
+
+        button {
+            min-height: 40px;
+            padding: 6px 14px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+            color: var(--ink);
+            font: inherit;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--chip);
+        }
+
+        button.primary {
+            border-color: var(--signal);
+            background-color: var(--signal);
+            color: var(--white);
+        }
+
+        button.primary:hover {
+            background-color: #9c2f14;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--signal);
+            vertical-align: -3px;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            align-items: center;
+            margin: 12px 0;
+            font-size: 15px;
+        }
+
+        /* 1. 비유 */
+        .analogy {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+            margin: 0 0 24px;
+            padding: 0;
+            list-style: none;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        .analogy li {
+            padding: 16px 18px;
+            border-right: 1px solid var(--line);
+        }
+
+        .analogy li:last-child {
+            border-right: 0;
+        }
+
+        .analogy code {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--signal);
+            font-size: 18px;
+            font-weight: 700;
+            padding: 0;
+            background-color: transparent;
+        }
+
+        .analogy p {
+            margin: 0;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        /* 2. 표 */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 0 0 16px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        th, td {
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        tbody tr:last-child th, tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        thead th {
+            background-color: var(--chip);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        caption {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            font-weight: 700;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.8;
+            white-space: nowrap;
+        }
+
+        .badge.yes {
+            background-color: var(--safe-soft);
+            color: var(--safe);
+        }
+
+        .badge.no {
+            background-color: var(--signal-soft);
+            color: var(--signal);
+        }
+
+        /* 3. 스택 실험대 */
+        .lab {
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        .lab-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px 24px;
+            padding: 16px 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .lab-controls fieldset {
+            margin: 0;
+            padding: 0;
+            border: 0;
+        }
+
+        .lab-controls legend {
+            margin-bottom: 6px;
+            padding: 0;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .lab-controls .group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .lab-controls button {
+            min-height: 36px;
+            padding: 4px 10px;
+            font-family: var(--font-code);
+            font-size: 14px;
+        }
+
+        .lab-controls button.key {
+            border-width: 2px;
+            border-color: var(--signal);
+            font-weight: 700;
+        }
+
+        .swatch {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            margin-right: 6px;
+            border: 1px solid var(--ink);
+            border-radius: 2px;
+            vertical-align: -1px;
+        }
+
+        .lab-body {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 260px;
+            gap: 20px;
+            padding: 18px;
+        }
+
+        .now {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 16px;
+            margin: 12px 0 0;
+            padding: 10px 14px;
+            border-left: 3px solid var(--signal);
+            background-color: var(--paper);
+            font-family: var(--font-code);
+            font-size: 15px;
+        }
+
+        .now b {
+            color: var(--signal);
+        }
+
+        .stack-title {
+            margin: 0 0 6px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .stack {
+            display: flex;
+            flex-direction: column-reverse;
+            justify-content: flex-start;
+            gap: 4px;
+            min-height: 180px;
+            margin: 0;
+            padding: 8px;
+            list-style: none;
+            border: 2px solid var(--ink);
+            border-top: 0;
+            border-radius: 0 0 6px 6px;
+            background-color: var(--paper);
+        }
+
+        .stack li {
+            padding: 6px 10px;
+            border: 1px solid var(--ink);
+            border-radius: 4px;
+            background-color: var(--white);
+            font-family: var(--font-code);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .stack li.top {
+            border-color: var(--signal);
+            box-shadow: inset 4px 0 0 var(--signal);
+        }
+
+        .stack li small {
+            display: block;
+            color: var(--muted);
+            font-family: var(--font-body);
+            font-size: 12px;
+        }
+
+        .stack .empty {
+            border: 0;
+            background-color: transparent;
+            color: var(--muted);
+            font-family: var(--font-body);
+        }
+
+        .log {
+            max-height: 220px;
+            margin: 0;
+            overflow-y: auto;
+        }
+
+        .message {
+            margin: 12px 0 0;
+            min-height: 1.6em;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .message.warn {
+            color: var(--signal);
+        }
+
+        /* 실수 */
+        .trap {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 8px 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .trap:last-of-type {
+            border-bottom: 0;
+        }
+
+        .trap > p {
+            grid-column: 1 / -1;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .trap pre {
+            margin: 0;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .trap .wrong {
+            border: 1px solid var(--signal);
+            background-color: var(--white);
+            color: var(--ink);
+        }
+
+        .trap .wrong .out {
+            color: var(--signal);
+        }
+
+        .tag {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .tag-wrong {
+            color: var(--signal);
+            font-weight: 700;
+        }
+
+        /* 확인 문제 */
+        .quiz {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: quiz;
+        }
+
+        .quiz > li {
+            padding: 20px 0;
+            border-top: 1px solid var(--line);
+            counter-increment: quiz;
+        }
+
+        .quiz h3 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .quiz h3::before {
+            content: "문제 " counter(quiz) ". ";
+            color: var(--signal);
+        }
+
+        .choices {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .choices button.correct {
+            border-color: var(--safe);
+            background-color: var(--safe-soft);
+            color: #1f4037;
+            font-weight: 700;
+        }
+
+        .choices button.wrong {
+            border-color: var(--signal);
+            background-color: var(--signal-soft);
+            color: #7d2610;
+            text-decoration: line-through;
+        }
+
+        .explain {
+            margin: 10px 0 0;
+            font-size: 16px;
+        }
+
+        .explain:empty {
+            display: none;
+        }
+
+        .score {
+            margin: 16px 0 12px;
+            padding: 12px 16px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+            font-weight: 500;
+        }
+
+        /* 꼬리말 */
+        footer {
+            border-top: 1px solid var(--ink);
+            font-size: 15px;
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 8px 32px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 24px 32px;
+            color: var(--muted);
+        }
+
+        .footer-inner p {
+            margin: 0;
+        }
+
+        @media (max-width: 900px) {
+            .page-header-inner {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 24px;
+                padding: 32px 16px 24px;
+            }
+
+            .layout {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 0;
+                padding: 0 16px;
+            }
+
+            .toc {
+                position: static;
+                padding: 16px 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .toc ol {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0 16px;
+            }
+
+            .lab-body {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .footer-inner {
+                padding: 24px 16px;
+            }
+        }
+
+        @media (max-width: 720px) {
+            body {
+                font-size: 16px;
+            }
+
+            main > section {
+                padding: 36px 0;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+
+            .split, .trap {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .analogy {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .analogy li {
+                border-right: 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .analogy li:last-child {
+                border-bottom: 0;
+            }
+
+            .summary-card li {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 2px;
+            }
+        }
+    </style>
+</head>
+<body id="top">
+    <a class="skip-link" href="#content">본문으로 건너뛰기</a>
+
+    <header class="page-header">
+        <div class="page-header-inner">
+            <div>
+                <p class="kicker">자바스크립트 수업 자료 · 11 캔버스 상태 저장</p>
+                <h1>캔버스 <code>save()</code>와 <code>restore()</code></h1>
+                <p class="lead">색을 바꾸고, 선을 굵게 하고, 캔버스를 돌린 뒤에 "아까 설정으로 돌아가고 싶다"면 이 두 줄을 쓴다. 그려 놓은 그림이 아니라 <strong>그리기 설정</strong>을 저장한다는 점이 핵심이다.</p>
+                <p class="needs">미리 알아야 할 것: <code>fillStyle</code>, <code>fillRect()</code>, <code>arc()</code>, <code>setInterval</code></p>
+            </div>
+            <ul class="summary-card">
+                <li><code>save()</code><span>지금 설정(색, 굵기, 이동·회전 등)을 저장 상자에 한 장 쌓는다.</span></li>
+                <li><code>restore()</code><span>맨 위에 쌓인 한 장을 꺼내 그 설정으로 되돌린다.</span></li>
+                <li><strong>그림은?</strong><span>이미 그린 그림은 지워지지도, 되살아나지도 않는다.</span></li>
+            </ul>
+        </div>
+    </header>
+
+    <div class="layout">
+        <nav class="toc" aria-labelledby="tocTitle">
+            <h2 id="tocTitle">차례</h2>
+            <ol>
+                <li><a href="#concept">1. 기본 흐름</a></li>
+                <li><a href="#what">2. 무엇이 저장되나</a></li>
+                <li><a href="#stack">3. 스택 실험대</a></li>
+                <li><a href="#transform">4. 이동·회전</a></li>
+                <li><a href="#clip">5. clip 되돌리기</a></li>
+                <li><a href="#traps">6. 자주 하는 실수</a></li>
+                <li><a href="#quiz">7. 확인 문제</a></li>
+            </ol>
+        </nav>
+
+        <main id="content">
+            <section id="concept" aria-labelledby="conceptTitle">
+                <h2 id="conceptTitle"><span class="num">1</span>기본 흐름: 저장 → 바꾸기 → 되돌리기</h2>
+                <ol class="analogy">
+                    <li><code>ctx.save();</code><p>"지금 설정 기억해 둬." 펜 색과 굵기를 사진 찍어 둔다.</p></li>
+                    <li><code>ctx.fillStyle = ...</code><p>마음대로 바꿔서 그린다. 이 사이에서 바꾼 설정은 잠깐 빌려 쓰는 것이다.</p></li>
+                    <li><code>ctx.restore();</code><p>"아까 찍은 사진대로 돌아가." 빌려 쓴 설정이 원래대로 돌아온다.</p></li>
+                </ol>
+
+                <div class="split">
+                    <pre><code>ctx.fillStyle = 'black';
+ctx.fillRect(20, 30, 60, 60);    <span class="out">// 1 검정</span>
+
+<span class="mark">ctx.save();</span>                      <span class="out">// 검정 상태 저장</span>
+ctx.fillStyle = 'tomato';
+ctx.fillRect(100, 30, 60, 60);   <span class="out">// 2 빨강</span>
+<span class="mark">ctx.restore();</span>                   <span class="out">// 다시 검정</span>
+
+ctx.fillRect(180, 30, 60, 60);   <span class="out">// 3 검정</span></code></pre>
+                    <div>
+                        <p class="demo-label">실행 결과</p>
+                        <canvas id="basicCanvas" width="260" height="120" role="img" aria-label="검정, 빨강, 검정 사각형 세 개"></canvas>
+                        <p class="hint">3번 사각형은 <code>fillStyle</code>을 다시 쓰지 않았는데도 검정이다. <code>restore()</code>가 설정을 되돌렸기 때문이다. 그리고 2번 빨간 사각형은 <code>restore()</code> 뒤에도 그대로 남아 있다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="what" aria-labelledby="whatTitle">
+                <h2 id="whatTitle"><span class="num">2</span>무엇이 저장되고, 무엇은 저장되지 않나</h2>
+                <div class="split">
+                    <div class="table-wrap" tabindex="0" role="region" aria-label="저장되는 것">
+                        <table>
+                            <caption><span class="badge yes">저장됨</span> 그리기 설정</caption>
+                            <tbody>
+                                <tr><td>색</td><td><code>fillStyle</code>, <code>strokeStyle</code></td></tr>
+                                <tr><td>선</td><td><code>lineWidth</code>, <code>lineCap</code>, <code>lineJoin</code>, <code>setLineDash()</code></td></tr>
+                                <tr><td>글자</td><td><code>font</code>, <code>textAlign</code>, <code>textBaseline</code></td></tr>
+                                <tr><td>투명도·그림자</td><td><code>globalAlpha</code>, <code>shadowColor</code>, <code>shadowBlur</code> 등</td></tr>
+                                <tr><td>이동·회전·크기</td><td><code>translate()</code>, <code>rotate()</code>, <code>scale()</code>의 결과</td></tr>
+                                <tr><td>자르기 영역</td><td><code>clip()</code>의 결과</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-wrap" tabindex="0" role="region" aria-label="저장되지 않는 것">
+                        <table>
+                            <caption><span class="badge no">저장 안 됨</span></caption>
+                            <tbody>
+                                <tr><td>이미 그린 그림</td><td><code>restore()</code>해도 지워지지 않는다. 지우려면 <code>clearRect()</code>.</td></tr>
+                                <tr><td>그리던 경로</td><td><code>beginPath()</code>, <code>moveTo()</code>, <code>arc()</code>로 만든 경로는 저장 대상이 아니다.</td></tr>
+                                <tr><td>캔버스 크기</td><td><code>width</code>, <code>height</code> 속성은 따로 관리된다.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <p class="hint">정리하면, <code>save()</code>는 "펜과 종이 놓는 방법"을 기억하고, "종이에 그려진 그림"은 기억하지 않는다.</p>
+            </section>
+
+            <section id="stack" aria-labelledby="stackTitle">
+                <h2 id="stackTitle"><span class="num">3</span>스택 실험대: 쌓고 꺼내기</h2>
+                <p>저장 상자는 접시를 쌓듯이 <strong>위로 쌓이고, 맨 위부터 꺼내진다</strong>. 이런 구조를 스택(stack)이라고 한다. <code>save()</code>를 두 번 하면 두 장이 쌓이고, <code>restore()</code>는 마지막에 저장한 것부터 하나씩 되돌린다.</p>
+                <p>아래 버튼으로 설정을 바꾸고 <code>save()</code>·<code>restore()</code>를 섞어 누른 뒤, "사각형 그리기"로 지금 설정이 무엇인지 확인해 보자.</p>
+
+                <div class="lab">
+                    <div class="lab-controls">
+                        <fieldset>
+                            <legend>색 바꾸기</legend>
+                            <div class="group">
+                                <button type="button" data-fill="black"><span class="swatch" style="background-color:black"></span>black</button>
+                                <button type="button" data-fill="tomato"><span class="swatch" style="background-color:tomato"></span>tomato</button>
+                                <button type="button" data-fill="royalblue"><span class="swatch" style="background-color:royalblue"></span>royalblue</button>
+                                <button type="button" data-fill="seagreen"><span class="swatch" style="background-color:seagreen"></span>seagreen</button>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>테두리 굵기</legend>
+                            <div class="group">
+                                <button type="button" data-width="1">lineWidth = 1</button>
+                                <button type="button" data-width="8">lineWidth = 8</button>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>저장과 되돌리기</legend>
+                            <div class="group">
+                                <button class="key" type="button" id="btnSave">save()</button>
+                                <button class="key" type="button" id="btnRestore">restore()</button>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>그리기</legend>
+                            <div class="group">
+                                <button class="primary" type="button" id="btnDraw">사각형 그리기</button>
+                                <button type="button" id="btnStackReset">처음부터</button>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="lab-body">
+                        <div>
+                            <canvas id="stackCanvas" width="560" height="150" role="img" aria-label="지금 설정으로 그린 사각형들"></canvas>
+                            <p class="now" aria-live="polite">지금 설정: <span>fillStyle = <b id="nowFill">black</b></span><span>lineWidth = <b id="nowWidth">1</b></span></p>
+                            <p class="message" id="stackMessage" aria-live="polite"></p>
+                            <p class="stack-title">지금까지 실행한 코드</p>
+                            <pre class="log"><code id="stackLog">// 아직 실행한 코드가 없다</code></pre>
+                        </div>
+                        <div>
+                            <p class="stack-title">저장 상자 (위가 마지막 save)</p>
+                            <ol class="stack" id="stackView" aria-live="polite"></ol>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="transform" aria-labelledby="transformTitle">
+                <h2 id="transformTitle"><span class="num">4</span>가장 많이 쓰는 곳: 이동과 회전</h2>
+                <p><code>translate()</code>와 <code>rotate()</code>는 그림이 아니라 <strong>종이(좌표)를 옮기고 돌린다</strong>. 그리고 이 효과는 계속 쌓인다. <code>translate(160, 160)</code>을 두 번 하면 (320, 320)으로 간다. 그래서 무언가를 돌려 그린 뒤에는 <code>restore()</code>로 종이를 제자리에 돌려놓아야 다음 그림이 엉뚱한 곳에 그려지지 않는다.</p>
+
+                <div class="split">
+                    <div>
+                        <pre><code>function drawFrame() {
+    ctx.clearRect(0, 0, 320, 320);
+    ctx.fillStyle = '#1f1f1c';
+    ctx.fillRect(156, 160, 8, 150);   <span class="out">// 기둥</span>
+
+    for (let i = 0; i &lt; 4; i++) {
+        <span class="mark">ctx.save();</span>
+        ctx.translate(160, 160);  <span class="out">// 원점을 가운데로</span>
+        ctx.rotate(angle + i * Math.PI / 2);
+        ctx.fillStyle = colors[i];
+        ctx.fillRect(0, -14, 110, 28);
+        <span class="mark">ctx.restore();</span>            <span class="out">// 제자리, 원래 색</span>
+    }
+
+    ctx.beginPath();
+    ctx.arc(160, 160, 12, 0, 2 * Math.PI);
+    ctx.fill();                       <span class="out">// 가운데 축</span>
+    ctx.fillText('바람개비', 16, 28);
+
+    angle = angle + 0.03;
+}
+
+setInterval(drawFrame, 30);</code></pre>
+                    </div>
+                    <div>
+                        <p class="demo-label">직접 해 보기</p>
+                        <canvas id="windCanvas" width="320" height="320" role="img" aria-label="네 날개 바람개비 애니메이션"></canvas>
+                        <div class="row">
+                            <button class="primary" type="button" id="windToggle">돌리기</button>
+                            <label><input type="checkbox" id="windSave" checked> <code>save()</code> / <code>restore()</code> 사용</label>
+                        </div>
+                        <p class="hint" id="windHint">체크를 끄면 날개마다 <code>translate</code>와 <code>rotate</code>가 계속 쌓인다. 두 번째 날개부터 엉뚱한 곳으로 날아가고, 가운데 축과 글자도 마지막 날개 색으로 돌아간 자리에 그려진다.</p>
+                        <p class="hint">실험을 위해 매 장면을 시작할 때 종이 위치를 초기화해 두었다. 실제로 초기화도 안 하면 장면이 넘어갈 때마다 더 멀리 밀려나 금방 화면에서 사라진다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="clip" aria-labelledby="clipTitle">
+                <h2 id="clipTitle"><span class="num">5</span><code>clip()</code>을 풀 수 있는 유일한 방법</h2>
+                <p><code>clip()</code>은 지금 경로 모양으로 "그릴 수 있는 구역"을 잘라 낸다. 한 번 자르면 그 바깥에는 아무것도 그려지지 않고, <strong>clip을 해제하는 함수는 따로 없다</strong>. 그래서 <code>clip()</code>은 거의 항상 <code>save()</code>와 <code>restore()</code> 사이에 쓴다.</p>
+                <div class="split">
+                    <pre><code><span class="mark">ctx.save();</span>
+ctx.beginPath();
+ctx.arc(110, 100, 70, 0, 2 * Math.PI);
+ctx.clip();                     <span class="out">// 원 안만 그려짐</span>
+
+for (let i = 0; i &lt; 12; i++) {  <span class="out">// 줄무늬</span>
+    ctx.fillStyle = (i % 2 == 0) ? 'tomato' : 'gold';
+    ctx.fillRect(i * 20, 0, 20, 200);
+}
+<span class="mark">ctx.restore();</span>                  <span class="out">// 자르기 해제</span>
+
+ctx.fillStyle = 'black';
+ctx.font = '20px sans-serif';
+ctx.fillText('원 밖의 글자', 210, 108);</code></pre>
+                    <div>
+                        <p class="demo-label">직접 해 보기</p>
+                        <canvas id="clipCanvas" width="360" height="200" role="img" aria-label="원 모양으로 잘린 줄무늬와 원 밖의 글자"></canvas>
+                        <div class="row">
+                            <label><input type="checkbox" id="clipSave" checked> <code>save()</code> / <code>restore()</code> 사용</label>
+                        </div>
+                        <p class="hint" id="clipHint"></p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="traps" aria-labelledby="trapsTitle">
+                <h2 id="trapsTitle"><span class="num">6</span>자주 하는 실수</h2>
+
+                <div class="trap">
+                    <p><code>restore()</code>가 그림을 지워 준다고 생각한다. 되돌리는 것은 설정뿐이다.</p>
+                    <div><span class="tag tag-wrong">기대와 다른 코드</span><pre class="wrong"><code>ctx.save();
+ctx.fillRect(0, 0, 100, 100);
+ctx.restore();
+<span class="out">// 사각형은 그대로 남는다</span></code></pre></div>
+                    <div><span class="tag">그림을 지우려면</span><pre><code>ctx.clearRect(0, 0, canvas.width, canvas.height);</code></pre></div>
+                </div>
+
+                <div class="trap">
+                    <p><code>save()</code>와 <code>restore()</code>의 개수가 맞지 않는다. 반복문 안에서 <code>save()</code>만 하면 상자가 계속 쌓이고, 바꾼 설정도 계속 누적된다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>for (let i = 0; i &lt; 4; i++) {
+    ctx.save();
+    ctx.rotate(Math.PI / 2);
+    ctx.fillRect(0, 0, 100, 20);
+}   <span class="out">// restore 없음: 회전이 쌓인다</span></code></pre></div>
+                    <div><span class="tag">올바른 코드 (한 쌍씩)</span><pre><code>for (let i = 0; i &lt; 4; i++) {
+    ctx.save();
+    ctx.rotate(i * Math.PI / 2);
+    ctx.fillRect(0, 0, 100, 20);
+    ctx.restore();
+}</code></pre></div>
+                </div>
+
+                <div class="trap">
+                    <p>설정을 바꾼 뒤에 <code>save()</code>한다. <code>save()</code>는 "그 순간"의 설정을 찍기 때문에, 되돌아가고 싶은 상태일 때 먼저 불러야 한다.</p>
+                    <div><span class="tag tag-wrong">잘못된 순서</span><pre class="wrong"><code>ctx.fillStyle = 'tomato';
+ctx.save();        <span class="out">// tomato가 저장됨</span>
+ctx.fillRect(0, 0, 50, 50);
+ctx.restore();     <span class="out">// 여전히 tomato</span></code></pre></div>
+                    <div><span class="tag">올바른 순서</span><pre><code>ctx.save();        <span class="out">// 원래 색이 저장됨</span>
+ctx.fillStyle = 'tomato';
+ctx.fillRect(0, 0, 50, 50);
+ctx.restore();     <span class="out">// 원래 색으로 돌아옴</span></code></pre></div>
+                </div>
+
+                <div class="trap">
+                    <p><code>save()</code> 없이 <code>restore()</code>만 부른다. 오류는 나지 않지만 꺼낼 것이 없어서 <strong>아무 일도 일어나지 않는다</strong>.</p>
+                    <div><span class="tag tag-wrong">효과 없음</span><pre class="wrong"><code>ctx.fillStyle = 'tomato';
+ctx.restore();
+ctx.fillRect(0, 0, 50, 50);   <span class="out">// tomato</span></code></pre></div>
+                    <div><span class="tag">확인하는 법</span><pre><code>console.log(ctx.fillStyle);
+<span class="out">// restore 앞뒤에 찍어 보면 바뀌었는지 알 수 있다</span></code></pre></div>
+                </div>
+            </section>
+
+            <section id="quiz" aria-labelledby="quizTitle">
+                <h2 id="quizTitle"><span class="num">7</span>확인 문제</h2>
+                <p>코드를 끝까지 실행했을 때의 결과를 골라 보자. 고르면 바로 정답과 풀이가 나온다.</p>
+                <ol class="quiz" id="quizList"></ol>
+                <p class="score" id="quizScore" aria-live="polite">5문제 중 0문제를 풀었다.</p>
+                <button id="quizReset" type="button">다시 풀기</button>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <div class="footer-inner">
+            <p>&copy; 2026 자바스크립트 수업 자료 · 업데이트 2026-11-23</p>
+            <p>연락처: TODO: 담당 교수 이메일</p>
+            <p><a href="https://developer.mozilla.org/ko/docs/Web/API/CanvasRenderingContext2D/save">MDN save() 문서</a> · <a href="#top">맨 위로</a></p>
+        </div>
+    </footer>
+
+    <script>
+        window.onload = function () {
+            // 1. 기본 흐름
+            let basic = document.getElementById('basicCanvas').getContext('2d');
+            basic.fillStyle = 'black';
+            basic.fillRect(20, 30, 60, 60);
+            basic.save();
+            basic.fillStyle = 'tomato';
+            basic.fillRect(100, 30, 60, 60);
+            basic.restore();
+            basic.fillRect(180, 30, 60, 60);
+            basic.font = '14px sans-serif';
+            basic.fillStyle = '#5c5a54';
+            basic.fillText('1', 46, 110);
+            basic.fillText('2', 126, 110);
+            basic.fillText('3', 206, 110);
+
+            // 3. 스택 실험대
+            let stackCanvas = document.getElementById('stackCanvas');
+            let stackCtx = stackCanvas.getContext('2d');
+            let stackView = document.getElementById('stackView');
+            let stackLog = document.getElementById('stackLog');
+            let stackMessage = document.getElementById('stackMessage');
+            let saved = [];        // 화면에 보여 주기 위한 복사본 (실제 저장은 ctx가 한다)
+            let logLines = [];
+            let drawCount = 0;
+            let colorNames = {
+                '#000000': 'black',
+                '#ff6347': 'tomato',
+                '#4169e1': 'royalblue',
+                '#2e8b57': 'seagreen'
+            };
+
+            function currentState() {
+                return {
+                    fill: colorNames[stackCtx.fillStyle] || stackCtx.fillStyle,
+                    width: stackCtx.lineWidth
+                };
+            }
+
+            function addLog(line) {
+                logLines.push(line);
+                stackLog.textContent = logLines.join('\n');
+                stackLog.parentElement.scrollTop = stackLog.parentElement.scrollHeight;
+            }
+
+            function showStack() {
+                let state = currentState();
+                document.getElementById('nowFill').textContent = state.fill;
+                document.getElementById('nowWidth').textContent = state.width;
+
+                stackView.innerHTML = '';
+                if(saved.length == 0){
+                    stackView.innerHTML = '<li class="empty">비어 있다</li>';
+                    return;
+                }
+                for (let i = 0; i < saved.length; i++) {
+                    let item = document.createElement('li');
+                    item.innerHTML = '<small>' + (i + 1) + '번째 save</small>' + saved[i].fill + ', ' + saved[i].width;
+                    if(i == saved.length - 1){
+                        item.classList.add('top');
+                    }
+                    stackView.appendChild(item);
+                }
+            }
+
+            function resetStack() {
+                // 쌓여 있는 것을 모두 꺼낸 뒤 기본값으로
+                for (let i = 0; i < saved.length; i++) {
+                    stackCtx.restore();
+                }
+                saved = [];
+                logLines = [];
+                drawCount = 0;
+                stackCtx.fillStyle = 'black';
+                stackCtx.lineWidth = 1;
+                stackCtx.strokeStyle = '#1f1f1c';
+                stackCtx.clearRect(0, 0, stackCanvas.width, stackCanvas.height);
+                stackLog.textContent = '// 아직 실행한 코드가 없다';
+                stackMessage.textContent = '';
+                stackMessage.className = 'message';
+                showStack();
+            }
+
+            let fillButtons = document.querySelectorAll('[data-fill]');
+            for (let i = 0; i < fillButtons.length; i++) {
+                fillButtons[i].addEventListener('click', function () {
+                    let color = fillButtons[i].dataset.fill;
+                    stackCtx.fillStyle = color;
+                    addLog("ctx.fillStyle = '" + color + "';");
+                    stackMessage.textContent = '';
+                    showStack();
+                });
+            }
+
+            let widthButtons = document.querySelectorAll('[data-width]');
+            for (let i = 0; i < widthButtons.length; i++) {
+                widthButtons[i].addEventListener('click', function () {
+                    let width = Number(widthButtons[i].dataset.width);
+                    stackCtx.lineWidth = width;
+                    addLog('ctx.lineWidth = ' + width + ';');
+                    stackMessage.textContent = '';
+                    showStack();
+                });
+            }
+
+            document.getElementById('btnSave').addEventListener('click', function () {
+                stackCtx.save();
+                saved.push(currentState());
+                addLog('ctx.save();');
+                stackMessage.className = 'message';
+                stackMessage.textContent = '지금 설정을 상자 맨 위에 저장했다. (' + saved.length + '장 쌓임)';
+                showStack();
+            });
+
+            document.getElementById('btnRestore').addEventListener('click', function () {
+                stackCtx.restore();
+                addLog('ctx.restore();');
+                if(saved.length == 0){
+                    stackMessage.className = 'message warn';
+                    stackMessage.textContent = '상자가 비어 있어서 아무 일도 일어나지 않았다. 오류도 나지 않는다.';
+                }else{
+                    let back = saved.pop();
+                    stackMessage.className = 'message';
+                    stackMessage.textContent = '맨 위 한 장을 꺼내 ' + back.fill + ', ' + back.width + ' 설정으로 돌아갔다.';
+                }
+                showStack();
+            });
+
+            document.getElementById('btnDraw').addEventListener('click', function () {
+                if(drawCount >= 8){
+                    stackCtx.clearRect(0, 0, stackCanvas.width, stackCanvas.height);
+                    drawCount = 0;
+                }
+                let x = 20 + drawCount * 66;
+                stackCtx.fillRect(x, 40, 48, 48);
+                stackCtx.strokeRect(x, 40, 48, 48);
+                stackCtx.save();
+                stackCtx.fillStyle = '#5c5a54';
+                stackCtx.font = '13px sans-serif';
+                stackCtx.fillText(String(drawCount + 1), x + 20, 120);
+                stackCtx.restore();
+                drawCount = drawCount + 1;
+                addLog('ctx.fillRect(' + x + ', 40, 48, 48);  // 사각형 ' + drawCount);
+                stackMessage.className = 'message';
+                stackMessage.textContent = '사각형 ' + drawCount + '을 지금 설정(' + currentState().fill + ', ' + currentState().width + ')으로 그렸다.';
+            });
+
+            document.getElementById('btnStackReset').addEventListener('click', resetStack);
+            resetStack();
+
+            // 4. 바람개비
+            let windCanvas = document.getElementById('windCanvas');
+            let wind = windCanvas.getContext('2d');
+            let windSave = document.getElementById('windSave');
+            let windToggle = document.getElementById('windToggle');
+            let colors = ['tomato', 'gold', 'seagreen', 'royalblue'];
+            let angle = 0;
+            let windTimer = null;
+
+            function drawWind() {
+                wind.setTransform(1, 0, 0, 1, 0, 0); // 실험용: 장면마다 종이 위치 초기화
+                wind.clearRect(0, 0, 320, 320);
+                wind.fillStyle = '#1f1f1c';
+                wind.font = '18px sans-serif';
+                wind.fillRect(156, 160, 8, 150);
+
+                for (let i = 0; i < 4; i++) {
+                    if(windSave.checked){
+                        wind.save();
+                    }
+                    wind.translate(160, 160);
+                    wind.rotate(angle + i * Math.PI / 2);
+                    wind.fillStyle = colors[i];
+                    wind.fillRect(0, -14, 110, 28);
+                    if(windSave.checked){
+                        wind.restore();
+                    }
+                }
+
+                wind.beginPath();
+                wind.arc(160, 160, 12, 0, 2 * Math.PI);
+                wind.fill();
+                wind.fillText('바람개비', 16, 28);
+            }
+
+            windToggle.addEventListener('click', function () {
+                if(windTimer == null){
+                    windTimer = setInterval(function () {
+                        angle = angle + 0.03;
+                        drawWind();
+                    }, 30);
+                    windToggle.textContent = '멈추기';
+                }else{
+                    clearInterval(windTimer);
+                    windTimer = null;
+                    windToggle.textContent = '돌리기';
+                }
+            });
+
+            windSave.addEventListener('change', drawWind);
+            drawWind();
+
+            // 5. clip
+            let clipCanvas = document.getElementById('clipCanvas');
+            let clip = clipCanvas.getContext('2d');
+            let clipSave = document.getElementById('clipSave');
+            let clipHint = document.getElementById('clipHint');
+
+            function drawClip() {
+                // 실험용: 남아 있는 clip까지 지우려고 캔버스를 새로 만든 것처럼 초기화한다
+                clipCanvas.width = clipCanvas.width;
+
+                if(clipSave.checked){
+                    clip.save();
+                }
+                clip.beginPath();
+                clip.arc(110, 100, 70, 0, 2 * Math.PI);
+                clip.clip();
+                for (let i = 0; i < 12; i++) {
+                    clip.fillStyle = (i % 2 == 0) ? 'tomato' : 'gold';
+                    clip.fillRect(i * 20, 0, 20, 200);
+                }
+                if(clipSave.checked){
+                    clip.restore();
+                }
+
+                clip.fillStyle = 'black';
+                clip.font = '20px sans-serif';
+                clip.fillText('원 밖의 글자', 210, 108);
+
+                if(clipSave.checked){
+                    clipHint.textContent = 'restore()로 자르기가 풀려서 원 밖의 글자가 보인다.';
+                }else{
+                    clipHint.textContent = '자르기가 그대로 남아 있어서 원 밖에 쓴 글자가 보이지 않는다. 코드는 실행됐지만 그릴 수 있는 구역이 원 안뿐이다.';
+                }
+            }
+
+            clipSave.addEventListener('change', drawClip);
+            drawClip();
+
+            // 7. 확인 문제
+            let questions = [
+                {
+                    code: "ctx.fillStyle = 'red';\nctx.save();\nctx.fillStyle = 'blue';\nctx.restore();\nctx.fillRect(0, 0, 50, 50);",
+                    ask: '마지막 사각형의 색은?',
+                    choices: ['red', 'blue', '검정(기본값)'],
+                    answer: 0,
+                    explain: "save() 순간의 색은 red였다. blue로 바꿨다가 restore()로 red에 돌아왔다."
+                },
+                {
+                    code: "ctx.save();\nctx.fillStyle = 'blue';\nctx.fillRect(0, 0, 50, 50);\nctx.restore();",
+                    ask: 'restore() 뒤 캔버스의 파란 사각형은?',
+                    choices: ['사라진다', '그대로 남는다', '검정으로 바뀐다'],
+                    answer: 1,
+                    explain: 'restore()는 설정만 되돌린다. 이미 그린 그림은 건드리지 않는다.'
+                },
+                {
+                    code: "ctx.fillStyle = 'red';\nctx.save();\nctx.fillStyle = 'blue';\nctx.save();\nctx.fillStyle = 'green';\nctx.restore();\nctx.fillRect(0, 0, 50, 50);",
+                    ask: '마지막 사각형의 색은?',
+                    choices: ['red', 'blue', 'green'],
+                    answer: 1,
+                    explain: '저장 상자에는 red, blue 순서로 쌓였다. restore()를 한 번만 했으니 맨 위의 blue로 돌아간다.'
+                },
+                {
+                    code: 'ctx.save();\nctx.translate(100, 0);\nctx.restore();\nctx.fillRect(0, 0, 50, 50);',
+                    ask: '사각형의 왼쪽 위 모서리는 캔버스 어디에 그려질까?',
+                    choices: ['(0, 0)', '(100, 0)', '(200, 0)'],
+                    answer: 0,
+                    explain: 'translate()도 저장 대상이다. restore()로 이동이 취소되어 원래 자리 (0, 0)에 그려진다.'
+                },
+                {
+                    code: "ctx.fillStyle = 'red';\nctx.restore();\nctx.fillRect(0, 0, 50, 50);",
+                    ask: '어떻게 될까?',
+                    choices: ['오류가 난다', '검정 사각형', '빨간 사각형'],
+                    answer: 2,
+                    explain: '저장한 것이 없으니 restore()는 아무 일도 하지 않는다. 오류도 나지 않고 red가 유지된다.'
+                }
+            ];
+
+            let quizList = document.getElementById('quizList');
+            let quizScore = document.getElementById('quizScore');
+            let solved = 0;
+            let correct = 0;
+
+            function updateScore() {
+                if(solved == questions.length){
+                    quizScore.textContent = questions.length + '문제 중 ' + correct + '문제를 맞혔다.';
+                }else{
+                    quizScore.textContent = questions.length + '문제 중 ' + solved + '문제를 풀었다. (맞힌 문제 ' + correct + '개)';
+                }
+            }
+
+            function buildQuiz() {
+                quizList.innerHTML = '';
+                solved = 0;
+                correct = 0;
+
+                for (let i = 0; i < questions.length; i++) {
+                    let q = questions[i];
+                    let item = document.createElement('li');
+                    let title = document.createElement('h3');
+                    let pre = document.createElement('pre');
+                    let choiceBox = document.createElement('div');
+                    let explain = document.createElement('p');
+
+                    title.textContent = q.ask;
+                    pre.textContent = q.code;
+                    choiceBox.className = 'choices';
+                    explain.className = 'explain';
+                    explain.setAttribute('aria-live', 'polite');
+
+                    for (let j = 0; j < q.choices.length; j++) {
+                        let button = document.createElement('button');
+                        button.type = 'button';
+                        button.textContent = q.choices[j];
+                        button.addEventListener('click', function () {
+                            let buttons = choiceBox.querySelectorAll('button');
+                            for (let k = 0; k < buttons.length; k++) {
+                                buttons[k].disabled = true;
+                            }
+                            buttons[q.answer].classList.add('correct');
+                            solved = solved + 1;
+                            if(j == q.answer){
+                                correct = correct + 1;
+                                explain.textContent = '정답. ' + q.explain;
+                            }else{
+                                button.classList.add('wrong');
+                                explain.textContent = '정답은 ' + q.choices[q.answer] + '. ' + q.explain;
+                            }
+                            updateScore();
+                        });
+                        choiceBox.appendChild(button);
+                    }
+
+                    item.appendChild(title);
+                    item.appendChild(pre);
+                    item.appendChild(choiceBox);
+                    item.appendChild(explain);
+                    quizList.appendChild(item);
+                }
+                updateScore();
+            }
+
+            document.getElementById('quizReset').addEventListener('click', buildQuiz);
+            buildQuiz();
+        }
+    </script>
+</body>
+</html>
