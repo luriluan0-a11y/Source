@@ -1,0 +1,1349 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파괴적 메소드와 비파괴적 메소드 | 자바스크립트 수업 자료</title>
+    <meta name="description" content="sort()와 toSorted()처럼 원본을 바꾸는 파괴적 메소드와 새 값을 돌려주는 비파괴적 메소드의 차이를 버튼으로 실행해 보고 확인 문제로 점검하는 자바스크립트 수업 자료입니다.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@700&display=swap" rel="stylesheet">
+    <style>
+        /* 수업 자료 공통 색 체계: 신호색 하나는 "원본이 바뀌었다"는 표시에만 쓰고, 나머지는 종이·먹 계열 중성색 */
+        :root {
+            --signal: #b93a1b;
+            --signal-soft: #f6ddd4;
+            --ink: #1f1f1c;
+            --muted: #5c5a54;
+            --line: #d9d5cb;
+            --paper: #f7f5f0;
+            --chip: #ebe7dd;
+            --white: #ffffff;
+            --safe: #2f5d50;
+            --safe-soft: #dcebe5;
+            --font-title: "Noto Serif KR", Batang, serif;
+            --font-body: "Noto Sans KR", "Malgun Gothic", sans-serif;
+            --font-code: D2Coding, Consolas, "Courier New", monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+        }
+
+        body {
+            margin: 0;
+            background-color: var(--paper);
+            color: var(--ink);
+            font-family: var(--font-body);
+            font-size: 17px;
+            line-height: 1.75;
+            word-break: keep-all;
+            overflow-wrap: break-word;
+        }
+
+        a {
+            color: var(--signal);
+        }
+
+        :focus-visible {
+            outline: 3px solid var(--signal);
+            outline-offset: 2px;
+        }
+
+        .skip-link {
+            position: absolute;
+            left: 16px;
+            top: -60px;
+            padding: 8px 12px;
+            background-color: var(--ink);
+            color: var(--white);
+        }
+
+        .skip-link:focus {
+            top: 8px;
+        }
+
+        /* 머리말 */
+        .page-header {
+            border-bottom: 1px solid var(--ink);
+        }
+
+        .page-header-inner {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 440px);
+            gap: 40px;
+            align-items: end;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 56px 32px 40px;
+        }
+
+        .kicker {
+            margin: 0 0 8px;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        h1, h2 {
+            font-family: var(--font-title);
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        h1 {
+            margin: 0 0 16px;
+            font-size: clamp(36px, 5.6vw, 64px);
+        }
+
+        .lead {
+            max-width: 32em;
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .needs {
+            margin: 16px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+        }
+
+        .versus {
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        .versus div {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .versus div:last-child {
+            border-bottom: 0;
+        }
+
+        .versus span {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .versus code {
+            font-size: 18px;
+        }
+
+        .versus .bad span {
+            color: var(--signal);
+        }
+
+        .versus .good span {
+            color: var(--safe);
+        }
+
+        /* 전체 틀 */
+        .layout {
+            display: grid;
+            grid-template-columns: 170px minmax(0, 1fr);
+            gap: 48px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+
+        .toc {
+            position: sticky;
+            top: 0;
+            align-self: start;
+            padding: 32px 0;
+        }
+
+        .toc h2 {
+            margin: 0 0 8px;
+            font-family: var(--font-body);
+            font-size: 14px;
+            color: var(--muted);
+        }
+
+        .toc ol {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            font-size: 15px;
+            line-height: 1.4;
+        }
+
+        .toc a {
+            display: block;
+            padding: 6px 0;
+            color: var(--ink);
+            text-decoration: none;
+        }
+
+        .toc a:hover {
+            color: var(--signal);
+            text-decoration: underline;
+        }
+
+        main {
+            min-width: 0;
+        }
+
+        main > section {
+            padding: 48px 0;
+            border-bottom: 1px solid var(--line);
+            scroll-margin-top: 8px;
+        }
+
+        main > section:last-child {
+            border-bottom: 0;
+        }
+
+        h2 {
+            margin: 0 0 16px;
+            font-size: 32px;
+        }
+
+        h2 .num {
+            margin-right: 10px;
+            color: var(--signal);
+        }
+
+        h3 {
+            margin: 32px 0 8px;
+            font-size: 20px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        p {
+            margin: 0 0 16px;
+        }
+
+        code {
+            font-family: var(--font-code);
+            font-size: 0.94em;
+        }
+
+        p code, li code, td code, th code, summary code, h3 code {
+            padding: 1px 4px;
+            border-radius: 4px;
+            background-color: var(--chip);
+        }
+
+        pre {
+            margin: 0 0 16px;
+            padding: 16px;
+            overflow-x: auto;
+            border-radius: 6px;
+            background-color: var(--ink);
+            color: #f7f5f0;
+            font-family: var(--font-code);
+            font-size: 15px;
+            line-height: 1.6;
+            word-break: normal;
+        }
+
+        pre code {
+            font-size: inherit;
+        }
+
+        pre .out {
+            color: #b9b4a8;
+        }
+
+        pre .mark {
+            color: #ffb59e;
+            font-weight: 700;
+        }
+
+        .hint {
+            margin: 8px 0 16px;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .split {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: 700;
+            line-height: 1.8;
+            white-space: nowrap;
+        }
+
+        .badge.d {
+            background-color: var(--signal-soft);
+            color: var(--signal);
+        }
+
+        .badge.n {
+            background-color: var(--safe-soft);
+            color: var(--safe);
+        }
+
+        button {
+            min-height: 40px;
+            padding: 6px 14px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+            color: var(--ink);
+            font: inherit;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: var(--chip);
+        }
+
+        /* 1. 비유 */
+        .analogy {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            margin: 0 0 24px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        .analogy > div {
+            padding: 18px 20px;
+        }
+
+        .analogy > div + div {
+            border-left: 1px solid var(--line);
+        }
+
+        .analogy h3 {
+            margin: 6px 0 6px;
+        }
+
+        .analogy p {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .code-title {
+            margin: 0 0 6px;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        /* 2. 실험대 */
+        .lab {
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        .lab-buttons {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            border-bottom: 1px solid var(--line);
+        }
+
+        .lab-buttons > div {
+            padding: 16px 18px;
+        }
+
+        .lab-buttons > div + div {
+            border-left: 1px solid var(--line);
+        }
+
+        .lab-buttons p {
+            margin: 0 0 10px;
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .method-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .method-list button {
+            min-height: 36px;
+            padding: 4px 10px;
+            font-family: var(--font-code);
+            font-size: 14px;
+        }
+
+        .method-list.d button {
+            border-color: var(--signal);
+        }
+
+        .method-list.n button {
+            border-color: var(--safe);
+        }
+
+        .lab-result {
+            padding: 18px;
+        }
+
+        .ran {
+            margin: 0 0 14px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            background-color: var(--ink);
+            color: #f7f5f0;
+            font-family: var(--font-code);
+            font-size: 16px;
+        }
+
+        .state-row {
+            display: grid;
+            grid-template-columns: 110px minmax(0, 1fr);
+            gap: 12px;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed var(--line);
+        }
+
+        .state-row:last-of-type {
+            border-bottom: 0;
+        }
+
+        .state-row > span {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .cells {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .cells li {
+            min-width: 44px;
+            padding: 2px 6px 4px;
+            border: 1px solid var(--ink);
+            border-radius: 4px;
+            background-color: var(--white);
+            font-family: var(--font-code);
+            font-size: 17px;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .cells li small {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .cells.changed li {
+            border-color: var(--signal);
+            background-color: var(--signal-soft);
+        }
+
+        .cells.empty {
+            color: var(--muted);
+            font-family: var(--font-code);
+            font-size: 16px;
+        }
+
+        .ret {
+            font-family: var(--font-code);
+            font-size: 17px;
+        }
+
+        .verdict {
+            margin: 14px 0 0;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+        }
+
+        .verdict.d {
+            background-color: var(--signal-soft);
+            color: #7d2610;
+        }
+
+        .verdict.n {
+            background-color: var(--safe-soft);
+            color: #1f4037;
+        }
+
+        .verdict.idle {
+            background-color: var(--chip);
+            color: var(--muted);
+        }
+
+        .lab-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+            align-items: center;
+            padding: 12px 18px;
+            border-top: 1px solid var(--line);
+            font-size: 15px;
+        }
+
+        .lab-tools span {
+            color: var(--muted);
+        }
+
+        /* 표 */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 0 0 16px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        th, td {
+            padding: 9px 12px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            vertical-align: top;
+        }
+
+        tbody tr:last-child th, tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        thead th {
+            background-color: var(--chip);
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        td.name {
+            white-space: nowrap;
+        }
+
+        caption {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--line);
+            text-align: left;
+            font-weight: 700;
+        }
+
+        /* 짝 */
+        .pairs {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+            margin: 0 0 8px;
+            padding: 0;
+            list-style: none;
+        }
+
+        .pairs li {
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            background-color: var(--white);
+            font-family: var(--font-code);
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .pairs .from {
+            display: block;
+            color: var(--signal);
+        }
+
+        .pairs .to {
+            display: block;
+            color: var(--safe);
+            font-weight: 700;
+        }
+
+        .pairs .to::before {
+            content: "→ ";
+            color: var(--muted);
+            font-weight: 400;
+        }
+
+        /* 실수 */
+        .trap {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 8px 16px;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .trap:last-of-type {
+            border-bottom: 0;
+        }
+
+        .trap > p {
+            grid-column: 1 / -1;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .trap pre {
+            margin: 0;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .trap .wrong {
+            border: 1px solid var(--signal);
+            background-color: var(--white);
+            color: var(--ink);
+        }
+
+        .trap .wrong .out {
+            color: var(--signal);
+        }
+
+        .tag {
+            display: block;
+            margin-bottom: 4px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .tag-wrong {
+            color: var(--signal);
+            font-weight: 700;
+        }
+
+        /* 언제 무엇을 */
+        .choose {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            border-top: 1px solid var(--ink);
+        }
+
+        .choose li {
+            display: grid;
+            grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+            gap: 16px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .choose li > span:last-child {
+            text-align: right;
+        }
+
+        /* 확인 문제 */
+        .quiz {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            counter-reset: quiz;
+        }
+
+        .quiz > li {
+            padding: 20px 0;
+            border-top: 1px solid var(--line);
+            counter-increment: quiz;
+        }
+
+        .quiz h3 {
+            margin: 0 0 8px;
+            font-size: 18px;
+        }
+
+        .quiz h3::before {
+            content: "문제 " counter(quiz) ". ";
+            color: var(--signal);
+        }
+
+        .choices {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .choices button {
+            font-family: var(--font-code);
+        }
+
+        .choices button.correct {
+            border-color: var(--safe);
+            background-color: var(--safe-soft);
+            color: #1f4037;
+            font-weight: 700;
+        }
+
+        .choices button.wrong {
+            border-color: var(--signal);
+            background-color: var(--signal-soft);
+            color: #7d2610;
+            text-decoration: line-through;
+        }
+
+        .explain {
+            margin: 10px 0 0;
+            font-size: 16px;
+        }
+
+        .explain:empty {
+            display: none;
+        }
+
+        .score {
+            margin: 16px 0 0;
+            padding: 12px 16px;
+            border: 1px solid var(--ink);
+            border-radius: 6px;
+            background-color: var(--white);
+            font-weight: 500;
+        }
+
+        /* 꼬리말 */
+        footer {
+            border-top: 1px solid var(--ink);
+            font-size: 15px;
+        }
+
+        .footer-inner {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 8px 32px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 24px 32px;
+            color: var(--muted);
+        }
+
+        .footer-inner p {
+            margin: 0;
+        }
+
+        @media (max-width: 900px) {
+            .page-header-inner {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 24px;
+                padding: 32px 16px 24px;
+            }
+
+            .layout {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 0;
+                padding: 0 16px;
+            }
+
+            .toc {
+                position: static;
+                padding: 16px 0;
+                border-bottom: 1px solid var(--line);
+            }
+
+            .toc ol {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 0 16px;
+            }
+
+            .pairs {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .footer-inner {
+                padding: 24px 16px;
+            }
+        }
+
+        @media (max-width: 720px) {
+            body {
+                font-size: 16px;
+            }
+
+            main > section {
+                padding: 36px 0;
+            }
+
+            h2 {
+                font-size: 26px;
+            }
+
+            .split, .trap, .analogy, .lab-buttons {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .analogy > div + div, .lab-buttons > div + div {
+                border-left: 0;
+                border-top: 1px solid var(--line);
+            }
+
+            .state-row {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 4px;
+            }
+
+            .choose li {
+                grid-template-columns: minmax(0, 1fr);
+                gap: 4px;
+            }
+
+            .choose li > span:last-child {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body id="top">
+    <a class="skip-link" href="#content">본문으로 건너뛰기</a>
+
+    <header class="page-header">
+        <div class="page-header-inner">
+            <div>
+                <p class="kicker">자바스크립트 수업 자료 · 10 배열 메소드</p>
+                <h1>파괴적 메소드와 비파괴적 메소드</h1>
+                <p class="lead">메소드를 실행한 뒤 <strong>원래 배열이 바뀌는가, 그대로인가.</strong> 이 한 가지만 구분하면 "분명히 정렬했는데 왜 그대로지?" 같은 버그 대부분을 피할 수 있다.</p>
+                <p class="needs">미리 알아야 할 것: 배열 <code>[ ]</code>, 인덱스, <code>let</code>과 <code>const</code>, <code>console.log</code></p>
+            </div>
+            <div class="versus" aria-label="같은 일을 하는 두 메소드 비교">
+                <div class="bad"><span>파괴적: 원본이 정렬된다</span><code>arr.sort();</code></div>
+                <div class="good"><span>비파괴적: 정렬된 새 배열을 돌려준다</span><code>let sorted = arr.toSorted();</code></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="layout">
+        <nav class="toc" aria-labelledby="tocTitle">
+            <h2 id="tocTitle">차례</h2>
+            <ol>
+                <li><a href="#concept">1. 무엇이 다른가</a></li>
+                <li><a href="#lab">2. 실험대</a></li>
+                <li><a href="#list">3. 메소드 목록</a></li>
+                <li><a href="#string">4. 문자열</a></li>
+                <li><a href="#traps">5. 자주 하는 실수</a></li>
+                <li><a href="#choose">6. 언제 무엇을</a></li>
+                <li><a href="#quiz">7. 확인 문제</a></li>
+            </ol>
+        </nav>
+
+        <main id="content">
+            <section id="concept" aria-labelledby="conceptTitle">
+                <h2 id="conceptTitle"><span class="num">1</span>무엇이 다른가</h2>
+                <div class="analogy">
+                    <div>
+                        <span class="badge d">파괴적 (mutating)</span>
+                        <h3>원본 노트에 바로 고쳐 쓰기</h3>
+                        <p>메소드가 <strong>원래 배열 자체를 바꾼다</strong>. 고치기 전 모습은 남지 않는다.</p>
+                    </div>
+                    <div>
+                        <span class="badge n">비파괴적 (non-mutating)</span>
+                        <h3>복사본을 만들어 고쳐 쓰기</h3>
+                        <p>원래 배열은 그대로 두고, <strong>결과를 새 값으로 돌려준다</strong>. 돌려받은 값을 변수에 담아야 쓸 수 있다.</p>
+                    </div>
+                </div>
+
+                <div class="split">
+                    <div>
+                        <p class="code-title"><span class="badge d">파괴적</span> <code>sort()</code></p>
+                        <pre><code>let arr = [3, 1, 2];
+arr.sort();
+
+console.log(arr);
+<span class="out">// [1, 2, 3]  ← 원본이 바뀌었다</span></code></pre>
+                    </div>
+                    <div>
+                        <p class="code-title"><span class="badge n">비파괴적</span> <code>toSorted()</code></p>
+                        <pre><code>let arr = [3, 1, 2];
+let sorted = arr.toSorted();
+
+console.log(arr);     <span class="out">// [3, 1, 2]  ← 그대로</span>
+console.log(sorted);  <span class="out">// [1, 2, 3]  ← 새 배열</span></code></pre>
+                    </div>
+                </div>
+                <p class="hint"><code>toSorted()</code>, <code>toReversed()</code>, <code>toSpliced()</code>, <code>with()</code>는 2023년에 추가된 메소드다. Chrome·Edge 110, Firefox 115, Safari 16 이상에서 쓸 수 있다.</p>
+            </section>
+
+            <section id="lab" aria-labelledby="labTitle">
+                <h2 id="labTitle"><span class="num">2</span>실험대: 직접 눌러 보기</h2>
+                <p>버튼을 누르면 <code>arr</code>에 그 메소드를 실행한다. 실행 전과 후의 <code>arr</code>, 그리고 메소드가 돌려준 값(반환값)을 비교해 보자. 파괴적 메소드를 연달아 누르면 바뀐 결과가 계속 쌓인다.</p>
+
+                <div class="lab">
+                    <div class="lab-buttons">
+                        <div>
+                            <p><span class="badge d">파괴적</span> 원본을 바꾼다</p>
+                            <div class="method-list d" id="destructiveButtons"></div>
+                        </div>
+                        <div>
+                            <p><span class="badge n">비파괴적</span> 원본은 그대로</p>
+                            <div class="method-list n" id="safeButtons"></div>
+                        </div>
+                    </div>
+                    <div class="lab-result" aria-live="polite">
+                        <p class="ran" id="ranCode">let arr = [3, 1, 4, 1, 5];</p>
+                        <div class="state-row"><span>실행 전 arr</span><ul class="cells" id="beforeCells"></ul></div>
+                        <div class="state-row"><span>실행 후 arr</span><ul class="cells" id="afterCells"></ul></div>
+                        <div class="state-row"><span>반환값</span><div class="ret" id="returnValue">-</div></div>
+                        <p class="verdict idle" id="verdict">위의 버튼 중 하나를 눌러 보자.</p>
+                    </div>
+                    <div class="lab-tools">
+                        <button id="labReset" type="button">arr을 [3, 1, 4, 1, 5]로 되돌리기</button>
+                        <span>콘솔(F12)에서 직접 쳐 봐도 결과는 같다.</span>
+                    </div>
+                </div>
+            </section>
+
+            <section id="list" aria-labelledby="listTitle">
+                <h2 id="listTitle"><span class="num">3</span>배열 메소드 목록</h2>
+                <p>"반환값" 칸을 꼭 같이 보자. 파괴적 메소드는 바뀐 배열이 아니라 <strong>엉뚱한 값을 돌려주는 경우</strong>가 많다.</p>
+
+                <div class="table-wrap" tabindex="0" role="region" aria-label="파괴적 메소드 표">
+                    <table>
+                        <caption><span class="badge d">파괴적</span> 원본 배열을 바꾸는 메소드</caption>
+                        <thead>
+                            <tr><th scope="col">메소드</th><th scope="col">하는 일</th><th scope="col">반환값</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="name"><code>push(값)</code></td><td>맨 뒤에 추가</td><td>추가한 뒤의 <strong>길이</strong> (숫자)</td></tr>
+                            <tr><td class="name"><code>pop()</code></td><td>맨 뒤 하나 빼기</td><td>뺀 값</td></tr>
+                            <tr><td class="name"><code>unshift(값)</code></td><td>맨 앞에 추가</td><td>추가한 뒤의 <strong>길이</strong></td></tr>
+                            <tr><td class="name"><code>shift()</code></td><td>맨 앞 하나 빼기</td><td>뺀 값</td></tr>
+                            <tr><td class="name"><code>splice(시작, 개수)</code></td><td>중간에서 빼기(넣기)</td><td>뺀 값들의 배열</td></tr>
+                            <tr><td class="name"><code>sort()</code></td><td>정렬</td><td>원본 배열 자기 자신</td></tr>
+                            <tr><td class="name"><code>reverse()</code></td><td>순서 뒤집기</td><td>원본 배열 자기 자신</td></tr>
+                            <tr><td class="name"><code>fill(값)</code></td><td>전부 같은 값으로 채우기</td><td>원본 배열 자기 자신</td></tr>
+                            <tr><td class="name"><code>arr[i] = 값</code></td><td>(메소드는 아니지만) i번째 바꾸기</td><td>-</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="table-wrap" tabindex="0" role="region" aria-label="비파괴적 메소드 표">
+                    <table>
+                        <caption><span class="badge n">비파괴적</span> 원본은 두고 새 값을 돌려주는 메소드</caption>
+                        <thead>
+                            <tr><th scope="col">메소드</th><th scope="col">하는 일</th><th scope="col">반환값</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td class="name"><code>slice(시작, 끝)</code></td><td>일부 잘라 복사 (끝 번호는 빠짐)</td><td>새 배열</td></tr>
+                            <tr><td class="name"><code>concat(배열)</code></td><td>뒤에 이어 붙이기</td><td>새 배열</td></tr>
+                            <tr><td class="name"><code>map(함수)</code></td><td>하나씩 바꾸기</td><td>새 배열</td></tr>
+                            <tr><td class="name"><code>filter(함수)</code></td><td>조건에 맞는 것만 남기기</td><td>새 배열</td></tr>
+                            <tr><td class="name"><code>join(구분자)</code></td><td>하나의 문자열로 잇기</td><td>문자열</td></tr>
+                            <tr><td class="name"><code>indexOf(값)</code>, <code>includes(값)</code></td><td>찾기</td><td>번호 / <code>true</code>·<code>false</code></td></tr>
+                            <tr><td class="name"><code>toSorted()</code></td><td>정렬</td><td>새 배열</td></tr>
+                            <tr><td class="name"><code>toReversed()</code></td><td>순서 뒤집기</td><td>새 배열</td></tr>
+                            <tr><td class="name"><code>toSpliced(시작, 개수)</code></td><td>중간에서 빼기(넣기)</td><td>새 배열</td></tr>
+                            <tr><td class="name"><code>with(i, 값)</code></td><td>i번째만 바꾸기</td><td>새 배열</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>짝으로 외우기</h3>
+                <p>파괴적 메소드 네 개에는 같은 일을 하는 비파괴적 짝이 있다. 이름 앞에 <code>to</code>가 붙으면 비파괴적이다.</p>
+                <ul class="pairs">
+                    <li><span class="from">sort()</span><span class="to">toSorted()</span></li>
+                    <li><span class="from">reverse()</span><span class="to">toReversed()</span></li>
+                    <li><span class="from">splice()</span><span class="to">toSpliced()</span></li>
+                    <li><span class="from">arr[i] = 값</span><span class="to">with(i, 값)</span></li>
+                </ul>
+                <p class="hint">짝 메소드가 없는 오래된 브라우저에서는 <code>[...arr].sort()</code>처럼 먼저 복사한 뒤 파괴적 메소드를 쓰면 같은 효과가 난다.</p>
+            </section>
+
+            <section id="string" aria-labelledby="stringTitle">
+                <h2 id="stringTitle"><span class="num">4</span>문자열 메소드는 모두 비파괴적</h2>
+                <p>자바스크립트의 문자열은 한 번 만들면 바꿀 수 없다. 그래서 <code>toUpperCase()</code>, <code>trim()</code>, <code>replace()</code>, <code>slice()</code> 같은 문자열 메소드는 <strong>모두 새 문자열을 돌려줄 뿐</strong>이고, 원래 변수는 그대로다.</p>
+                <div class="split">
+                    <div>
+                        <p class="code-title"><span class="badge d">효과 없음</span> 반환값을 버렸다</p>
+                        <pre><code>let name = '  kim  ';
+name.trim();
+name.toUpperCase();
+
+console.log(name);
+<span class="out">// '  kim  '  ← 하나도 안 바뀌었다</span></code></pre>
+                    </div>
+                    <div>
+                        <p class="code-title"><span class="badge n">올바름</span> 반환값을 다시 담았다</p>
+                        <pre><code>let name = '  kim  ';
+name = name.trim();
+name = name.toUpperCase();
+
+console.log(name);
+<span class="out">// 'KIM'</span></code></pre>
+                    </div>
+                </div>
+            </section>
+
+            <section id="traps" aria-labelledby="trapsTitle">
+                <h2 id="trapsTitle"><span class="num">5</span>자주 하는 실수</h2>
+
+                <div class="trap">
+                    <p>비파괴적 메소드를 부르고 결과를 받지 않으면 아무 일도 일어나지 않은 것과 같다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>let scores = [70, 95, 80];
+scores.toSorted();
+console.log(scores);
+<span class="out">// [70, 95, 80]</span></code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>let scores = [70, 95, 80];
+let sorted = scores.toSorted();
+console.log(sorted);
+<span class="out">// [70, 80, 95]</span></code></pre></div>
+                </div>
+
+                <div class="trap">
+                    <p><code>push()</code>는 배열이 아니라 <strong>길이</strong>를 돌려준다. 결과를 다시 담으면 배열이 숫자로 바뀐다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>let fruits = ['사과', '배'];
+fruits = fruits.push('귤');
+console.log(fruits);
+<span class="out">// 3</span></code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>let fruits = ['사과', '배'];
+fruits.push('귤');
+console.log(fruits);
+<span class="out">// ['사과', '배', '귤']</span></code></pre></div>
+                </div>
+
+                <div class="trap">
+                    <p><code>sort()</code>의 결과를 새 변수에 담아도 복사본이 생기지 않는다. 두 변수가 같은 배열을 가리킨다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드 (원본을 남기고 싶었다)</span><pre class="wrong"><code>let original = [3, 1, 2];
+let sorted = original.sort();
+console.log(original);
+<span class="out">// [1, 2, 3]  ← 원본도 정렬됨</span></code></pre></div>
+                    <div><span class="tag">올바른 코드</span><pre><code>let original = [3, 1, 2];
+let sorted = original.toSorted();
+console.log(original);
+<span class="out">// [3, 1, 2]</span></code></pre></div>
+                </div>
+
+                <div class="trap">
+                    <p><code>=</code>로 배열을 옮기면 복사가 아니라 <strong>같은 배열에 이름표를 하나 더</strong> 붙인 것이다. 한쪽을 파괴적 메소드로 바꾸면 다른 쪽도 바뀐다.</p>
+                    <div><span class="tag tag-wrong">잘못된 코드</span><pre class="wrong"><code>let a = [1, 2];
+let b = a;
+b.push(3);
+console.log(a);
+<span class="out">// [1, 2, 3]</span></code></pre></div>
+                    <div><span class="tag">올바른 코드 (진짜 복사)</span><pre><code>let a = [1, 2];
+let b = [...a];   <span class="out">// 또는 a.slice()</span>
+b.push(3);
+console.log(a);
+<span class="out">// [1, 2]</span></code></pre></div>
+                </div>
+
+                <div class="trap">
+                    <p><code>const</code> 배열도 파괴적 메소드로는 바뀐다. <code>const</code>가 막는 것은 <strong>다른 배열을 다시 넣는 것(=)</strong>뿐이다.</p>
+                    <div><span class="tag">오류 없음</span><pre><code>const list = [1, 2];
+list.push(3);
+console.log(list);
+<span class="out">// [1, 2, 3]</span></code></pre></div>
+                    <div><span class="tag tag-wrong">오류</span><pre class="wrong"><code>const list = [1, 2];
+list = [1, 2, 3];
+<span class="out">// TypeError: Assignment to constant variable.</span></code></pre></div>
+                </div>
+
+                <div class="trap">
+                    <p>덤: <code>sort()</code>와 <code>toSorted()</code>는 기본적으로 숫자도 <strong>글자 순서</strong>로 정렬한다. 숫자 크기 순으로 정렬하려면 비교 함수를 넣는다.</p>
+                    <div><span class="tag tag-wrong">예상과 다른 결과</span><pre class="wrong"><code>[10, 9, 1].toSorted();
+<span class="out">// [1, 10, 9]</span></code></pre></div>
+                    <div><span class="tag">숫자 크기 순</span><pre><code>[10, 9, 1].toSorted(function (a, b) {
+    return a - b;
+});
+<span class="out">// [1, 9, 10]</span></code></pre></div>
+                </div>
+            </section>
+
+            <section id="choose" aria-labelledby="chooseTitle">
+                <h2 id="chooseTitle"><span class="num">6</span>언제 무엇을 쓸까</h2>
+                <p>파괴적 메소드가 나쁜 것은 아니다. 원본을 바꾸는 것이 <strong>목적인지 아닌지</strong>에 따라 고른다.</p>
+                <ul class="choose">
+                    <li><span>할 일 목록에 새 항목을 추가한다. 목록 자체가 바뀌어야 한다.</span><span><span class="badge d">파괴적</span> <code>push()</code></span></li>
+                    <li><span>게임 점수 배열에서 1등을 뽑아 보여 주되, 입력 순서도 남겨 둬야 한다.</span><span><span class="badge n">비파괴적</span> <code>toSorted()</code></span></li>
+                    <li><span>장바구니 가격 배열로 "할인가 목록"을 따로 만든다.</span><span><span class="badge n">비파괴적</span> <code>map()</code></span></li>
+                    <li><span>함수에 배열을 받아서 처리한다. 함수를 부른 쪽의 배열은 건드리지 말아야 한다.</span><span><span class="badge n">비파괴적</span></span></li>
+                    <li><span>대기열에서 맨 앞 사람을 꺼낸다.</span><span><span class="badge d">파괴적</span> <code>shift()</code></span></li>
+                </ul>
+                <p class="hint">헷갈리면 "이 배열을 다른 곳에서도 쓰고 있나?"를 물어보자. 쓰고 있다면 비파괴적 메소드가 안전하다.</p>
+            </section>
+
+            <section id="quiz" aria-labelledby="quizTitle">
+                <h2 id="quizTitle"><span class="num">7</span>확인 문제</h2>
+                <p>마지막 <code>console.log</code>에 무엇이 찍힐지 골라 보자. 고르면 바로 정답과 풀이가 나온다.</p>
+                <ol class="quiz" id="quizList"></ol>
+                <p class="score" id="quizScore" aria-live="polite">6문제 중 0문제를 풀었다.</p>
+                <button id="quizReset" type="button">다시 풀기</button>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <div class="footer-inner">
+            <p>&copy; 2026 자바스크립트 수업 자료 · 업데이트 2026-11-23</p>
+            <p>연락처: TODO: 담당 교수 이메일</p>
+            <p><a href="https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Array">MDN 배열 문서</a> · <a href="#top">맨 위로</a></p>
+        </div>
+    </footer>
+
+    <script>
+        window.onload = function () {
+            // 2. 실험대
+            let arr = [3, 1, 4, 1, 5];
+
+            let methods = [
+                { code: 'arr.push(9)', kind: 'd', run: function (a) { return a.push(9); } },
+                { code: 'arr.pop()', kind: 'd', run: function (a) { return a.pop(); } },
+                { code: 'arr.unshift(0)', kind: 'd', run: function (a) { return a.unshift(0); } },
+                { code: 'arr.shift()', kind: 'd', run: function (a) { return a.shift(); } },
+                { code: 'arr.splice(1, 2)', kind: 'd', run: function (a) { return a.splice(1, 2); } },
+                { code: 'arr.sort()', kind: 'd', run: function (a) { return a.sort(); } },
+                { code: 'arr.reverse()', kind: 'd', run: function (a) { return a.reverse(); } },
+                { code: 'arr.fill(7)', kind: 'd', run: function (a) { return a.fill(7); } },
+                { code: 'arr.slice(1, 3)', kind: 'n', run: function (a) { return a.slice(1, 3); } },
+                { code: 'arr.concat([8, 9])', kind: 'n', run: function (a) { return a.concat([8, 9]); } },
+                { code: 'arr.map(x => x * 2)', kind: 'n', run: function (a) { return a.map(function (x) { return x * 2; }); } },
+                { code: 'arr.filter(x => x > 2)', kind: 'n', run: function (a) { return a.filter(function (x) { return x > 2; }); } },
+                { code: 'arr.join("-")', kind: 'n', run: function (a) { return a.join('-'); } },
+                { code: 'arr.includes(4)', kind: 'n', run: function (a) { return a.includes(4); } },
+                { code: 'arr.toSorted()', kind: 'n', modern: 'toSorted', run: function (a) { return a.toSorted(); } },
+                { code: 'arr.toReversed()', kind: 'n', modern: 'toReversed', run: function (a) { return a.toReversed(); } },
+                { code: 'arr.toSpliced(1, 2)', kind: 'n', modern: 'toSpliced', run: function (a) { return a.toSpliced(1, 2); } },
+                { code: 'arr.with(0, 7)', kind: 'n', modern: 'with', run: function (a) { return a.with(0, 7); } }
+            ];
+
+            let ranCode = document.getElementById('ranCode');
+            let beforeCells = document.getElementById('beforeCells');
+            let afterCells = document.getElementById('afterCells');
+            let returnValue = document.getElementById('returnValue');
+            let verdict = document.getElementById('verdict');
+
+            function showCells(list, values, changed) {
+                list.innerHTML = '';
+                list.classList.toggle('changed', changed);
+                list.classList.toggle('empty', values.length == 0);
+                if(values.length == 0){
+                    list.innerHTML = '<li>[] (빈 배열)</li>';
+                    return;
+                }
+                for (let i = 0; i < values.length; i++) {
+                    let item = document.createElement('li');
+                    item.innerHTML = '<small>' + i + '</small>' + values[i];
+                    list.appendChild(item);
+                }
+            }
+
+            function describe(value) {
+                if(value === arr){
+                    return '[' + value.join(', ') + ']  ← arr 자기 자신 (새 배열 아님)';
+                }
+                if(Array.isArray(value)){
+                    return '[' + value.join(', ') + ']  ← 새 배열';
+                }
+                if(typeof value == 'string'){
+                    return "'" + value + "'  ← 문자열";
+                }
+                if(value === undefined){
+                    return 'undefined';
+                }
+                return String(value);
+            }
+
+            function sameValues(a, b) {
+                if(a.length != b.length){
+                    return false;
+                }
+                for (let i = 0; i < a.length; i++) {
+                    if(a[i] != b[i]){
+                        return false;
+                    }
+                }
+                return true;
+            }
+
+            function runMethod(method) {
+                let before = arr.slice();
+                ranCode.textContent = method.code + ';';
+
+                if(method.modern && typeof Array.prototype[method.modern] != 'function'){
+                    showCells(beforeCells, before, false);
+                    showCells(afterCells, arr, false);
+                    returnValue.textContent = '-';
+                    verdict.className = 'verdict idle';
+                    verdict.textContent = '이 브라우저는 ' + method.modern + '()를 지원하지 않는다. Chrome·Edge 110 이상에서 열어 보자.';
+                    return;
+                }
+
+                let result = method.run(arr);
+                let changed = !sameValues(before, arr);
+
+                showCells(beforeCells, before, false);
+                showCells(afterCells, arr, changed);
+                returnValue.textContent = describe(result);
+
+                if(method.kind == 'd'){
+                    verdict.className = 'verdict d';
+                    if(changed){
+                        verdict.textContent = '파괴적 메소드: 원본 arr이 바뀌었다.';
+                    }else{
+                        verdict.textContent = '파괴적 메소드지만 이번에는 바뀔 것이 없었다. (이미 정렬됐거나 비어 있는 경우) 원본을 직접 고치는 메소드라는 점은 같다.';
+                    }
+                }else{
+                    verdict.className = 'verdict n';
+                    verdict.textContent = '비파괴적 메소드: 원본 arr은 그대로이고, 결과는 반환값으로만 나왔다.';
+                }
+            }
+
+            function addButtons(boxId, kind) {
+                let box = document.getElementById(boxId);
+                for (let i = 0; i < methods.length; i++) {
+                    if(methods[i].kind != kind){
+                        continue;
+                    }
+                    let button = document.createElement('button');
+                    button.type = 'button';
+                    button.textContent = methods[i].code.replace('arr', '');
+                    button.setAttribute('aria-label', methods[i].code + ' 실행');
+                    button.addEventListener('click', function () {
+                        runMethod(methods[i]);
+                    });
+                    box.appendChild(button);
+                }
+            }
+
+            function resetLab() {
+                arr = [3, 1, 4, 1, 5];
+                ranCode.textContent = 'let arr = [3, 1, 4, 1, 5];';
+                showCells(beforeCells, arr, false);
+                showCells(afterCells, arr, false);
+                returnValue.textContent = '-';
+                verdict.className = 'verdict idle';
+                verdict.textContent = '위의 버튼 중 하나를 눌러 보자.';
+            }
+
+            addButtons('destructiveButtons', 'd');
+            addButtons('safeButtons', 'n');
+            document.getElementById('labReset').addEventListener('click', resetLab);
+            resetLab();
+
+            // 7. 확인 문제
+            let questions = [
+                {
+                    code: 'let a = [3, 1, 2];\nlet b = a.toSorted();\nconsole.log(a);',
+                    choices: ['[3, 1, 2]', '[1, 2, 3]', 'undefined'],
+                    answer: 0,
+                    explain: 'toSorted()는 비파괴적이다. 정렬된 배열은 b에 들어가고 a는 그대로다.'
+                },
+                {
+                    code: 'let a = [3, 1, 2];\nlet b = a.sort();\nb.push(9);\nconsole.log(a);',
+                    choices: ['[3, 1, 2]', '[1, 2, 3]', '[1, 2, 3, 9]'],
+                    answer: 2,
+                    explain: 'sort()는 a를 정렬하고 a 자기 자신을 돌려준다. b와 a는 같은 배열이라 b.push(9)도 a에 반영된다.'
+                },
+                {
+                    code: "let s = 'hi';\ns.toUpperCase();\nconsole.log(s);",
+                    choices: ["'HI'", "'hi'", '오류'],
+                    answer: 1,
+                    explain: '문자열 메소드는 모두 비파괴적이다. 새 문자열 \'HI\'를 돌려줬지만 아무 변수에도 담지 않았다.'
+                },
+                {
+                    code: 'let a = [1, 2];\na = a.push(3);\nconsole.log(a);',
+                    choices: ['[1, 2, 3]', '3', '[1, 2]'],
+                    answer: 1,
+                    explain: 'push()는 추가한 뒤의 길이 3을 돌려준다. 그 숫자를 a에 다시 넣었으니 a는 3이 됐다.'
+                },
+                {
+                    code: 'let a = [1, 2, 3, 4];\nlet b = a.splice(1, 2);\nconsole.log(a);',
+                    choices: ['[1, 2, 3, 4]', '[2, 3]', '[1, 4]'],
+                    answer: 2,
+                    explain: 'splice(1, 2)는 1번부터 2개(2와 3)를 원본에서 빼 버린다. 뺀 [2, 3]은 b에 들어가고 a에는 [1, 4]가 남는다.'
+                },
+                {
+                    code: 'const a = [1];\na.push(2);\nconsole.log(a);',
+                    choices: ['오류', '[1]', '[1, 2]'],
+                    answer: 2,
+                    explain: 'const는 a에 다른 배열을 다시 넣는 것만 막는다. push()로 배열 안을 바꾸는 것은 허용된다.'
+                }
+            ];
+
+            let quizList = document.getElementById('quizList');
+            let quizScore = document.getElementById('quizScore');
+            let solved = 0;
+            let correct = 0;
+
+            function updateScore() {
+                if(solved == questions.length){
+                    quizScore.textContent = questions.length + '문제 중 ' + correct + '문제를 맞혔다.';
+                }else{
+                    quizScore.textContent = questions.length + '문제 중 ' + solved + '문제를 풀었다. (맞힌 문제 ' + correct + '개)';
+                }
+            }
+
+            function buildQuiz() {
+                quizList.innerHTML = '';
+                solved = 0;
+                correct = 0;
+
+                for (let i = 0; i < questions.length; i++) {
+                    let q = questions[i];
+                    let item = document.createElement('li');
+                    let title = document.createElement('h3');
+                    let pre = document.createElement('pre');
+                    let choiceBox = document.createElement('div');
+                    let explain = document.createElement('p');
+
+                    title.textContent = 'console.log에 찍히는 값은?';
+                    pre.textContent = q.code;
+                    choiceBox.className = 'choices';
+                    explain.className = 'explain';
+                    explain.setAttribute('aria-live', 'polite');
+
+                    for (let j = 0; j < q.choices.length; j++) {
+                        let button = document.createElement('button');
+                        button.type = 'button';
+                        button.textContent = q.choices[j];
+                        button.addEventListener('click', function () {
+                            let buttons = choiceBox.querySelectorAll('button');
+                            for (let k = 0; k < buttons.length; k++) {
+                                buttons[k].disabled = true;
+                            }
+                            buttons[q.answer].classList.add('correct');
+                            solved = solved + 1;
+                            if(j == q.answer){
+                                correct = correct + 1;
+                                explain.textContent = '정답. ' + q.explain;
+                            }else{
+                                button.classList.add('wrong');
+                                explain.textContent = '정답은 ' + q.choices[q.answer] + '. ' + q.explain;
+                            }
+                            updateScore();
+                        });
+                        choiceBox.appendChild(button);
+                    }
+
+                    item.appendChild(title);
+                    item.appendChild(pre);
+                    item.appendChild(choiceBox);
+                    item.appendChild(explain);
+                    quizList.appendChild(item);
+                }
+                updateScore();
+            }
+
+            document.getElementById('quizReset').addEventListener('click', buildQuiz);
+            buildQuiz();
+        }
+    </script>
+</body>
+</html>
