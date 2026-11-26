@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA 포트폴리오 종류와 초점</title>
+<style>
+  :root{
+    --navy:#1a3a5c; --ink:#171b21; --blue:#2e6da4; --orange:#f0a500;
+    --canvas:#ececef; --card:#ffffff; --line:#e4e6eb; --text:#2a2e35; --text-light:#5f6672;
+    --text-faint:#9aa0aa; --field-bg:#f4f5f7; --ok:#3a8a5c; --no:#b5523b; --warn-bg:#fdf6e6; --warn-line:#f1dfb2;
+    --tint:#eef3f8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{font-family:'Pretendard','Malgun Gothic','Apple SD Gothic Neo',sans-serif;color:var(--text);line-height:1.7;background:var(--canvas);}
+
+  .navwrap{position:sticky;top:0;z-index:100;display:flex;justify-content:center;padding:14px 16px 0;}
+  nav{background:rgba(255,255,255,.92);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:999px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 10px 8px 20px;max-width:1040px;width:100%;box-shadow:0 4px 18px rgba(20,25,35,.06);overflow-x:auto;}
+  .nav-logo{color:var(--navy);font-weight:800;text-decoration:none;font-size:.86rem;white-space:nowrap;}
+  .nav-links{list-style:none;display:flex;gap:2px;white-space:nowrap;}
+  .nav-links a{color:var(--text-light);text-decoration:none;padding:7px 11px;border-radius:999px;font-size:.78rem;font-weight:600;}
+  .nav-links a:hover{background:var(--navy);color:#fff;}
+
+  .page{max-width:1040px;margin:0 auto;padding:28px 16px 60px;display:flex;flex-direction:column;gap:18px;}
+  .block{background:var(--card);border-radius:26px;border:1px solid var(--line);box-shadow:0 10px 28px rgba(20,25,35,.05);padding:40px;}
+  @media(max-width:640px){.block{padding:28px 18px;border-radius:20px;}}
+  .eyebrow{display:inline-flex;font-size:.72rem;font-weight:700;letter-spacing:.04em;color:var(--navy);background:var(--tint);padding:6px 14px;border-radius:999px;margin-bottom:16px;}
+  h1{font-size:2rem;font-weight:800;color:var(--ink);line-height:1.35;letter-spacing:-.02em;margin-bottom:14px;}
+  @media(max-width:480px){h1{font-size:1.55rem;}}
+  h2{font-size:1.3rem;color:var(--ink);margin-bottom:6px;}
+  h2 + .sub{color:var(--text-light);font-size:.9rem;margin-bottom:22px;}
+  h3{font-size:1.02rem;color:var(--ink);margin:0 0 8px;}
+  p{color:var(--text-light);font-size:.93rem;margin-bottom:10px;}
+  ul{margin:0 0 4px 18px;color:var(--text-light);font-size:.92rem;}
+  li{margin-bottom:5px;}
+  li::marker{color:var(--orange);}
+  strong{color:var(--text);}
+  code{background:var(--field-bg);border:1px solid var(--line);border-radius:6px;padding:1px 6px;font-size:.84em;word-break:break-all;}
+
+  .lead{font-size:1.02rem;color:var(--text-light);max-width:700px;}
+  .keyline{margin-top:22px;background:var(--navy);color:#fff;border-radius:18px;padding:18px 22px;font-size:.98rem;font-weight:600;line-height:1.6;}
+  .keyline b{color:var(--orange);}
+
+  /* type overview */
+  .types{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+  @media(max-width:820px){.types{grid-template-columns:repeat(2,1fr);}}
+  @media(max-width:520px){.types{grid-template-columns:1fr;}}
+  .type{display:block;text-decoration:none;background:var(--field-bg);border:1px solid var(--line);border-radius:16px;padding:16px 18px;transition:border-color .15s;}
+  .type:hover{border-color:var(--blue);}
+  .type .no{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font-size:.78rem;font-weight:800;margin-bottom:8px;}
+  .type .nm{display:block;color:var(--ink);font-weight:800;font-size:.95rem;margin-bottom:4px;}
+  .type .sh{display:block;color:var(--text-light);font-size:.84rem;line-height:1.55;}
+
+  /* detail cards */
+  .detail{display:flex;flex-direction:column;gap:12px;}
+  .card{border:1px solid var(--line);border-radius:18px;padding:22px 24px;scroll-margin-top:90px;}
+  @media(max-width:520px){.card{padding:18px 16px;}}
+  .card-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap;}
+  .card-head .no{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--navy);color:#fff;font-size:.8rem;font-weight:800;flex-shrink:0;}
+  .card-head h3{margin:0;}
+  .shows{font-size:.84rem;color:var(--blue);font-weight:700;margin-bottom:10px;}
+  .goal{display:inline-block;background:var(--warn-bg);border:1px solid var(--warn-line);color:#7a5a12;border-radius:10px;padding:4px 10px;font-size:.82rem;font-weight:700;margin-bottom:10px;}
+
+  /* principles */
+  .principles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;}
+  @media(max-width:720px){.principles{grid-template-columns:1fr;}}
+  .pr{background:var(--field-bg);border-radius:18px;padding:20px 22px;border-left:5px solid var(--navy);}
+  .pr .tag{font-size:.74rem;font-weight:800;color:var(--orange);letter-spacing:.04em;}
+  .pr h3{margin:2px 0 8px;}
+
+  .quote{background:var(--tint);border-radius:14px;padding:14px 18px;margin:10px 0 4px;font-size:.9rem;color:var(--navy);font-weight:600;}
+  .qlist{list-style:none;margin:8px 0 0;padding:0;}
+  .qlist li{background:#fff;border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin-bottom:6px;font-size:.88rem;}
+  .qlist li::before{content:"Q. ";color:var(--orange);font-weight:800;}
+
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}
+  @media(max-width:520px){.compare{grid-template-columns:1fr;}}
+  .bad,.good{border-radius:12px;padding:10px 14px;font-size:.86rem;font-weight:700;}
+  .bad{background:#f7ece9;color:var(--no);}
+  .bad::before{content:"✕ ";}
+  .good{background:#e9f3ed;color:var(--ok);}
+  .good::before{content:"○ ";}
+
+  /* table */
+  .tbl{width:100%;border-collapse:collapse;font-size:.9rem;}
+  .tbl th,.tbl td{border-bottom:1px solid var(--line);padding:12px 10px;text-align:left;vertical-align:top;}
+  .tbl th{background:var(--navy);color:#fff;font-weight:700;}
+  .tbl th:first-child{border-radius:12px 0 0 0;} .tbl th:last-child{border-radius:0 12px 0 0;}
+  .tbl td:first-child{font-weight:800;color:var(--ink);white-space:nowrap;}
+  @media(max-width:520px){.tbl td:first-child{white-space:normal;}}
+
+  /* checklist */
+  .check{list-style:none;margin:0;padding:0;}
+  .check li{margin:0;}
+  .check label{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid var(--line);border-radius:14px;margin-bottom:8px;cursor:pointer;font-size:.92rem;color:var(--text);}
+  .check input{margin-top:5px;width:17px;height:17px;accent-color:var(--navy);flex-shrink:0;}
+  .check input:checked + span{color:var(--text-faint);text-decoration:line-through;}
+  .progress{margin-top:12px;font-size:.86rem;color:var(--text-light);font-weight:700;}
+
+  footer{text-align:center;color:var(--text-faint);font-size:.78rem;padding-top:8px;}
+
+  @media print{
+    body{background:#fff;}
+    .navwrap{display:none;}
+    .block{box-shadow:none;border:1px solid #ccc;page-break-inside:avoid;}
+    .card{page-break-inside:avoid;}
+  }
+</style>
+</head>
+<body>
+
+<div class="navwrap">
+  <nav>
+    <a class="nav-logo" href="#top">QA 포트폴리오</a>
+    <ul class="nav-links">
+      <li><a href="#types">종류</a></li>
+      <li><a href="#detail">종류별 초점</a></li>
+      <li><a href="#focus">공통 초점</a></li>
+      <li><a href="#compose">구성</a></li>
+      <li><a href="#checklist">체크리스트</a></li>
+    </ul>
+  </nav>
+</div>
+
+<main class="page" id="top">
+
+  <!-- HERO -->
+  <section class="block">
+    <span class="eyebrow">게임 QA 취업 준비</span>
+    <h1>포트폴리오, 무엇을 만들고<br>어디에 초점을 맞출까</h1>
+    <p class="lead">신입 QA는 실무 능력을 이력서만으로 보여 주기 어렵습니다. 그래서 포트폴리오가 <strong>"할 줄 안다"는 증거</strong>가 됩니다. 만들 수 있는 종류는 여러 가지이지만 초점은 하나입니다.</p>
+    <div class="keyline">읽는 사람이 <b>결론을 바로 알고</b>, <b>근거를 확인하고</b>,<br>"이 사람에게 일을 맡겨도 되겠다"고 <b>판단하게</b> 만든다.</div>
+  </section>
+
+  <!-- TYPES -->
+  <section class="block" id="types">
+    <h2>1. 만들 수 있는 포트폴리오 9가지</h2>
+    <p class="sub">카드를 누르면 종류별 초점으로 이동합니다.</p>
+    <div class="types">
+      <a class="type" href="#t1"><span class="no">1</span><span class="nm">버그리포트 모음</span><span class="sh">결함을 찾고, 남이 재현할 수 있게 쓰는 능력</span></a>
+      <a class="type" href="#t2"><span class="no">2</span><span class="nm">TC(테스트 케이스) 문서</span><span class="sh">명세를 테스트 항목으로 바꾸는 설계 능력</span></a>
+      <a class="type" href="#t3"><span class="no">3</span><span class="nm">게임 분석서</span><span class="sh">게임 구조와 매출·재미의 관계를 데이터로 설명하는 능력</span></a>
+      <a class="type" href="#t4"><span class="no">4</span><span class="nm">데이터 분석</span><span class="sh">직접 모은 수치로 패턴을 찾고 해석하는 능력</span></a>
+      <a class="type" href="#t5"><span class="no">5</span><span class="nm">재미요소 분석 · Fun 테스트 · 사용자 동향 조사</span><span class="sh">유저 관점에서 "왜 재미있나, 왜 떠나나"를 보는 능력</span></a>
+      <a class="type" href="#t6"><span class="no">6</span><span class="nm">개선 제안서</span><span class="sh">근거로 설득해 실제 반영을 끌어내는 능력</span></a>
+      <a class="type" href="#t7"><span class="no">7</span><span class="nm">게임 기획서 + 테스트 계획</span><span class="sh">기획 의도를 이해하고 검증 방법까지 설계하는 능력</span></a>
+      <a class="type" href="#t8"><span class="no">8</span><span class="nm">직접 만든 게임 프로젝트</span><span class="sh">팀 작업, 출시, 개발 중 버그를 다룬 경험</span></a>
+      <a class="type" href="#t9"><span class="no">9</span><span class="nm">게임 플레이 기록</span><span class="sh">많이, 깊게 플레이했다는 증거</span></a>
+    </div>
+  </section>
+
+  <!-- DETAIL -->
+  <section class="block" id="detail">
+    <h2>2. 종류별로 무엇에 초점을 맞추나</h2>
+    <p class="sub">같은 버그리포트라도 무엇을 담느냐에 따라 평가가 달라집니다.</p>
+    <div class="detail">
+
+      <div class="card" id="t1">
+        <div class="card-head"><span class="no">1</span><h3>버그리포트 모음</h3></div>
+        <div class="goal">목표 분량: 버그리포트 100개, 그중 실제 회사에 리포트한 것 30개</div>
+        <ul>
+          <li><strong>제목만 보고도</strong> 어떤 버그인지 알 수 있게 짧게 씁니다.</li>
+          <li>재현 절차, 환경, 등급(critical → major → minor → trivial)을 빠짐없이 적습니다.</li>
+          <li>회사에 보낸 리포트가 실제 패치에 반영됐다면 <strong>그 결과까지</strong> 붙입니다. 가장 강한 근거입니다.</li>
+          <li>재현이 안 되는 버그(이벤트 종료 등)는 발견 당시 화면·시각·조건을 남깁니다. 면접에서 "그럴 땐 어떻게 문서화하나"를 묻습니다.</li>
+        </ul>
+      </div>
+
+      <div class="card" id="t2">
+        <div class="card-head"><span class="no">2</span><h3>TC(테스트 케이스) 문서</h3></div>
+        <div class="goal">목표 분량: 게임 7개, UI 하나에 TC 400개. 매주 1개씩 만들고, 7개를 다 만들면 돌아가며 고친다</div>
+        <ul>
+          <li>기대 결과는 <strong>Pass/Fail을 낼 수 있게</strong> 단정형으로 씁니다.</li>
+          <li>정상값 · 경계값 · 오류값으로 나눠 설계합니다. <strong>동등분할</strong>과 <strong>경계값 분석</strong>은 면접에 자주 나오는 용어입니다.</li>
+          <li>명세에 없는 내용은 추측해서 채우지 않고 "확인 필요" 질의로 남깁니다. 질의를 정리하는 능력도 QA 역량입니다.</li>
+        </ul>
+        <div class="compare">
+          <div class="bad">목록이 갱신되거나 보던 위치가 유지됨</div>
+          <div class="good">새로고침 후 1초 안에 목록이 갱신된다</div>
+        </div>
+      </div>
+
+      <div class="card" id="t3">
+        <div class="card-head"><span class="no">3</span><h3>게임 분석서</h3></div>
+        <p class="shows">목적: 의사결정권자에게 무엇을 고치거나 바꿀지에 대한 데이터를 주는 것</p>
+        <ul>
+          <li>순위나 수치를 늘어놓는 데서 멈추지 않습니다. 그 수치가 <strong>왜 나왔는지, 무엇을 개선해야 하는지</strong>까지 씁니다.</li>
+          <li>분석할 이유가 보이는 연결을 고릅니다. 예) 신규 캐릭터 출시와 매출 순위의 관계</li>
+          <li>목적만 쓰지 말고 <strong>방법</strong>(무엇을, 며칠 동안, 어떤 데이터로)과 선정 근거를 같이 적습니다.</li>
+        </ul>
+      </div>
+
+      <div class="card" id="t4">
+        <div class="card-head"><span class="no">4</span><h3>데이터 분석</h3></div>
+        <p class="shows">예: 스토어 순위 데이터 분석, 방치형 게임을 100레벨 단위로 플레이하며 스탯을 기록한 성장 분석</p>
+        <ul>
+          <li>직접 모은 데이터라면 <strong>기록 방법</strong>(무엇을, 어떤 단위로, 몇 명이 교차 검증했는지)을 먼저 밝힙니다.</li>
+          <li>"기획 의도로 보인다"고 쓰려면 그렇게 판단한 <strong>관찰을 같이</strong> 씁니다. 면접에서 반드시 근거를 묻습니다.</li>
+          <li>한계와 다음에 더할 지표를 적습니다. 예) 스탯만 기록했으니 다음엔 장비 수치도. 한계를 아는 것도 평가받습니다.</li>
+        </ul>
+      </div>
+
+      <div class="card" id="t5">
+        <div class="card-head"><span class="no">5</span><h3>재미요소 분석 · Fun 테스트 · 사용자 동향 조사</h3></div>
+        <p class="shows">결국 파악할 것은 데이터 너머에 있는 사람</p>
+        <ul>
+          <li>재미와 매출을 따로 보지 않습니다. 어떤 재미가 <strong>과금이나 잔존으로 이어지는지</strong> 연결합니다.</li>
+          <li>유저 반응(리뷰, 커뮤니티)을 인용할 때는 출처와 날짜를 적습니다.</li>
+        </ul>
+      </div>
+
+      <div class="card" id="t6">
+        <div class="card-head"><span class="no">6</span><h3>개선 제안서</h3></div>
+        <p class="shows">목적: 제안이 실제로 반영되는 것</p>
+        <ul>
+          <li>"지금도 잘 되는데 왜 고치나", "기획 의도다"라는 반론에 답할 <strong>근거를 미리</strong> 준비합니다.</li>
+          <li>기획서 형태로 씁니다: <strong>대상 화면 / 현재 동작 / 제안 동작 / 기대 효과</strong></li>
+        </ul>
+      </div>
+
+      <div class="card" id="t7">
+        <div class="card-head"><span class="no">7</span><h3>게임 기획서 + 테스트 계획</h3></div>
+        <ul>
+          <li>기획서만 쓰면 기획 직무 포트폴리오가 됩니다. QA 포트폴리오라면 <strong>그 기획을 어떻게 검증할지</strong>(TC, 테스트 계획)를 한 문서에 함께 담습니다.</li>
+          <li>수치를 바꿨다면 바꾼 이유를 "조정 기록"으로 남깁니다.</li>
+        </ul>
+      </div>
+
+      <div class="card" id="t8">
+        <div class="card-head"><span class="no">8</span><h3>직접 만든 게임 프로젝트</h3></div>
+        <p class="shows">예: 졸업 프로젝트, 공모전 작품, 스토어 출시 경험</p>
+        <ul>
+          <li>게임 소개보다 <strong>QA 관점의 경험</strong>에 무게를 둡니다. 어떤 버그가 났고, 어떻게 찾고 고쳤고, 그 경험이 왜 QA를 택하게 했는지.</li>
+          <li>팀 프로젝트는 <strong>내가 맡은 부분</strong>을 분명히 합니다. 면접에서 "가장 자신 있는 작업물"과 "아쉬운 작업물"을 같이 묻습니다.</li>
+        </ul>
+      </div>
+
+      <div class="card" id="t9">
+        <div class="card-head"><span class="no">9</span><h3>게임 플레이 기록</h3></div>
+        <ul>
+          <li>게임마다 <strong>플랫폼</strong>(모바일 → PC → 콘솔), <strong>장르</strong>, <strong>레벨(티어)</strong>, <strong>플레이 기간</strong>, <strong>20자 안팎의 게임 설명</strong>을 적습니다.</li>
+          <li>모바일 게임 순위처럼 시장에서 많이 하는 게임부터 플레이합니다.</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- FOCUS -->
+  <section class="block" id="focus">
+    <h2>3. 어떤 종류든 공통으로 지킬 초점</h2>
+    <p class="sub">이 여섯 가지가 빠지면 내용이 좋아도 끝까지 읽히지 않습니다.</p>
+    <div class="principles">
+
+      <div class="pr">
+        <span class="tag">FOCUS 1</span>
+        <h3>지원 회사와 직무에 맞춘다</h3>
+        <ul>
+          <li>그동안의 버그리포트, TC, 플레이 기록을 모으되 <strong>지원 직무에 맞게 강조점</strong>을 바꿉니다.</li>
+          <li>가능하면 <strong>지원 회사의 게임</strong>으로 버그리포트·분석서·개선 제안을 만듭니다.</li>
+        </ul>
+      </div>
+
+      <div class="pr">
+        <span class="tag">FOCUS 2</span>
+        <h3>결론을 먼저 보여 준다</h3>
+        <ul>
+          <li>읽는 사람은 이 게임을 모른다고 가정합니다. 첫 장부터 "더 읽을지"를 판단하며 넘깁니다.</li>
+          <li>앞쪽에 <strong>왜 했는지와 결론</strong>을 두고, 세부 장도 맨 위에 결과 한 줄을 먼저 씁니다.</li>
+        </ul>
+      </div>
+
+      <div class="pr">
+        <span class="tag">FOCUS 3</span>
+        <h3>근거는 수치 · 날짜 · 화면으로</h3>
+        <ul>
+          <li>설명은 문장보다 표와 수치로 보여 줍니다(확률, 횟수, 순위).</li>
+          <li>순위·매출 화면에는 <strong>찍은 날짜</strong>를 적고, 그림마다 무엇을 봐야 하는지 설명을 붙입니다. 꼭 볼 부분은 빨간 테두리로 표시해 확대합니다.</li>
+        </ul>
+      </div>
+
+      <div class="pr">
+        <span class="tag">FOCUS 4</span>
+        <h3>모든 작업물을 설명할 수 있어야 한다</h3>
+        <ul>
+          <li>이력서에 포트폴리오 링크를 넣으면 면접관이 미리 보고 들어옵니다. 실린 작업물은 <strong>하나도 빠짐없이</strong> 설명할 수 있어야 합니다.</li>
+          <li>자기소개서에는 핵심 경험과 배운 점만, 자세한 TC나 결과물은 포트폴리오로 보냅니다.</li>
+        </ul>
+        <ul class="qlist">
+          <li>이 분석을 시작한 계기는?</li>
+          <li>그렇게 해석한 근거는 어떤 데이터인가?</li>
+          <li>재현이 안 되는 버그는 어떻게 문서화하나?</li>
+          <li>다시 한다면 어떤 지표를 더하겠나?</li>
+          <li>개인 과제와 실제 QA 조직의 테스트 과정은 무엇이 다른가?</li>
+        </ul>
+      </div>
+
+      <div class="pr">
+        <span class="tag">FOCUS 5</span>
+        <h3>노력이 보이게 한다</h3>
+        <ul>
+          <li>목표는 <strong>시간과 노력이 듬뿍 담긴</strong> 포트폴리오입니다.</li>
+          <li>분량 목표 자체가 이력서와 면접에서 말할 거리가 됩니다.</li>
+        </ul>
+        <div class="quote">"버그리포트 100개, 회사에 리포트 30개, TC 7개, 게임 200여 개를 플레이하며 준비해 온 것처럼 회사에서도 매일 조금씩 성장하겠습니다."</div>
+      </div>
+
+      <div class="pr">
+        <span class="tag">FOCUS 6</span>
+        <h3>형식에서 감점받지 않는다</h3>
+        <ul>
+          <li>페이지 번호는 슬라이드 번호 기능으로 넣습니다.</li>
+          <li>PPT 본문은 반말 개조식("~함", "~가능")으로 씁니다.</li>
+          <li>용어는 처음 나올 때 풀어 쓰고 끝까지 같은 말을 씁니다.</li>
+          <li>제목은 작게, 같은 종류의 장은 위치와 크기를 맞춥니다.</li>
+        </ul>
+        <div class="compare">
+          <div class="bad"><code>Portfolio_file_09200857_1.pptx</code></div>
+          <div class="good"><code>이름_포트폴리오_프로젝트명.pptx</code></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- COMPOSE -->
+  <section class="block" id="compose">
+    <h2>4. 이렇게 묶어 보세요</h2>
+    <p class="sub">모든 작업물을 다 넣기보다, 역할이 다른 네 묶음으로 나눕니다.</p>
+    <table class="tbl">
+      <thead><tr><th>구성</th><th>넣을 것</th></tr></thead>
+      <tbody>
+        <tr><td>대표작 1개</td><td>가장 공들인 게임 분석서 · 데이터 분석 · 개선 제안서 중 하나. 가능하면 지원 회사의 게임으로</td></tr>
+        <tr><td>실무 샘플</td><td>버그리포트 몇 건(회사에 보내 반영된 것 우선), TC 문서 일부</td></tr>
+        <tr><td>프로젝트</td><td>직접 만든 게임에서 맡은 역할과 QA 관점의 경험</td></tr>
+        <tr><td>부록</td><td>게임 플레이 기록 목록</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- CHECKLIST -->
+  <section class="block" id="checklist">
+    <h2>5. 제출 전 체크리스트</h2>
+    <p class="sub">모두 체크되면 제출합니다.</p>
+    <ul class="check" id="checks">
+      <li><label><input type="checkbox"><span>지원 회사·직무에 맞게 대표작과 강조점을 골랐다</span></label></li>
+      <li><label><input type="checkbox"><span>각 작업물 앞쪽에 목적과 결론이 있다</span></label></li>
+      <li><label><input type="checkbox"><span>수치·날짜·화면 근거가 있고, 그림마다 설명이 있다</span></label></li>
+      <li><label><input type="checkbox"><span>버그리포트는 제목만 보고 내용을 알 수 있고, 재현 절차·환경·등급이 있다</span></label></li>
+      <li><label><input type="checkbox"><span>TC의 기대 결과로 Pass/Fail을 낼 수 있다</span></label></li>
+      <li><label><input type="checkbox"><span>실린 모든 작업물을 면접에서 설명할 수 있다(계기·근거·한계·다음 개선)</span></label></li>
+      <li><label><input type="checkbox"><span>페이지 번호, 반말 개조식, 용어 통일, 파일명(이름_포트폴리오_프로젝트명)을 확인했다</span></label></li>
+    </ul>
+    <div class="progress" id="progress">0 / 7 완료</div>
+  </section>
+
+  <footer>게임 QA 취업반 · 포트폴리오 가이드</footer>
+</main>
+
+<script>
+  (function(){
+    var boxes = document.querySelectorAll('#checks input');
+    var out = document.getElementById('progress');
+    function update(){
+      var n = 0;
+      boxes.forEach(function(b){ if (b.checked) n++; });
+      out.textContent = n + ' / ' + boxes.length + ' 완료' + (n === boxes.length ? ' · 제출해도 좋습니다' : '');
+    }
+    boxes.forEach(function(b){ b.addEventListener('change', update); });
+  })();
+</script>
+</body>
+</html>
